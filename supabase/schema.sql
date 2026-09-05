@@ -1,0 +1,400 @@
+-- ============================================================================
+-- ระบบตัดเกรด ปพ.5 (V2) — Schema สำหรับ Supabase (PostgreSQL)
+-- รันไฟล์นี้ทั้งไฟล์ใน Supabase Studio > SQL Editor (ครั้งเดียวตอนติดตั้ง)
+-- ผู้ดูแลระบบเริ่มต้น: ชื่อผู้ใช้ = admin  รหัสผ่าน = 044357246
+-- ============================================================================
+
+create extension if not exists pgcrypto;
+
+-- ---------------------------------------------------------------------------
+-- ตาราง profiles : ผู้ใช้งาน (ครู/ผู้ดูแลระบบ) เชื่อมกับ auth.users
+-- ---------------------------------------------------------------------------
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  username text unique not null,
+  full_name text not null default '',
+  role text not null default 'teacher' check (role in ('admin','teacher')),
+  position text not null default '',           -- ตำแหน่ง เช่น ครูชำนาญการ
+  is_active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+-- ---------------------------------------------------------------------------
+-- ตาราง school : ข้อมูลโรงเรียน (มีแถวเดียว) + โลโก้ + บุคลากรหลัก
+-- ---------------------------------------------------------------------------
+create table if not exists public.school (
+  id int primary key default 1 check (id = 1),
+  name text not null default '',
+  tambon text not null default '',             -- ตำบล
+  amphoe text not null default '',             -- อำเภอ
+  province text not null default '',           -- จังหวัด
+  area text not null default '',               -- เขตพื้นที่การศึกษา
+  academic_year text not null default '',      -- ปีการศึกษา เช่น 2568
+  min_attendance_percent numeric not null default 80,
+  start_date text not null default '',         -- เริ่มใช้งานวันที่ (ข้อความไทย)
+  approve_date text not null default '',        -- อนุมัติผลการเรียนวันที่
+  registrar_head text not null default '',     -- หัวหน้าทะเบียนและวัดผล
+  academic_head text not null default '',      -- หัวหน้าฝ่ายวิชาการ
+  director text not null default '',           -- ผู้บริหาร
+  director_position text not null default '',  -- ตำแหน่งผู้บริหาร
+  logo_url text not null default '',
+  updated_at timestamptz not null default now()
+);
+
+insert into public.school (id) values (1) on conflict (id) do nothing;
+
+-- ---------------------------------------------------------------------------
+-- ตาราง grade_criteria : เกณฑ์การตัดเกรด (คะแนนตั้งแต่ -> ผลการเรียน)
+-- ---------------------------------------------------------------------------
+create table if not exists public.grade_criteria (
+  id uuid primary key default gen_random_uuid(),
+  min_score numeric not null,
+  grade_point numeric not null,
+  sort int not null default 0
+);
+
+insert into public.grade_criteria (min_score, grade_point, sort)
+select * from (values
+  (0,   0,   0),
+  (50,  1,   1),
+  (55,  1.5, 2),
+  (60,  2,   3),
+  (65,  2.5, 4),
+  (70,  3,   5),
+  (75,  3.5, 6),
+  (80,  4,   7)
+) as v(min_score, grade_point, sort)
+where not exists (select 1 from public.grade_criteria);
+
+-- ---------------------------------------------------------------------------
+-- ตาราง classes : ชั้น/ห้องเรียน (รองรับหลายห้อง) — ครูประจำชั้นดูแลห้องตัวเอง
+-- ---------------------------------------------------------------------------
+create table if not exists public.classes (
+  id uuid primary key default gen_random_uuid(),
+  academic_year text not null default '',
+  grade_level text not null default '',        -- เช่น ประถมศึกษาปีที่ 6
+  room text not null default '',               -- ห้องที่
+  homeroom_teacher_id uuid references public.profiles(id) on delete set null,
+  homeroom_teacher_name text not null default '',  -- ครูประจำชั้นคนที่ 1 (ตามที่พิมพ์ในรายงาน)
+  homeroom_teacher2_name text not null default '', -- ครูประจำชั้นคนที่ 2
+  created_at timestamptz not null default now()
+);
+
+-- ---------------------------------------------------------------------------
+-- ตาราง students : นักเรียนในแต่ละห้อง
+-- ---------------------------------------------------------------------------
+create table if not exists public.students (
+  id uuid primary key default gen_random_uuid(),
+  class_id uuid not null references public.classes(id) on delete cascade,
+  no int not null default 0,                   -- เลขที่
+  student_code text not null default '',       -- เลขประจำตัว
+  national_id text not null default '',        -- เลขประจำตัวประชาชน
+  prefix text not null default '',             -- คำนำหน้า
+  first_name text not null default '',
+  last_name text not null default '',
+  gender text not null default '',
+  status text not null default 'กำลังศึกษา',
+  move_date text not null default '',
+  blood_type text not null default '',
+  birth_date text not null default '',
+  photo_url text not null default '',
+  created_at timestamptz not null default now()
+);
+create index if not exists students_class_idx on public.students(class_id);
+
+-- ---------------------------------------------------------------------------
+-- ตาราง subjects : รายวิชาในแต่ละห้อง (สูงสุด 15) + ความสามารถชั้นปี
+-- ---------------------------------------------------------------------------
+create table if not exists public.subjects (
+  id uuid primary key default gen_random_uuid(),
+  class_id uuid not null references public.classes(id) on delete cascade,
+  order_no int not null default 1,
+  category text not null default 'พื้นฐาน',    -- พื้นฐาน/ประยุกต์/เพิ่มเติม
+  name text not null default '',
+  code text not null default '',
+  hours numeric not null default 0,            -- เวลาเรียน
+  credits numeric not null default 0,          -- น้ำหนัก/หน่วยกิต
+  midterm_max numeric not null default 70,     -- คะแนนเต็มระหว่างภาค
+  final_max numeric not null default 30,       -- คะแนนเต็มปลายภาค
+  competency_text text not null default '',    -- ความสามารถชั้นปี (สำหรับรายงานรายคน)
+  is_active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+create index if not exists subjects_class_idx on public.subjects(class_id);
+
+-- ---------------------------------------------------------------------------
+-- ตาราง subject_scores : คะแนนรายวิชา ต่อ นักเรียน (2 ภาคเรียน)
+-- ---------------------------------------------------------------------------
+create table if not exists public.subject_scores (
+  id uuid primary key default gen_random_uuid(),
+  student_id uuid not null references public.students(id) on delete cascade,
+  subject_id uuid not null references public.subjects(id) on delete cascade,
+  sem1_mid numeric,    -- ระหว่างภาค เทอม 1
+  sem1_final numeric,  -- ปลายภาค เทอม 1
+  sem2_mid numeric,    -- ระหว่างภาค เทอม 2
+  sem2_final numeric,  -- ปลายภาค เทอม 2
+  override_grade numeric,  -- ถ้ากรอก จะใช้แทนเกรดรายปีที่ระบบคำนวณ
+  updated_at timestamptz not null default now(),
+  unique (student_id, subject_id)
+);
+
+-- ---------------------------------------------------------------------------
+-- ตาราง assessment_items : หัวข้อประเมิน คุณลักษณะ / อ่านคิดเขียน (ต่อห้อง)
+-- ---------------------------------------------------------------------------
+create table if not exists public.assessment_items (
+  id uuid primary key default gen_random_uuid(),
+  class_id uuid not null references public.classes(id) on delete cascade,
+  kind text not null check (kind in ('characteristic','read_write')),
+  no int not null default 1,
+  title text not null default '',
+  max_score numeric not null default 3,
+  unique (class_id, kind, no)
+);
+
+-- ---------------------------------------------------------------------------
+-- ตาราง assessment_scores : คะแนนหัวข้อประเมิน ต่อ นักเรียน (2 ภาคเรียน)
+-- ---------------------------------------------------------------------------
+create table if not exists public.assessment_scores (
+  id uuid primary key default gen_random_uuid(),
+  student_id uuid not null references public.students(id) on delete cascade,
+  item_id uuid not null references public.assessment_items(id) on delete cascade,
+  sem1 numeric,
+  sem2 numeric,
+  unique (student_id, item_id)
+);
+
+-- ---------------------------------------------------------------------------
+-- ตาราง activities : กิจกรรมพัฒนาผู้เรียน (ต่อห้อง)
+-- ---------------------------------------------------------------------------
+create table if not exists public.activities (
+  id uuid primary key default gen_random_uuid(),
+  class_id uuid not null references public.classes(id) on delete cascade,
+  order_no int not null default 1,
+  code text not null default '',
+  name text not null default '',
+  hours numeric not null default 0
+);
+
+create table if not exists public.activity_results (
+  id uuid primary key default gen_random_uuid(),
+  student_id uuid not null references public.students(id) on delete cascade,
+  activity_id uuid not null references public.activities(id) on delete cascade,
+  sem1_result text not null default '',   -- ผ่าน/ไม่ผ่าน/ผมป
+  sem2_result text not null default '',
+  unique (student_id, activity_id)
+);
+
+-- ============================================================================
+-- ฟังก์ชันช่วยตรวจสิทธิ์ (SECURITY DEFINER เพื่อเลี่ยง RLS recursion)
+-- ============================================================================
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'admin' and p.is_active
+  );
+$$;
+
+create or replace function public.owns_class(cid uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select public.is_admin() or exists (
+    select 1 from public.classes c
+    where c.id = cid and c.homeroom_teacher_id = auth.uid()
+  );
+$$;
+
+-- owns_class โดยอ้างจาก student
+create or replace function public.owns_student(sid uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select public.is_admin() or exists (
+    select 1 from public.students s
+    join public.classes c on c.id = s.class_id
+    where s.id = sid and c.homeroom_teacher_id = auth.uid()
+  );
+$$;
+
+-- ============================================================================
+-- เปิด RLS ทุกตาราง
+-- ============================================================================
+alter table public.profiles          enable row level security;
+alter table public.school            enable row level security;
+alter table public.grade_criteria    enable row level security;
+alter table public.classes           enable row level security;
+alter table public.students          enable row level security;
+alter table public.subjects          enable row level security;
+alter table public.subject_scores    enable row level security;
+alter table public.assessment_items  enable row level security;
+alter table public.assessment_scores enable row level security;
+alter table public.activities        enable row level security;
+alter table public.activity_results  enable row level security;
+
+-- profiles: อ่านของตัวเองได้เสมอ / admin จัดการได้ทั้งหมด
+drop policy if exists profiles_self_select on public.profiles;
+create policy profiles_self_select on public.profiles for select
+  using (id = auth.uid() or public.is_admin());
+drop policy if exists profiles_admin_all on public.profiles;
+create policy profiles_admin_all on public.profiles for all
+  using (public.is_admin()) with check (public.is_admin());
+drop policy if exists profiles_self_update on public.profiles;
+create policy profiles_self_update on public.profiles for update
+  using (id = auth.uid()) with check (id = auth.uid());
+
+-- school / grade_criteria: ทุกคนที่ล็อกอินอ่านได้ / admin แก้ได้
+drop policy if exists school_read on public.school;
+create policy school_read on public.school for select using (auth.role() = 'authenticated');
+drop policy if exists school_admin on public.school;
+create policy school_admin on public.school for all using (public.is_admin()) with check (public.is_admin());
+
+drop policy if exists gc_read on public.grade_criteria;
+create policy gc_read on public.grade_criteria for select using (auth.role() = 'authenticated');
+drop policy if exists gc_admin on public.grade_criteria;
+create policy gc_admin on public.grade_criteria for all using (public.is_admin()) with check (public.is_admin());
+
+-- classes: ทุกคนที่ล็อกอินอ่านได้ / admin จัดการ / ครูแก้ชื่อครูของห้องตัวเองได้
+drop policy if exists classes_read on public.classes;
+create policy classes_read on public.classes for select using (auth.role() = 'authenticated');
+drop policy if exists classes_admin on public.classes;
+create policy classes_admin on public.classes for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists classes_owner_update on public.classes;
+create policy classes_owner_update on public.classes for update
+  using (homeroom_teacher_id = auth.uid()) with check (homeroom_teacher_id = auth.uid());
+
+-- students / subjects / activities / items: admin หรือ ครูเจ้าของห้อง
+drop policy if exists students_rw on public.students;
+create policy students_rw on public.students for all
+  using (public.owns_class(class_id)) with check (public.owns_class(class_id));
+
+drop policy if exists subjects_rw on public.subjects;
+create policy subjects_rw on public.subjects for all
+  using (public.owns_class(class_id)) with check (public.owns_class(class_id));
+
+drop policy if exists activities_rw on public.activities;
+create policy activities_rw on public.activities for all
+  using (public.owns_class(class_id)) with check (public.owns_class(class_id));
+
+drop policy if exists items_rw on public.assessment_items;
+create policy items_rw on public.assessment_items for all
+  using (public.owns_class(class_id)) with check (public.owns_class(class_id));
+
+-- scores: อ้างจาก student
+drop policy if exists ss_rw on public.subject_scores;
+create policy ss_rw on public.subject_scores for all
+  using (public.owns_student(student_id)) with check (public.owns_student(student_id));
+
+drop policy if exists asc_rw on public.assessment_scores;
+create policy asc_rw on public.assessment_scores for all
+  using (public.owns_student(student_id)) with check (public.owns_student(student_id));
+
+drop policy if exists ar_rw on public.activity_results;
+create policy ar_rw on public.activity_results for all
+  using (public.owns_student(student_id)) with check (public.owns_student(student_id));
+
+-- ============================================================================
+-- Storage bucket สำหรับโลโก้/รูป (public read)
+-- ============================================================================
+insert into storage.buckets (id, name, public)
+values ('assets', 'assets', true)
+on conflict (id) do nothing;
+
+drop policy if exists assets_public_read on storage.objects;
+create policy assets_public_read on storage.objects for select
+  using (bucket_id = 'assets');
+drop policy if exists assets_auth_write on storage.objects;
+create policy assets_auth_write on storage.objects for insert
+  with check (bucket_id = 'assets' and auth.role() = 'authenticated');
+drop policy if exists assets_auth_update on storage.objects;
+create policy assets_auth_update on storage.objects for update
+  using (bucket_id = 'assets' and auth.role() = 'authenticated');
+drop policy if exists assets_auth_delete on storage.objects;
+create policy assets_auth_delete on storage.objects for delete
+  using (bucket_id = 'assets' and auth.role() = 'authenticated');
+
+-- ============================================================================
+-- ระบบเทียบโอน : วิชาปลายทาง (โครงสร้างเดิม) + การจับคู่กับวิชาต้นทาง
+-- ============================================================================
+create table if not exists public.transfer_subjects (
+  id uuid primary key default gen_random_uuid(),
+  class_id uuid not null references public.classes(id) on delete cascade,
+  order_no int not null default 1,
+  category text not null default 'พื้นฐาน',
+  code text not null default '',
+  name text not null default '',
+  credits numeric not null default 0,
+  enabled boolean not null default true,
+  created_at timestamptz not null default now()
+);
+create index if not exists transfer_subjects_class_idx on public.transfer_subjects(class_id);
+
+create table if not exists public.transfer_sources (
+  id uuid primary key default gen_random_uuid(),
+  transfer_subject_id uuid not null references public.transfer_subjects(id) on delete cascade,
+  subject_id uuid not null references public.subjects(id) on delete cascade,
+  unique (transfer_subject_id, subject_id)
+);
+
+create or replace function public.owns_transfer_subject(tid uuid)
+returns boolean language sql security definer set search_path = public as $$
+  select public.is_admin() or exists (
+    select 1 from public.transfer_subjects t
+    join public.classes c on c.id = t.class_id
+    where t.id = tid and c.homeroom_teacher_id = auth.uid()
+  );
+$$;
+
+alter table public.transfer_subjects enable row level security;
+alter table public.transfer_sources  enable row level security;
+
+drop policy if exists ts_rw on public.transfer_subjects;
+create policy ts_rw on public.transfer_subjects for all
+  using (public.owns_class(class_id)) with check (public.owns_class(class_id));
+drop policy if exists tsrc_rw on public.transfer_sources;
+create policy tsrc_rw on public.transfer_sources for all
+  using (public.owns_transfer_subject(transfer_subject_id))
+  with check (public.owns_transfer_subject(transfer_subject_id));
+
+-- ============================================================================
+-- สร้างผู้ดูแลระบบเริ่มต้น : admin / 044357246  (อีเมลสังเคราะห์ admin@grade.local)
+-- ============================================================================
+do $$
+declare
+  admin_id uuid := gen_random_uuid();
+begin
+  if not exists (select 1 from auth.users where email = 'admin@grade.local') then
+    insert into auth.users (
+      instance_id, id, aud, role, email, encrypted_password,
+      email_confirmed_at, created_at, updated_at,
+      raw_app_meta_data, raw_user_meta_data,
+      confirmation_token, recovery_token, email_change, email_change_token_new
+    ) values (
+      '00000000-0000-0000-0000-000000000000', admin_id, 'authenticated', 'authenticated',
+      'admin@grade.local', crypt('044357246', gen_salt('bf')),
+      now(), now(), now(),
+      '{"provider":"email","providers":["email"]}', '{}',
+      '', '', '', ''
+    );
+
+    insert into auth.identities (
+      provider_id, user_id, identity_data, provider,
+      last_sign_in_at, created_at, updated_at
+    ) values (
+      'admin@grade.local', admin_id,
+      jsonb_build_object('sub', admin_id::text, 'email', 'admin@grade.local', 'email_verified', true),
+      'email', now(), now(), now()
+    );
+
+    insert into public.profiles (id, username, full_name, role, position)
+    values (admin_id, 'admin', 'ผู้ดูแลระบบ', 'admin', 'ผู้ดูแลระบบ');
+  end if;
+end $$;

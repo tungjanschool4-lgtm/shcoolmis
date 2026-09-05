@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+:root {
+  --font-thai: var(--font-sarabun), "Sarabun", "TH Sarabun New", system-ui, sans-serif;
+}
+
+html,
+body {
+  font-family: var(--font-thai);
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* ---- สไตล์สำหรับพิมพ์รายงาน (A4) ---- */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm 10mm;
+  }
+  html,
+  body {
+    background: #fff;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-page {
+    page-break-after: always;
+    box-shadow: none !important;
+    margin: 0 !important;
+    border: none !important;
+  }
+  .print-page:last-child {
+    page-break-after: auto;
+  }
+}
+
+/* กระดาษ A4 บนหน้าจอ (พรีวิว) */
+.print-page {
+  background: #fff;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto 16px;
+  padding: 12mm 10mm;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
+}
+.print-page.landscape {
+  width: 297mm;
+  min-height: 210mm;
+}
+@media print {
+  .print-page.landscape {
+    width: auto;
+  }
+  @page landscape {
+    size: A4 landscape;
+  }
+}
+
+/* ตารางรายงาน (ให้เหมือน Excel: หัวตารางเทา เส้นดำ) */
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.report-table th,
+.report-table td {
+  border: 1px solid #000;
+  padding: 2px 4px;
+  font-size: 13px;
+  vertical-align: middle;
+}
+.report-table thead th {
+  background: #d9d9d9;
+  font-weight: 600;
+}
+.report-table td.shade,
+.report-table th.shade {
+  background: #d9d9d9;
+}
+
+/* ข้อความแนวตั้ง (หัวคอลัมน์แคบ เช่น คะแนน/เกรด/ระหว่างภาค) */
+.vtext {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  padding: 3px 0;
+}
+
+/* หน้ารายงานแบบเต็ม A4 : ดันลายเซ็นไปล่างสุด */
+.sheet {
+  display: flex;
+  flex-direction: column;
+}
+.sheet .grow {
+  flex: 1 1 auto;
+}
+.sheet-title {
+  text-align: center;
+  line-height: 1.35;
+}
