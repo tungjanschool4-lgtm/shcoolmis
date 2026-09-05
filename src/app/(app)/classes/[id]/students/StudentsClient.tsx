@@ -197,7 +197,7 @@ export default function StudentsClient({ classId, initial }: { classId: string; 
               <th className="px-2 py-2">ชื่อ</th>
               <th className="px-2 py-2">นามสกุล</th>
               <th className="px-2 py-2 w-24">วันเกิด</th>
-              <th className="px-2 py-2 w-20">หมู่เลือด</th>
+              <th className="px-2 py-2 w-20">อายุ (ปี)</th>
               <th className="px-2 py-2 w-28">สถานะ</th>
               <th className="px-2 py-2 w-12"></th>
             </tr>
@@ -221,7 +221,9 @@ export default function StudentsClient({ classId, initial }: { classId: string; 
                 <td className="px-1 py-1"><Inp v={r.first_name} onC={(v) => update(r._key, "first_name", v)} /></td>
                 <td className="px-1 py-1"><Inp v={r.last_name} onC={(v) => update(r._key, "last_name", v)} /></td>
                 <td className="px-1 py-1"><Inp v={r.birth_date} onC={(v) => update(r._key, "birth_date", v)} /></td>
-                <td className="px-1 py-1"><Inp v={r.blood_type} onC={(v) => update(r._key, "blood_type", v)} /></td>
+                <td className="px-2 py-1 text-center font-medium text-slate-700">
+                  {calculateAge(r.birth_date)}
+                </td>
                 <td className="px-1 py-1">
                   <select
                     value={r.status || "กำลังศึกษา"}
@@ -251,6 +253,51 @@ export default function StudentsClient({ classId, initial }: { classId: string; 
       </div>
     </div>
   );
+}
+
+function calculateAge(value: string | undefined): string {
+  const input = value?.trim();
+  if (!input) return "-";
+
+  let day: number;
+  let month: number;
+  let year: number;
+  const thaiDate = input.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  const isoDate = input.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+
+  if (thaiDate) {
+    day = Number(thaiDate[1]);
+    month = Number(thaiDate[2]);
+    year = Number(thaiDate[3]);
+  } else if (isoDate) {
+    year = Number(isoDate[1]);
+    month = Number(isoDate[2]);
+    day = Number(isoDate[3]);
+  } else {
+    return "-";
+  }
+
+  if (year >= 2400) year -= 543;
+  const birthDate = new Date(year, month - 1, day);
+  if (
+    Number.isNaN(birthDate.getTime()) ||
+    birthDate.getFullYear() !== year ||
+    birthDate.getMonth() !== month - 1 ||
+    birthDate.getDate() !== day
+  ) {
+    return "-";
+  }
+
+  const today = new Date();
+  let age = today.getFullYear() - year;
+  if (
+    today.getMonth() < month - 1 ||
+    (today.getMonth() === month - 1 && today.getDate() < day)
+  ) {
+    age -= 1;
+  }
+
+  return age >= 0 && age <= 120 ? String(age) : "-";
 }
 
 function Inp({
