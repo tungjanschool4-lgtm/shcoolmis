@@ -10,6 +10,7 @@ import {
   CHARACTERISTIC_TEMPLATE,
   READ_WRITE_TEMPLATE,
 } from "@/lib/template";
+import { SUBJECT_COMPETENCY_TEMPLATE } from "@/lib/subject-competency-template";
 import { revalidatePath } from "next/cache";
 
 export type ActionResult = { ok: boolean; error?: string; id?: string };
@@ -72,6 +73,9 @@ export async function createClassRoom(formData: FormData): Promise<ActionResult>
 
     await supabase.from("activities").insert(
       ACTIVITY_TEMPLATE.map((t) => ({ ...t, class_id: classId }))
+    );
+    await supabase.from("subject_competency_levels").insert(
+      SUBJECT_COMPETENCY_TEMPLATE.map((t) => ({ ...t, class_id: classId }))
     );
     const items = [
       ...COMPETENCY_TEMPLATE.map((title, i) => ({

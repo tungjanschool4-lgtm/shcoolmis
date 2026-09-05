@@ -81,6 +81,19 @@ export type Subject = {
   created_at: string;
 };
 
+export type SubjectCompetencyLevel = {
+  id: string;
+  class_id: string;
+  order_no: number;
+  subject_name: string;
+  competency_text: string;
+  beginner_text: string;
+  developing_text: string;
+  proficient_text: string;
+  expert_text: string;
+  created_at: string;
+};
+
 export type SubjectScore = {
   id: string;
   student_id: string;

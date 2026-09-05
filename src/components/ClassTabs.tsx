@@ -10,6 +10,7 @@ export default function ClassTabs({ classId }: { classId: string }) {
     { href: base, label: "ภาพรวม" },
     { href: `${base}/students`, label: "นักเรียน" },
     { href: `${base}/subjects`, label: "รายวิชา 2568" },
+    { href: `${base}/competency-levels`, label: "เกณฑ์ความสามารถ" },
     { href: `${base}/grades`, label: "กรอกคะแนน" },
     { href: `${base}/competencies`, label: "สมรรถนะผู้เรียน" },
     { href: `${base}/characteristics`, label: "คุณลักษณะฯ" },
