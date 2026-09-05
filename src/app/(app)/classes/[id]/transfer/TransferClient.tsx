@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Subject, TransferSubject, TransferSource } from "@/lib/types";
 import { seedTransferDefaults } from "./actions";
+import { usePasswordDelete } from "@/components/PasswordDeleteGuard";
 
 type Row = Partial<TransferSubject> & { _key: string; _new?: boolean };
 const CATS = ["พื้นฐาน", "ประยุกต์", "เพิ่มเติม"];
@@ -36,6 +37,7 @@ export default function TransferClient({
   const [saving, setSaving] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [msg, setMsg] = useState<{ t: "ok" | "err"; m: string } | null>(null);
+  const { requestDelete, deletePasswordDialog } = usePasswordDelete();
 
   const subjectName = (id: string) => subjects.find((s) => s.id === id)?.name ?? "?";
 
@@ -49,7 +51,12 @@ export default function TransferClient({
     setSourceMap((m) => ({ ...m, [key]: new Set() }));
   }
   function removeRow(key: string) {
-    setRows((rs) => rs.filter((r) => r._key !== key));
+    const row = rows.find((item) => item._key === key);
+    requestDelete({
+      title: "ยืนยันการลบวิชาเทียบโอน",
+      description: `ลบวิชา “${row?.name || "รายการนี้"}”? ต้องกดบันทึกเพื่อบันทึกการเปลี่ยนแปลง`,
+      onVerified: () => setRows((rs) => rs.filter((r) => r._key !== key)),
+    });
   }
   function toggleSource(key: string, subjectId: string) {
     setSourceMap((m) => {
@@ -136,6 +143,7 @@ export default function TransferClient({
 
   return (
     <div className="space-y-4">
+      {deletePasswordDialog}
       <div>
         <h2 className="text-lg font-semibold text-slate-800">บันทึกรายวิชาเทียบโอน หลักสูตร 2560</h2>
         <p className="text-sm text-slate-500">จับคู่รายวิชาหลักสูตรใหม่ 2568 กับรายวิชาในหลักสูตร 2560</p>

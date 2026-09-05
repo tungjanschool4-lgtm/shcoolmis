@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { SubjectCompetencyLevel } from "@/lib/types";
+import { usePasswordDelete } from "@/components/PasswordDeleteGuard";
 
 type Row = Partial<SubjectCompetencyLevel> & { _key: string; _dirty?: boolean; _new?: boolean };
 
@@ -25,6 +26,7 @@ export default function CompetencyLevelsClient({
   const [rows, setRows] = useState<Row[]>(initial.map((row) => ({ ...row, _key: row.id })));
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const { requestDelete, deletePasswordDialog } = usePasswordDelete();
 
   function update(key: string, field: keyof SubjectCompetencyLevel, value: string | number) {
     setRows((current) =>
@@ -50,20 +52,25 @@ export default function CompetencyLevelsClient({
     setMessage(null);
   }
 
-  async function removeRow(key: string) {
+  function removeRow(key: string) {
     const row = rows.find((item) => item._key === key);
     if (!row) return;
-    if (row._new) {
-      setRows((current) => current.filter((item) => item._key !== key));
-      return;
-    }
-    if (!confirm(`ลบเกณฑ์ของวิชา “${row.subject_name || "รายการนี้"}” หรือไม่?`)) return;
-    const { error } = await supabase.from("subject_competency_levels").delete().eq("id", row.id!);
-    if (error) setMessage(`ลบไม่สำเร็จ: ${error.message}`);
-    else {
-      setRows((current) => current.filter((item) => item._key !== key));
-      setMessage("ลบรายการแล้ว");
-    }
+    requestDelete({
+      title: "ยืนยันการลบเกณฑ์ความสามารถ",
+      description: `ลบเกณฑ์ของวิชา “${row.subject_name || "รายการนี้"}” หรือไม่?`,
+      onVerified: async () => {
+        if (row._new) {
+          setRows((current) => current.filter((item) => item._key !== key));
+          return;
+        }
+        const { error } = await supabase.from("subject_competency_levels").delete().eq("id", row.id!);
+        if (error) setMessage(`ลบไม่สำเร็จ: ${error.message}`);
+        else {
+          setRows((current) => current.filter((item) => item._key !== key));
+          setMessage("ลบรายการแล้ว");
+        }
+      },
+    });
   }
 
   async function saveAll() {
@@ -115,6 +122,7 @@ export default function CompetencyLevelsClient({
 
   return (
     <div className="space-y-4">
+      {deletePasswordDialog}
       <div>
         <h2 className="text-lg font-semibold text-slate-800">
           เกณฑ์ระดับความสามารถรายวิชา หลักสูตรใหม่ 2568

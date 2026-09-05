@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Subject } from "@/lib/types";
+import { usePasswordDelete } from "@/components/PasswordDeleteGuard";
 
 type Row = Partial<Subject> & { _key: string; _dirty?: boolean; _new?: boolean };
 
@@ -14,6 +15,7 @@ export default function SubjectsClient({ classId, initial }: { classId: string; 
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [editText, setEditText] = useState<Row | null>(null);
+  const { requestDelete, deletePasswordDialog } = usePasswordDelete();
 
   function update(key: string, field: keyof Subject, value: string | number | boolean) {
     setRows((rs) => rs.map((r) => (r._key === key ? { ...r, [field]: value, _dirty: true } : r)));
@@ -42,14 +44,19 @@ export default function SubjectsClient({ classId, initial }: { classId: string; 
     ]);
   }
 
-  async function removeRow(key: string) {
+  function removeRow(key: string) {
     const row = rows.find((r) => r._key === key);
     if (!row) return;
-    if (row._new) { setRows((rs) => rs.filter((r) => r._key !== key)); return; }
-    if (!confirm("ลบรายวิชานี้? คะแนนของวิชานี้จะถูกลบด้วย")) return;
-    const { error } = await supabase.from("subjects").delete().eq("id", row.id!);
-    if (error) setMsg("ลบไม่สำเร็จ: " + error.message);
-    else setRows((rs) => rs.filter((r) => r._key !== key));
+    requestDelete({
+      title: "ยืนยันการลบรายวิชา",
+      description: row._new ? "ลบรายวิชาที่ยังไม่ได้บันทึก?" : "ลบรายวิชานี้? คะแนนของวิชานี้จะถูกลบด้วย",
+      onVerified: async () => {
+        if (row._new) { setRows((rs) => rs.filter((r) => r._key !== key)); return; }
+        const { error } = await supabase.from("subjects").delete().eq("id", row.id!);
+        if (error) setMsg("ลบไม่สำเร็จ: " + error.message);
+        else setRows((rs) => rs.filter((r) => r._key !== key));
+      },
+    });
   }
 
   async function saveAll() {
@@ -89,6 +96,7 @@ export default function SubjectsClient({ classId, initial }: { classId: string; 
 
   return (
     <div className="space-y-4">
+      {deletePasswordDialog}
       <div>
         <h2 className="text-lg font-semibold text-slate-800">บันทึกรายวิชา หลักสูตรใหม่ 2568</h2>
         <p className="text-sm text-slate-500">กำหนดชื่อวิชา ประเภทวิชา เวลาเรียน และน้ำหนักรายวิชา</p>

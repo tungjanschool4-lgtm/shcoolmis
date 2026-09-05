@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Profile } from "@/lib/types";
 import { createTeacher, resetPassword, setActive, deleteTeacher } from "./actions";
 import { LOGIN_DOMAIN } from "@/lib/username";
+import { usePasswordDelete } from "@/components/PasswordDeleteGuard";
 
 export default function TeachersClient({ teachers }: { teachers: Profile[] }) {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function TeachersClient({ teachers }: { teachers: Profile[] }) {
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [, startTransition] = useTransition();
   const [busy, setBusy] = useState(false);
+  const { requestDelete, deletePasswordDialog } = usePasswordDelete();
 
   function refresh() {
     startTransition(() => router.refresh());
@@ -47,15 +49,21 @@ export default function TeachersClient({ teachers }: { teachers: Profile[] }) {
     else setMsg({ type: "err", text: res.error! });
   }
 
-  async function handleDelete(t: Profile) {
-    if (!confirm(`ยืนยันลบครู ${t.full_name || t.username}? การกระทำนี้ย้อนกลับไม่ได้`)) return;
-    const res = await deleteTeacher(t.id);
-    if (res.ok) refresh();
-    else setMsg({ type: "err", text: res.error! });
+  function handleDelete(t: Profile) {
+    requestDelete({
+      title: "ยืนยันการลบครู",
+      description: `ลบครู ${t.full_name || t.username}? การกระทำนี้ย้อนกลับไม่ได้`,
+      onVerified: async () => {
+        const res = await deleteTeacher(t.id);
+        if (res.ok) refresh();
+        else setMsg({ type: "err", text: res.error! });
+      },
+    });
   }
 
   return (
     <div className="space-y-5">
+      {deletePasswordDialog}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-800">จัดการครู</h1>
         <button

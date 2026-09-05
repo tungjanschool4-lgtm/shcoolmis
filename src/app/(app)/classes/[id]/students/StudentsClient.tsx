@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Student } from "@/lib/types";
 import { parseStudentsCsv } from "@/lib/student-csv";
+import { usePasswordDelete } from "@/components/PasswordDeleteGuard";
 
 type Row = Partial<Student> & { _key: string; _dirty?: boolean; _new?: boolean };
 
@@ -15,6 +16,7 @@ export default function StudentsClient({ classId, initial }: { classId: string; 
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { requestDelete, deletePasswordDialog } = usePasswordDelete();
 
   function update(key: string, field: keyof Student, value: string | number) {
     setRows((rs) => rs.map((r) => (r._key === key ? { ...r, [field]: value, _dirty: true } : r)));
@@ -98,17 +100,22 @@ export default function StudentsClient({ classId, initial }: { classId: string; 
     URL.revokeObjectURL(url);
   }
 
-  async function removeRow(key: string) {
+  function removeRow(key: string) {
     const row = rows.find((r) => r._key === key);
     if (!row) return;
-    if (row._new) {
-      setRows((rs) => rs.filter((r) => r._key !== key));
-      return;
-    }
-    if (!confirm("ลบนักเรียนคนนี้? คะแนนที่บันทึกไว้จะถูกลบด้วย")) return;
-    const { error } = await supabase.from("students").delete().eq("id", row.id!);
-    if (error) setMsg("ลบไม่สำเร็จ: " + error.message);
-    else setRows((rs) => rs.filter((r) => r._key !== key));
+    requestDelete({
+      title: "ยืนยันการลบนักเรียน",
+      description: row._new ? "ลบรายชื่อนักเรียนที่ยังไม่ได้บันทึก?" : "ลบนักเรียนคนนี้? คะแนนที่บันทึกไว้จะถูกลบด้วย",
+      onVerified: async () => {
+        if (row._new) {
+          setRows((rs) => rs.filter((r) => r._key !== key));
+          return;
+        }
+        const { error } = await supabase.from("students").delete().eq("id", row.id!);
+        if (error) setMsg("ลบไม่สำเร็จ: " + error.message);
+        else setRows((rs) => rs.filter((r) => r._key !== key));
+      },
+    });
   }
 
   async function saveAll() {
@@ -150,6 +157,7 @@ export default function StudentsClient({ classId, initial }: { classId: string; 
 
   return (
     <div className="space-y-4">
+      {deletePasswordDialog}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="text-sm text-slate-500">นักเรียน {rows.length} คน</div>
         <div className="flex items-center gap-2">

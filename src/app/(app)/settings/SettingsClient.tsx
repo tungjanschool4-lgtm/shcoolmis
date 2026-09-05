@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import type { School, GradeCriterion } from "@/lib/types";
+import { usePasswordDelete } from "@/components/PasswordDeleteGuard";
 
 const FIELDS: { key: keyof School; label: string; ph?: string }[] = [
   { key: "name", label: "ชื่อโรงเรียน", ph: "เช่น วัดทุ่งจาน" },
@@ -33,6 +34,7 @@ export default function SettingsClient({
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const { requestDelete, deletePasswordDialog } = usePasswordDelete();
 
   function up(key: keyof School, val: string | number) {
     setForm((f) => ({ ...f, [key]: val }));
@@ -85,9 +87,15 @@ export default function SettingsClient({
     setMsg({ type: "ok", text: "อัปโหลดโลโก้แล้ว" });
   }
 
-  async function removeLogo() {
-    await supabase.from("school").update({ logo_url: "" }).eq("id", 1);
-    setForm((f) => ({ ...f, logo_url: "" }));
+  function removeLogo() {
+    requestDelete({
+      title: "ยืนยันการลบโลโก้",
+      description: "ลบโลโก้โรงเรียนออกจากรายงานและหน้าระบบ?",
+      onVerified: async () => {
+        await supabase.from("school").update({ logo_url: "" }).eq("id", 1);
+        setForm((f) => ({ ...f, logo_url: "" }));
+      },
+    });
   }
 
   function updRow(i: number, key: "min_score" | "grade_point", val: string) {
@@ -100,7 +108,11 @@ export default function SettingsClient({
     ]);
   }
   function removeRow(i: number) {
-    setRows((r) => r.filter((_, idx) => idx !== i));
+    requestDelete({
+      title: "ยืนยันการลบเกณฑ์ตัดเกรด",
+      description: "ลบแถวเกณฑ์ตัดเกรดนี้? ต้องกดบันทึกเกณฑ์เพื่อบันทึกการเปลี่ยนแปลง",
+      onVerified: () => setRows((r) => r.filter((_, idx) => idx !== i)),
+    });
   }
 
   async function saveCriteria() {
@@ -118,6 +130,7 @@ export default function SettingsClient({
 
   return (
     <div className="space-y-6">
+      {deletePasswordDialog}
       <h1 className="text-2xl font-bold text-slate-800">ข้อมูลโรงเรียน</h1>
 
       {msg && (

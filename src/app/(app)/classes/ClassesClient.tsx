@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ClassRoom, Profile } from "@/lib/types";
 import { createClassRoom, deleteClassRoom } from "./actions";
+import { usePasswordDelete } from "@/components/PasswordDeleteGuard";
 
 export default function ClassesClient({
   profile,
@@ -22,6 +23,7 @@ export default function ClassesClient({
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const isAdmin = profile.role === "admin";
+  const { requestDelete, deletePasswordDialog } = usePasswordDelete();
 
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -38,15 +40,21 @@ export default function ClassesClient({
     }
   }
 
-  async function handleDelete(c: ClassRoom) {
-    if (!confirm(`ลบห้อง ${c.grade_level} ${c.room}? ข้อมูลนักเรียน/คะแนนทั้งหมดจะถูกลบด้วย`)) return;
-    const res = await deleteClassRoom(c.id);
-    if (res.ok) router.refresh();
-    else setMsg(res.error!);
+  function handleDelete(c: ClassRoom) {
+    requestDelete({
+      title: "ยืนยันการลบห้องเรียน",
+      description: `ลบห้อง ${c.grade_level} ${c.room}? ข้อมูลนักเรียนและคะแนนทั้งหมดจะถูกลบด้วย`,
+      onVerified: async () => {
+        const res = await deleteClassRoom(c.id);
+        if (res.ok) router.refresh();
+        else setMsg(res.error!);
+      },
+    });
   }
 
   return (
     <div className="space-y-5">
+      {deletePasswordDialog}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-800">ห้องเรียน</h1>
         {isAdmin && (
