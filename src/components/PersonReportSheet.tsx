@@ -23,6 +23,20 @@ function behaviorForGrade(grade: number | null, rubric?: SubjectCompetencyLevel)
   return rubric.expert_text || "เชี่ยวชาญ";
 }
 
+function selectedGrade(
+  row: StudentReport["rows"][number] | undefined,
+  term: "1" | "2" | "year"
+): number | null {
+  if (!row) return null;
+  return term === "1" ? row.sem1Grade : term === "2" ? row.sem2Grade : row.yearGrade;
+}
+
+function averageGrade(grades: (number | null)[]): number | null {
+  const values = grades.filter((grade): grade is number => grade !== null);
+  if (!values.length) return null;
+  return values.reduce((sum, grade) => sum + grade, 0) / values.length;
+}
+
 export default function PersonReportSheet({
   school,
   cls,
@@ -40,17 +54,32 @@ export default function PersonReportSheet({
   const isYear = term === "year";
   const title = "แบบรายงานผลการพัฒนาคุณภาพผู้เรียน" + (isYear ? "" : ` (ภาคเรียนที่ ${term})`);
   const rubricByOrder = new Map(competencyLevels.map((item) => [item.order_no, item]));
+  const thai = report.rows.find((row) => row.subject.order_no === 1);
+  const math = report.rows.find((row) => row.subject.order_no === 3);
+  const applied = report.rows.filter((row) => row.subject.category === "ประยุกต์");
+  const termKey = term === "1" ? "sem1" : term === "2" ? "sem2" : "year";
+  const readingLevel = abilityForGrade(selectedGrade(thai, term));
+  const writingLevel = abilityForGrade(selectedGrade(thai, term));
+  const numeracyLevel = abilityForGrade(selectedGrade(math, term));
+  const appliedLevel = abilityForGrade(
+    averageGrade(applied.map((row) => selectedGrade(row, term)))
+  );
+  const activityLevel = report.activityLevels[termKey] || "-";
+  const characteristicLevel = report.assessmentLevels.characteristic[termKey] || "-";
+  const competencyLevel = report.assessmentLevels.competency[termKey] || "-";
 
   return (
-    <div className="print-page landscape sheet evaluation-sheet">
-      <ReportHeader school={school} cls={cls} title={title} />
+    <>
+      <div className="print-page sheet evaluation-sheet">
+        <div className="report-page-number">หน้า 1</div>
+        <ReportHeader school={school} cls={cls} title={title} />
 
-      <div className="flex justify-center gap-12 mt-2 mb-2 px-1 text-[13px]">
-        <div>เลขที่ <span className="underline px-4">{s.no}</span></div>
-        <div>ชื่อ - สกุล <span className="underline px-3">{fullName(s)}</span></div>
-      </div>
+        <div className="flex justify-center gap-12 mt-2 mb-2 px-1 text-[13px]">
+          <div>เลขที่ <span className="underline px-4">{s.no}</span></div>
+          <div>ชื่อ - สกุล <span className="underline px-3">{fullName(s)}</span></div>
+        </div>
 
-      <table className="report-table evaluation-report-table">
+        <table className="report-table evaluation-report-table">
         <thead>
           <tr>
             <th style={{ width: "3%" }}>ที่</th>
@@ -77,11 +106,11 @@ export default function PersonReportSheet({
             );
           })}
         </tbody>
-      </table>
+        </table>
 
-      <div className="grow" />
+        <div className="grow" />
 
-      <div className="grid grid-cols-3 gap-8 mt-5 text-center text-[12px]">
+        <div className="grid grid-cols-3 gap-8 mt-5 text-center text-[12px]">
         <div>
           <div>ลงชื่อ ..................................................................</div>
           <div className="mt-1">( {cls?.homeroom_teacher_name || "..............................."} )</div>
@@ -97,7 +126,89 @@ export default function PersonReportSheet({
           <div className="mt-1">( {school?.director || "..............................."} )</div>
           <div>{school?.director_position || `ผู้อำนวยการโรงเรียน${school?.name || ""}`}</div>
         </div>
+        </div>
       </div>
-    </div>
+
+      <div className="print-page sheet evaluation-sheet summary-sheet">
+        <div className="report-page-number">หน้า 2</div>
+        <ReportHeader
+          school={school}
+          cls={cls}
+          title="แบบรายงานผลการเรียนระดับชั้นประถมศึกษาตอนต้น"
+        />
+
+        <div className="flex justify-center gap-12 mt-2 mb-5 px-1 text-[13px]">
+          <div>เลขที่ <span className="underline px-4">{s.no}</span></div>
+          <div>ชื่อ - สกุล <span className="underline px-3">{fullName(s)}</span></div>
+        </div>
+
+        <table className="report-table summary-report-table">
+          <thead>
+            <tr>
+              <th style={{ width: "5%" }}>ที่</th>
+              <th colSpan={2} style={{ width: "45%" }}>ความสามารถ/กิจกรรม</th>
+              <th style={{ width: "18%" }}>ระดับ<br />ความสามารถที่คาดหวัง</th>
+              <th style={{ width: "18%" }}>ระดับ<br />ความสามารถที่ได้</th>
+              <th style={{ width: "14%" }}>หมายเหตุ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowSpan={3} className="text-center">1</td>
+              <td rowSpan={3} className="text-center font-semibold">ความสามารถพื้นฐาน<br />ด้านการเรียนรู้</td>
+              <td>การอ่าน</td>
+              <td rowSpan={3} className="text-center font-semibold">ชำนาญ</td>
+              <td className="text-center font-semibold">{readingLevel}</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>การเขียน</td>
+              <td className="text-center font-semibold">{writingLevel}</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>การคิดคำนวณ</td>
+              <td className="text-center font-semibold">{numeracyLevel}</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td className="text-center">2</td>
+              <td colSpan={2}>ความสามารถในการประยุกต์ใช้ในชีวิตประจำวัน</td>
+              <td className="text-center font-semibold">ชำนาญ</td>
+              <td className="text-center font-semibold">{appliedLevel}</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td className="text-center">3</td>
+              <td colSpan={2}>กิจกรรมพัฒนาผู้เรียน</td>
+              <td className="text-center font-semibold">ผ่าน</td>
+              <td className="text-center font-semibold">{activityLevel}</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td className="text-center">4</td>
+              <td colSpan={2}>คุณลักษณะอันพึงประสงค์</td>
+              <td></td>
+              <td className="text-center font-semibold">{characteristicLevel}</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td className="text-center">5</td>
+              <td colSpan={2}>สมรรถนะผู้เรียน</td>
+              <td></td>
+              <td className="text-center font-semibold">{competencyLevel}</td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div className="summary-signature text-center text-[13px]">
+          <div>ลงชื่อ ..................................................................</div>
+          <div className="mt-1">( {cls?.homeroom_teacher_name || "..............................."} )</div>
+          <div>ครูประจำชั้น</div>
+        </div>
+        <div className="grow" />
+      </div>
+    </>
   );
 }

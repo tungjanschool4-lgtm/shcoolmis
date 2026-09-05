@@ -18,6 +18,18 @@ export type StudentReport = {
   characteristicLevel: string;
   readWriteLevel: string;
   activityOverall: string;
+  assessmentLevels: {
+    characteristic: TermLevels;
+    readWrite: TermLevels;
+    competency: TermLevels;
+  };
+  activityLevels: TermLevels;
+};
+
+export type TermLevels = {
+  sem1: string;
+  sem2: string;
+  year: string;
 };
 
 export function computeStudentReport(bundle: ClassBundle, student: Student): StudentReport {
@@ -46,35 +58,49 @@ export function computeStudentReport(bundle: ClassBundle, student: Student): Stu
   const scoreByItem = new Map(
     bundle.assessmentScores.filter((s) => s.student_id === student.id).map((s) => [s.item_id, s])
   );
-  function levelFor(kind: "characteristic" | "read_write"): string {
+  function levelsFor(kind: "characteristic" | "read_write" | "competency"): TermLevels {
     const items = bundle.items.filter((i) => i.kind === kind);
-    const vals: (number | null)[] = [];
+    const sem1: (number | null)[] = [];
+    const sem2: (number | null)[] = [];
     for (const it of items) {
       const sc = scoreByItem.get(it.id);
-      if (sc?.sem1 != null) vals.push(sc.sem1);
-      if (sc?.sem2 != null) vals.push(sc.sem2);
+      sem1.push(sc?.sem1 ?? null);
+      sem2.push(sc?.sem2 ?? null);
     }
-    return qualityLevel(itemsAverage(vals));
+    return {
+      sem1: qualityLevel(itemsAverage(sem1)),
+      sem2: qualityLevel(itemsAverage(sem2)),
+      year: qualityLevel(itemsAverage([...sem1, ...sem2])),
+    };
   }
 
   // กิจกรรม : ผ่านถ้าไม่มี "ไม่ผ่าน" และมีผลอย่างน้อยหนึ่งรายการ
   const myActivities = bundle.activityResults.filter((r) => r.student_id === student.id);
-  let hasResult = false;
-  let anyFail = false;
-  for (const r of myActivities) {
-    for (const v of [r.sem1_result, r.sem2_result]) {
-      if (v) { hasResult = true; if (v === "ไม่ผ่าน") anyFail = true; }
-    }
+  function activityLevelFor(values: string[]): string {
+    const recorded = values.filter(Boolean);
+    if (!recorded.length) return "";
+    return recorded.some((value) => value === "ไม่ผ่าน") ? "ไม่ผ่าน" : "ผ่าน";
   }
-  const activityOverall = !hasResult ? "" : anyFail ? "ไม่ผ่าน" : "ผ่าน";
+  const activityLevels: TermLevels = {
+    sem1: activityLevelFor(myActivities.map((r) => r.sem1_result)),
+    sem2: activityLevelFor(myActivities.map((r) => r.sem2_result)),
+    year: activityLevelFor(myActivities.flatMap((r) => [r.sem1_result, r.sem2_result])),
+  };
+  const assessmentLevels = {
+    characteristic: levelsFor("characteristic"),
+    readWrite: levelsFor("read_write"),
+    competency: levelsFor("competency"),
+  };
 
   return {
     student,
     rows,
     gpa,
-    characteristicLevel: levelFor("characteristic"),
-    readWriteLevel: levelFor("read_write"),
-    activityOverall,
+    characteristicLevel: assessmentLevels.characteristic.year,
+    readWriteLevel: assessmentLevels.readWrite.year,
+    activityOverall: activityLevels.year,
+    assessmentLevels,
+    activityLevels,
   };
 }
 

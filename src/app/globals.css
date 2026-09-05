@@ -102,6 +102,7 @@ body {
 .evaluation-sheet {
   padding: 8mm 9mm;
   line-height: 1.25;
+  position: relative;
 }
 .evaluation-sheet .sheet-title {
   line-height: 1.25;
@@ -118,6 +119,38 @@ body {
 }
 .evaluation-report-table thead th {
   font-size: 10.5px;
+}
+
+.report-page-number {
+  position: absolute;
+  top: 8mm;
+  right: 9mm;
+  min-width: 17mm;
+  border: 1px solid #999;
+  padding: 1px 5px;
+  text-align: center;
+  font-size: 9px;
+}
+
+.summary-sheet {
+  padding-top: 13mm;
+}
+.summary-report-table {
+  table-layout: fixed;
+}
+.summary-report-table th,
+.summary-report-table td {
+  padding: 5px 6px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+.summary-report-table tbody tr {
+  height: 15mm;
+}
+.summary-signature {
+  width: 42%;
+  margin-top: 20mm;
+  margin-left: 8%;
 }
 
 @media print {
