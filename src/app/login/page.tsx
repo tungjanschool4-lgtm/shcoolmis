@@ -78,6 +78,10 @@ export default function LoginPage() {
             {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
           </button>
         </form>
+
+        <div className="mt-6 pt-4 border-t border-slate-100 text-center text-xs text-slate-400">
+          ผู้พัฒนาระบบ นางโสภิตรา จิตชู
+        </div>
       </div>
     </div>
   );

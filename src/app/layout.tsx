@@ -12,6 +12,7 @@ const sarabun = Sarabun({
 export const metadata: Metadata = {
   title: "ระบบตัดเกรด ปพ.5",
   description: "ระบบบันทึกผลการเรียนและออกรายงาน ปพ.5",
+  authors: [{ name: "นางโสภิตรา จิตชู" }],
 };
 
 export default function RootLayout({

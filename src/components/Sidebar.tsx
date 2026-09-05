@@ -73,6 +73,10 @@ export default function Sidebar({ profile }: { profile: Profile }) {
               ออกจากระบบ →
             </button>
           </form>
+          <div className="mt-4 pt-3 border-t border-slate-800 text-[11px] leading-relaxed text-slate-500">
+            <div>ผู้พัฒนาระบบ</div>
+            <div className="text-slate-400">นางโสภิตรา จิตชู</div>
+          </div>
         </div>
       </aside>
     </>
