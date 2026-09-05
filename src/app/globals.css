@@ -98,3 +98,31 @@ body {
   text-align: center;
   line-height: 1.35;
 }
+
+.evaluation-sheet {
+  padding: 8mm 9mm;
+  line-height: 1.25;
+}
+.evaluation-sheet .sheet-title {
+  line-height: 1.25;
+}
+.evaluation-report-table {
+  table-layout: fixed;
+}
+.evaluation-report-table th,
+.evaluation-report-table td {
+  padding: 2px 3px;
+  font-size: 9.5px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.evaluation-report-table thead th {
+  font-size: 10.5px;
+}
+
+@media print {
+  .evaluation-sheet {
+    width: auto;
+    min-height: 190mm;
+  }
+}

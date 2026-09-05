@@ -12,6 +12,7 @@ import type {
   ActivityResult,
   TransferSubject,
   TransferSource,
+  SubjectCompetencyLevel,
 } from "@/lib/types";
 
 export type ClassBundle = {
@@ -27,6 +28,7 @@ export type ClassBundle = {
   activityResults: ActivityResult[];
   transferSubjects: TransferSubject[];
   transferSources: TransferSource[];
+  subjectCompetencyLevels: SubjectCompetencyLevel[];
 };
 
 export async function loadClassBundle(classId: string): Promise<ClassBundle> {
@@ -45,6 +47,7 @@ export async function loadClassBundle(classId: string): Promise<ClassBundle> {
     { data: activityResults },
     { data: transferSubjects },
     { data: transferSources },
+    { data: subjectCompetencyLevels },
   ] = await Promise.all([
     supabase.from("school").select("*").eq("id", 1).single(),
     supabase.from("classes").select("*").eq("id", classId).single(),
@@ -58,6 +61,7 @@ export async function loadClassBundle(classId: string): Promise<ClassBundle> {
     supabase.from("activity_results").select("*, students!inner(class_id)").eq("students.class_id", classId),
     supabase.from("transfer_subjects").select("*").eq("class_id", classId).order("order_no"),
     supabase.from("transfer_sources").select("*, transfer_subjects!inner(class_id)").eq("transfer_subjects.class_id", classId),
+    supabase.from("subject_competency_levels").select("*").eq("class_id", classId).order("order_no"),
   ]);
 
   return {
@@ -73,5 +77,6 @@ export async function loadClassBundle(classId: string): Promise<ClassBundle> {
     activityResults: (activityResults as ActivityResult[]) ?? [],
     transferSubjects: (transferSubjects as TransferSubject[]) ?? [],
     transferSources: (transferSources as TransferSource[]) ?? [],
+    subjectCompetencyLevels: (subjectCompetencyLevels as SubjectCompetencyLevel[]) ?? [],
   };
 }

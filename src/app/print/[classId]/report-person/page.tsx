@@ -1,5 +1,5 @@
 import { loadClassBundle } from "@/lib/report-data";
-import { computeStudentReport, rankByGpa } from "@/lib/report-compute";
+import { computeStudentReport } from "@/lib/report-compute";
 import PrintToolbar from "@/components/PrintToolbar";
 import PersonReportSheet from "@/components/PersonReportSheet";
 
@@ -19,7 +19,6 @@ export default async function ReportPersonPage({
   const bundle = await loadClassBundle(classId);
   const { school, cls, students } = bundle;
   const reports = students.map((s) => computeStudentReport(bundle, s));
-  const ranks = rankByGpa(reports);
 
   return (
     <>
@@ -31,9 +30,8 @@ export default async function ReportPersonPage({
             school={school}
             cls={cls}
             report={rep}
-            rank={ranks.get(rep.student.id) ?? "-"}
-            total={students.length}
             term={t}
+            competencyLevels={bundle.subjectCompetencyLevels}
           />
         ))}
         {students.length === 0 && (
