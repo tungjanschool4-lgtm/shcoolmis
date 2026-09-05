@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Student } from "@/lib/types";
+import { parseStudentsCsv } from "@/lib/student-csv";
 
 type Row = Partial<Student> & { _key: string; _dirty?: boolean; _new?: boolean };
 
@@ -13,6 +14,7 @@ export default function StudentsClient({ classId, initial }: { classId: string; 
   const [rows, setRows] = useState<Row[]>(initial.map((s) => ({ ...s, _key: s.id })));
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function update(key: string, field: keyof Student, value: string | number) {
     setRows((rs) => rs.map((r) => (r._key === key ? { ...r, [field]: value, _dirty: true } : r)));
@@ -39,6 +41,61 @@ export default function StudentsClient({ classId, initial }: { classId: string; 
         blood_type: "",
       },
     ]);
+  }
+
+  async function importCsv(file: File) {
+    setMsg(null);
+    try {
+      const buffer = await file.arrayBuffer();
+      let text = new TextDecoder("utf-8").decode(buffer);
+      if (text.includes("�")) text = new TextDecoder("windows-874").decode(buffer);
+
+      const nextNo = rows.reduce((max, row) => Math.max(max, Number(row.no) || 0), 0) + 1;
+      const imported = parseStudentsCsv(text, nextNo);
+      const existingCodes = new Set(rows.map((row) => row.student_code?.trim()).filter(Boolean));
+      const existingNationalIds = new Set(rows.map((row) => row.national_id?.trim()).filter(Boolean));
+      const accepted: Row[] = [];
+      let skipped = 0;
+
+      for (const student of imported) {
+        const duplicateCode = student.student_code && existingCodes.has(student.student_code);
+        const duplicateNationalId = student.national_id && existingNationalIds.has(student.national_id);
+        if (duplicateCode || duplicateNationalId) {
+          skipped += 1;
+          continue;
+        }
+        if (student.student_code) existingCodes.add(student.student_code);
+        if (student.national_id) existingNationalIds.add(student.national_id);
+        accepted.push({
+          ...student,
+          class_id: classId,
+          _key: `csv-${Date.now()}-${accepted.length}`,
+          _new: true,
+          _dirty: true,
+        });
+      }
+
+      if (!accepted.length) {
+        setMsg(skipped ? "ไม่ได้นำเข้า: ข้อมูลซ้ำกับรายชื่อเดิมทั้งหมด" : "ไม่พบข้อมูลที่นำเข้าได้");
+        return;
+      }
+      setRows((current) => [...current, ...accepted].sort((a, b) => (Number(a.no) || 0) - (Number(b.no) || 0)));
+      setMsg(`นำเข้า ${accepted.length} คน รอตรวจสอบและกดบันทึก${skipped ? ` (ข้ามข้อมูลซ้ำ ${skipped} คน)` : ""}`);
+    } catch (error) {
+      setMsg(`นำเข้าไม่สำเร็จ: ${error instanceof Error ? error.message : "รูปแบบไฟล์ไม่ถูกต้อง"}`);
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  function downloadTemplate() {
+    const csv = "\uFEFFเลขที่,เลขประจำตัว,เลขบัตรประชาชน,คำนำหน้า,ชื่อ,นามสกุล,เพศ,วันเกิด,หมู่เลือด,สถานะ\r\n1,65001,1234567890123,เด็กชาย,สมชาย,ใจดี,ชาย,01/01/2555,O,กำลังศึกษา\r\n";
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "student-import-template.csv";
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   async function removeRow(key: string) {
@@ -97,6 +154,25 @@ export default function StudentsClient({ classId, initial }: { classId: string; 
         <div className="text-sm text-slate-500">นักเรียน {rows.length} คน</div>
         <div className="flex items-center gap-2">
           {msg && <span className="text-sm text-slate-500">{msg}</span>}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) void importCsv(file);
+            }}
+          />
+          <button onClick={downloadTemplate} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            ดาวน์โหลด CSV ตัวอย่าง
+          </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm text-indigo-700 hover:bg-indigo-100"
+          >
+            นำเข้า CSV
+          </button>
           <button onClick={addRow} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">
             + เพิ่มนักเรียน
           </button>

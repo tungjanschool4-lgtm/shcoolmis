@@ -6,6 +6,7 @@ import {
   SUBJECT_TEMPLATE,
   TRANSFER_SUBJECT_TEMPLATE,
   ACTIVITY_TEMPLATE,
+  COMPETENCY_TEMPLATE,
   CHARACTERISTIC_TEMPLATE,
   READ_WRITE_TEMPLATE,
 } from "@/lib/template";
@@ -73,6 +74,13 @@ export async function createClassRoom(formData: FormData): Promise<ActionResult>
       ACTIVITY_TEMPLATE.map((t) => ({ ...t, class_id: classId }))
     );
     const items = [
+      ...COMPETENCY_TEMPLATE.map((title, i) => ({
+        class_id: classId,
+        kind: "competency" as const,
+        no: i + 1,
+        title,
+        max_score: 3,
+      })),
       ...CHARACTERISTIC_TEMPLATE.map((title, i) => ({
         class_id: classId,
         kind: "characteristic" as const,

@@ -40,7 +40,7 @@ export default function ClassOverview({
         </Link>
         <Link href={`/classes/${cls.id}/subjects`} className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
           <div className="text-2xl font-bold text-slate-800">{subjectCount}</div>
-          <div className="text-sm text-slate-500">รายวิชา</div>
+          <div className="text-sm text-slate-500">รายวิชา 2568</div>
         </Link>
         <Link href={`/classes/${cls.id}/grades`} className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
           <div className="text-2xl">✍️</div>

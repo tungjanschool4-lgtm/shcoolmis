@@ -89,6 +89,10 @@ export default function SubjectsClient({ classId, initial }: { classId: string; 
 
   return (
     <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold text-slate-800">บันทึกรายวิชา หลักสูตรใหม่ 2568</h2>
+        <p className="text-sm text-slate-500">กำหนดชื่อวิชา ประเภทวิชา เวลาเรียน และน้ำหนักรายวิชา</p>
+      </div>
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="text-sm text-slate-500">รายวิชา {rows.length} วิชา</div>
         <div className="flex items-center gap-2">
@@ -108,8 +112,8 @@ export default function SubjectsClient({ classId, initial }: { classId: string; 
         <table className="text-sm min-w-[980px] w-full">
           <thead className="bg-slate-50 text-slate-600">
             <tr>
-              <th className="px-2 py-2 w-12">ที่</th>
-              <th className="px-2 py-2 w-28">ประเภท</th>
+              <th className="px-2 py-2 w-12">วิชาที่</th>
+              <th className="px-2 py-2 w-28">ประเภทวิชา</th>
               <th className="px-2 py-2">ชื่อวิชา</th>
               <th className="px-2 py-2 w-24">รหัส</th>
               <th className="px-2 py-2 w-20">เวลาเรียน</th>

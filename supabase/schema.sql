@@ -144,7 +144,7 @@ create table if not exists public.subject_scores (
 create table if not exists public.assessment_items (
   id uuid primary key default gen_random_uuid(),
   class_id uuid not null references public.classes(id) on delete cascade,
-  kind text not null check (kind in ('characteristic','read_write')),
+  kind text not null check (kind in ('characteristic','read_write','competency')),
   no int not null default 1,
   title text not null default '',
   max_score numeric not null default 3,

@@ -114,7 +114,7 @@ export type TransferSource = {
 export type AssessmentItem = {
   id: string;
   class_id: string;
-  kind: "characteristic" | "read_write";
+  kind: "characteristic" | "read_write" | "competency";
   no: number;
   title: string;
   max_score: number;

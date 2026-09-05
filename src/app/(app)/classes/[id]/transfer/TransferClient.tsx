@@ -116,6 +116,7 @@ export default function TransferClient({
   if (rows.length === 0) {
     return (
       <div className="text-center py-14 space-y-4">
+        <h2 className="text-lg font-semibold text-slate-800">บันทึกรายวิชาเทียบโอน หลักสูตร 2560</h2>
         <div className="text-slate-500">ยังไม่ได้ตั้งค่าวิชาเทียบโอนสำหรับห้องนี้</div>
         <p className="text-sm text-slate-400 max-w-lg mx-auto">
           การเทียบโอนคือการจับคู่ “วิชาหลักสูตรใหม่ (ต้นทาง)” เข้ากับ “วิชาโครงสร้างเดิม (ปลายทาง)”
@@ -135,9 +136,13 @@ export default function TransferClient({
 
   return (
     <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold text-slate-800">บันทึกรายวิชาเทียบโอน หลักสูตร 2560</h2>
+        <p className="text-sm text-slate-500">จับคู่รายวิชาหลักสูตรใหม่ 2568 กับรายวิชาในหลักสูตร 2560</p>
+      </div>
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="text-sm text-slate-500">
-          จับคู่วิชาต้นทาง (หลักสูตรใหม่) → วิชาปลายทาง (โครงสร้างเดิม) · รวมหลายวิชาเป็น 1 ได้
+          จับคู่วิชาต้นทาง (หลักสูตรใหม่ 2568) → วิชาปลายทาง (หลักสูตร 2560) · รวมหลายวิชาเป็น 1 ได้
         </div>
         <div className="flex items-center gap-2">
           {msg && <span className={`text-sm ${msg.t === "ok" ? "text-emerald-600" : "text-red-600"}`}>{msg.m}</span>}

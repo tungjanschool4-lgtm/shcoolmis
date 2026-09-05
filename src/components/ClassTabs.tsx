@@ -9,12 +9,13 @@ export default function ClassTabs({ classId }: { classId: string }) {
   const tabs = [
     { href: base, label: "ภาพรวม" },
     { href: `${base}/students`, label: "นักเรียน" },
-    { href: `${base}/subjects`, label: "รายวิชา" },
+    { href: `${base}/subjects`, label: "รายวิชา 2568" },
     { href: `${base}/grades`, label: "กรอกคะแนน" },
-    { href: `${base}/characteristics`, label: "คุณลักษณะ" },
+    { href: `${base}/competencies`, label: "สมรรถนะผู้เรียน" },
+    { href: `${base}/characteristics`, label: "คุณลักษณะฯ" },
     { href: `${base}/readwrite`, label: "อ่านคิดเขียน" },
-    { href: `${base}/activities`, label: "กิจกรรม" },
-    { href: `${base}/transfer`, label: "เทียบโอน" },
+    { href: `${base}/activities`, label: "กิจกรรมพัฒนาผู้เรียน" },
+    { href: `${base}/transfer`, label: "เทียบโอน 2560" },
     { href: `${base}/reports`, label: "รายงาน/PDF" },
   ];
 

@@ -69,11 +69,20 @@ export default function ActivitiesClient({
   const dirtyCount = Object.values(map).reduce((a, r) => a + Object.values(r).filter((c) => c._dirty).length, 0);
 
   if (activities.length === 0) {
-    return <div className="text-slate-400 py-10 text-center">ยังไม่มีกิจกรรม</div>;
+    return (
+      <div className="py-10 text-center space-y-2">
+        <h2 className="text-lg font-semibold text-slate-800">บันทึกกิจกรรมพัฒนาผู้เรียน</h2>
+        <div className="text-slate-400">ยังไม่มีกิจกรรม</div>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold text-slate-800">บันทึกกิจกรรมพัฒนาผู้เรียน</h2>
+        <p className="text-sm text-slate-500">บันทึกผลการประเมินรายภาคเรียนเป็น ผ่าน หรือ ไม่ผ่าน</p>
+      </div>
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="text-sm text-slate-500">กิจกรรมพัฒนาผู้เรียน · ผลการประเมิน ผ่าน/ไม่ผ่าน</div>
         <div className="flex items-center gap-2">
