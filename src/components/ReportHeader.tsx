@@ -11,7 +11,7 @@ export default function ReportHeader({
   title: string;
   showLogo?: boolean;
 }) {
-  const year = school?.academic_year || cls?.academic_year || "";
+  const year = cls?.academic_year || school?.academic_year || "";
   return (
     <div className="sheet-title">
       {showLogo && school?.logo_url ? (
