@@ -2,9 +2,8 @@
 
 import { Fragment, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { Student, Activity, ActivityResult, Subject } from "@/lib/types";
+import type { Student, Activity, ActivityResult } from "@/lib/types";
 import { fullName } from "@/lib/types";
-import YearCompetencyPanel from "@/components/YearCompetencyPanel";
 
 type Cell = Partial<ActivityResult> & { _dirty?: boolean };
 const OPTIONS = ["", "ผ่าน", "ไม่ผ่าน"];
@@ -13,13 +12,11 @@ export default function ActivitiesClient({
   activities,
   students,
   results,
-  subjects,
 }: {
   classId: string;
   activities: Activity[];
   students: Student[];
   results: ActivityResult[];
-  subjects: Subject[];
 }) {
   const supabase = createClient();
   const [saving, setSaving] = useState(false);
@@ -73,12 +70,9 @@ export default function ActivitiesClient({
 
   if (activities.length === 0) {
     return (
-      <div className="space-y-6">
-        <div className="py-10 text-center space-y-2">
-          <h2 className="text-lg font-semibold text-slate-800">บันทึกกิจกรรมพัฒนาผู้เรียน</h2>
-          <div className="text-slate-400">ยังไม่มีกิจกรรม</div>
-        </div>
-        <YearCompetencyPanel subjects={subjects} />
+      <div className="py-10 text-center space-y-2">
+        <h2 className="text-lg font-semibold text-slate-800">บันทึกกิจกรรมพัฒนาผู้เรียน</h2>
+        <div className="text-slate-400">ยังไม่มีกิจกรรม</div>
       </div>
     );
   }
@@ -151,7 +145,6 @@ export default function ActivitiesClient({
           </tbody>
         </table>
       </div>
-      <YearCompetencyPanel subjects={subjects} />
     </div>
   );
 }
