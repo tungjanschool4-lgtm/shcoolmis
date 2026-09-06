@@ -16,6 +16,7 @@ export default function ClassTabs({ classId }: { classId: string }) {
     { href: `${base}/characteristics`, label: "คุณลักษณะฯ" },
     { href: `${base}/readwrite`, label: "ความสามารถและกิจกรรม" },
     { href: `${base}/activities`, label: "กิจกรรมพัฒนาผู้เรียน" },
+    { href: `${base}/attendance`, label: "ปฏิทิน/เวลาเรียน" },
     { href: `${base}/transfer`, label: "เทียบโอน 2560" },
     { href: `${base}/reports`, label: "รายงาน/PDF" },
   ];

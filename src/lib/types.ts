@@ -165,6 +165,22 @@ export type ActivityResult = {
   sem2_result: string;
 };
 
+export type SchoolDay = {
+  id: string;
+  class_id: string;
+  school_date: string;
+  term: 1 | 2;
+  created_at: string;
+};
+
+export type AttendanceRecord = {
+  id: string;
+  student_id: string;
+  school_day_id: string;
+  status: "" | "/" | "ข" | "ล";
+  updated_at: string;
+};
+
 export function fullName(s: Pick<Student, "prefix" | "first_name" | "last_name">): string {
   return `${s.prefix}${s.first_name}  ${s.last_name}`.trim();
 }

@@ -76,8 +76,10 @@ main h3 {
   min-height: 297mm;
   box-sizing: border-box;
   margin: 0 auto 16px;
-  padding: 12mm 10mm;
+  padding: 8mm;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
+  font-family: "TH SarabunPSK", "TH Sarabun New", var(--font-thai);
+  font-size: 14pt;
 }
 .print-page.landscape {
   width: 297mm;
@@ -262,9 +264,124 @@ main h3 {
 }
 .transfer-overview-table th,
 .transfer-overview-table td {
-  font-size: 13px;
+  font-size: 11pt;
   padding: 5px 7px;
 }
+
+/* ทุกหัวข้อในไฟล์ PDF ไม่เกิน 16 pt */
+.print-page h1,
+.print-page h2,
+.print-page h3,
+.print-page .text-3xl,
+.print-page .text-2xl,
+.print-page .text-xl,
+.print-page .text-lg,
+.print-page .text-base {
+  font-size: 16pt !important;
+}
+
+/* ตารางเวลาเรียน A4 แนวนอน */
+.attendance-print-page {
+  page: landscape;
+  width: 297mm;
+  min-height: 210mm;
+  height: 210mm;
+  padding: 6mm 7mm;
+  display: flex;
+  flex-direction: column;
+}
+.attendance-print-title {
+  text-align: center;
+  font-size: 16pt;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.attendance-print-subtitle {
+  text-align: center;
+  font-size: 14pt;
+  font-weight: 600;
+  line-height: 1.15;
+}
+.attendance-legend {
+  text-align: right;
+  font-size: 10pt;
+  margin-bottom: 1mm;
+}
+.attendance-print-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 8.5pt;
+}
+.attendance-print-table th,
+.attendance-print-table td {
+  border: 0.35mm solid #111;
+  padding: 0.6mm 0.3mm;
+  text-align: center;
+  line-height: 1.05;
+  height: 4.5mm;
+}
+.attendance-print-table thead th {
+  background: #d9e8c5;
+  font-weight: 700;
+}
+.attendance-print-table .attendance-no { width: 7mm; }
+.attendance-print-table .attendance-name { width: 42mm; }
+.attendance-print-table tfoot th { background: #f1f5f9; }
+.attendance-signatures {
+  margin-top: auto;
+  padding-top: 3mm;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20mm;
+  text-align: center;
+  font-size: 11pt;
+  line-height: 1.25;
+}
+.academic-calendar-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 9pt;
+  line-height: 1.15;
+}
+.academic-calendar-table th,
+.academic-calendar-table td {
+  height: 9mm;
+  border: 0.25mm solid #111;
+  padding: 0.5mm 0;
+  text-align: center;
+}
+.academic-calendar-table thead th,
+.academic-calendar-table tfoot th {
+  background: #e2e8f0;
+  font-weight: 700;
+}
+.academic-calendar-table .calendar-month-name { width: 25mm; }
+.academic-calendar-table .calendar-total { width: 14mm; }
+.academic-calendar-table tbody th {
+  width: 25mm;
+  padding: 1mm;
+  background: #fff7ed;
+  font-size: 10pt;
+  line-height: 1.05;
+}
+.academic-calendar-table tbody th span {
+  font-size: 8.5pt;
+  font-weight: 400;
+}
+.academic-calendar-table td.calendar-open {
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 700;
+}
+.academic-calendar-table td.calendar-disabled { background: #e5e7eb; }
+.academic-calendar-table td.calendar-total-value {
+  background: #ffedd5;
+  font-size: 10pt;
+  font-weight: 700;
+}
+.calendar-signatures { margin-top: 10mm; }
 .transfer-overview-table tbody tr {
   height: 11mm;
 }
