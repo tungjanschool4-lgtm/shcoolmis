@@ -1,5 +1,10 @@
 import { loadClassBundle } from "@/lib/report-data";
-import { computeTransferReport, rankByGpaTransfer } from "@/lib/report-compute";
+import {
+  computeTransferReport,
+  rankByGpaTransfer,
+  type TransferRow,
+  type TransferTerm,
+} from "@/lib/report-compute";
 import { gradeText } from "@/lib/grading";
 import { fullName } from "@/lib/types";
 import PrintToolbar from "@/components/PrintToolbar";
@@ -9,29 +14,106 @@ export const dynamic = "force-dynamic";
 
 function num(v: number | null): string {
   if (v === null || Number.isNaN(v)) return "-";
-  return String(Math.round(v));
+  return String(Math.round(v * 100) / 100);
+}
+
+function termLabel(term: TransferTerm): string {
+  return term === "year" ? "รายปี" : `ภาคเรียนที่ ${term}`;
+}
+
+function chunks<T>(items: T[], size: number): T[][] {
+  const result: T[][] = [];
+  for (let i = 0; i < items.length; i += size) result.push(items.slice(i, i + size));
+  return result;
+}
+
+function TransferRowsTable({
+  rows,
+  year,
+  term,
+  showHeader = true,
+  blankRows = 0,
+}: {
+  rows: TransferRow[];
+  year: string;
+  term: TransferTerm;
+  showHeader?: boolean;
+  blankRows?: number;
+}) {
+  return (
+    <table className="report-table transfer-report-table">
+      <colgroup>
+        <col style={{ width: "7%" }} />
+        <col style={{ width: "37%" }} />
+        <col style={{ width: "11%" }} />
+        <col style={{ width: "10%" }} />
+        <col style={{ width: "12%" }} />
+        <col style={{ width: "12%" }} />
+        <col style={{ width: "11%" }} />
+      </colgroup>
+      {showHeader && (
+        <thead>
+          <tr>
+            <th rowSpan={3}>ที่</th>
+            <th rowSpan={3}>ชื่อวิชา</th>
+            <th rowSpan={3}>ประเภท<br />วิชา</th>
+            <th rowSpan={3}><span className="vtext">น้ำหนัก</span></th>
+            <th colSpan={2}>ภาคเรียนที่</th>
+            <th rowSpan={3}><span className="vtext">หมายเหตุ</span></th>
+          </tr>
+          <tr><th colSpan={2}>{term === "year" ? `ปีการศึกษา ${year}` : term}</th></tr>
+          <tr>
+            <th><span className="vtext">คะแนน</span></th>
+            <th><span className="vtext">เกรด</span></th>
+          </tr>
+        </thead>
+      )}
+      <tbody>
+        {rows.map((r) => (
+          <tr key={r.transferSubject.id}>
+            <td className="text-center">{r.transferSubject.order_no}</td>
+            <td>{r.transferSubject.name}</td>
+            <td className="text-center">{r.transferSubject.category}</td>
+            <td className="text-center">{r.transferSubject.credits}</td>
+            <td className="text-center">{num(r.score)}</td>
+            <td className="text-center font-semibold">{gradeText(r.grade) || "-"}</td>
+            <td></td>
+          </tr>
+        ))}
+        {Array.from({ length: blankRows }).map((_, i) => (
+          <tr key={`blank-${i}`}>
+            <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
 }
 
 export default async function ReportTransferPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ classId: string }>;
+  searchParams: Promise<{ term?: string }>;
 }) {
   const { classId } = await params;
+  const { term = "1" } = await searchParams;
+  const selectedTerm = (term === "2" || term === "year" ? term : "1") as TransferTerm;
   const bundle = await loadClassBundle(classId);
   const { school, cls, students } = bundle;
   const year = school?.academic_year || cls?.academic_year || "";
 
-  const reports = students.map((s) => computeTransferReport(bundle, s));
+  const reports = students.map((s) => computeTransferReport(bundle, s, selectedTerm));
   const ranks = rankByGpaTransfer(reports);
-  const minRows = 13;
+  const reportTitle = `แบบรายงานผลการพัฒนาคุณภาพผู้เรียน${selectedTerm === "year" ? "" : ` (ภาคเรียนที่ ${selectedTerm})`}`;
 
   if (bundle.transferSubjects.filter((t) => t.enabled).length === 0) {
     return (
       <>
-        <PrintToolbar title="รายงานเทียบโอน (รายปี)" />
+        <PrintToolbar title={`รายงานเทียบโอน (${termLabel(selectedTerm)})`} />
         <div className="print-page text-center text-slate-500 pt-20">
-          ยังไม่ได้ตั้งค่าวิชาเทียบโอนของห้องนี้ — ไปที่แท็บ “เทียบโอน” เพื่อเลือกวิชาและจับคู่ก่อน
+          ยังไม่ได้ตั้งค่าวิชาเทียบโอนของห้องนี้ — ไปที่แท็บ “เทียบโอน 2560” เพื่อเลือกวิชาและจับคู่ก่อน
         </div>
       </>
     );
@@ -39,102 +121,96 @@ export default async function ReportTransferPage({
 
   return (
     <>
-      <PrintToolbar title="รายงานเทียบโอน (รายปี)" />
-      <div className="py-4">
+      <PrintToolbar title={`รายงานเทียบโอน (${termLabel(selectedTerm)})`} />
+      <div className="py-4 print:py-0">
         {reports.map((rep) => {
-          const s = rep.student;
-          const blanks = Math.max(0, minRows - rep.rows.length);
+          const student = rep.student;
+          const firstRows = rep.rows.slice(0, 6);
+          const remainingPages = chunks(rep.rows.slice(6), 12);
+          if (remainingPages.length === 0) remainingPages.push([]);
+
           return (
-            <div key={s.id} className="print-page sheet text-[13px]" style={{ lineHeight: 1.35 }}>
-              <ReportHeader school={school} cls={cls} title="แบบรายงานผลการพัฒนาคุณภาพผู้เรียน" />
-
-              <div className="flex justify-between mt-2 mb-1 px-1">
-                <div>เลขที่ <span className="underline px-4">{s.no}</span></div>
-                <div>ชื่อ - นามสกุล <span className="underline px-2">{fullName(s)}</span></div>
-                <div>เลขประจำตัว {s.student_code || "-"}</div>
-              </div>
-
-              <table className="report-table">
-                <thead>
-                  <tr>
-                    <th rowSpan={2} style={{ width: 28 }}>ที่</th>
-                    <th rowSpan={2} style={{ width: 60 }}>รหัสวิชา</th>
-                    <th rowSpan={2}>ชื่อวิชา</th>
-                    <th rowSpan={2} style={{ width: 66 }}>ประเภทวิชา</th>
-                    <th rowSpan={2} style={{ width: 42 }}>น้ำหนัก</th>
-                    <th colSpan={2}>ปีการศึกษา {year}</th>
-                    <th rowSpan={2} style={{ width: 54 }}>หมายเหตุ</th>
-                  </tr>
-                  <tr>
-                    <th style={{ width: 54 }}>คะแนน</th>
-                    <th style={{ width: 46 }}>เกรด</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rep.rows.map((r) => (
-                    <tr key={r.transferSubject.id}>
-                      <td className="text-center">{r.transferSubject.order_no}</td>
-                      <td className="text-center">{r.transferSubject.code}</td>
-                      <td>{r.transferSubject.name}</td>
-                      <td className="text-center">{r.transferSubject.category}</td>
-                      <td className="text-center">{r.transferSubject.credits}</td>
-                      <td className="text-center">{num(r.score)}</td>
-                      <td className="text-center font-semibold">{gradeText(r.grade)}</td>
-                      <td></td>
-                    </tr>
-                  ))}
-                  {Array.from({ length: blanks }).map((_, i) => (
-                    <tr key={`b${i}`}>
-                      <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                    </tr>
-                  ))}
-                  <tr>
-                    <td colSpan={5} className="text-center font-semibold shade">ผลการเรียนเฉลี่ย</td>
-                    <td className="text-center font-bold">{rep.gpa !== null ? rep.gpa.toFixed(2) : "-"}</td>
-                    <td className="text-center shade">ลำดับที่</td>
-                    <td className="text-center font-semibold">{ranks.get(s.id) ?? "-"}</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <table className="report-table" style={{ marginTop: 10 }}>
-                <thead>
-                  <tr><th colSpan={3} className="text-center">สรุปผลการประเมินด้านต่าง ๆ</th></tr>
-                  <tr>
-                    <th>คุณลักษณะอันพึงประสงค์</th>
-                    <th>การอ่าน คิดวิเคราะห์ และเขียนสื่อความ</th>
-                    <th>กิจกรรมพัฒนาผู้เรียน</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="text-center" style={{ height: 28 }}>
-                    <td>{rep.characteristicLevel || "-"}</td>
-                    <td>{rep.readWriteLevel || "-"}</td>
-                    <td>{rep.activityOverall || "-"}</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <div className="grow" />
-
-              <div className="grid grid-cols-2 gap-8 mt-8 text-center">
-                <div>
-                  <div className="text-left">ลงชื่อ ...................................................</div>
-                  <div className="mt-1">( {cls?.homeroom_teacher_name || "..............................."} )</div>
-                  <div>ครูประจำชั้น</div>
+            <div key={student.id} className="contents">
+              <div className="print-page sheet transfer-sheet text-[14px]">
+                <ReportHeader school={school} cls={cls} title={reportTitle} />
+                <div className="student-heading-line mt-2 mb-4 px-1">
+                  <span>เลขที่ <span className="underline px-4">{student.no}</span></span>
+                  <span className="student-name">ชื่อ - นามสกุล <span className="underline px-3">{fullName(student)}</span></span>
                 </div>
-                <div>
-                  <div className="text-left">ลงชื่อ ...................................................</div>
-                  <div className="mt-1">( {school?.academic_head || "..............................."} )</div>
-                  <div>หัวหน้าฝ่ายวิชาการ</div>
-                </div>
+                <TransferRowsTable
+                  rows={firstRows}
+                  year={year}
+                  term={selectedTerm}
+                  blankRows={Math.max(0, 6 - firstRows.length)}
+                />
               </div>
 
-              <div className="text-center mt-8">
-                <div>ลงชื่อ ว่าที่ ร.ต. ...................................................</div>
-                <div className="mt-1">( {school?.director || "..............................."} )</div>
-                <div>{school?.director_position || "ผู้อำนวยการโรงเรียน"}</div>
-              </div>
+              {remainingPages.map((pageRows, pageIndex) => {
+                const isLast = pageIndex === remainingPages.length - 1;
+                return (
+                  <div key={`${student.id}-continued-${pageIndex}`} className="print-page sheet transfer-sheet transfer-continuation-sheet text-[14px]">
+                    <TransferRowsTable
+                      rows={pageRows}
+                      year={year}
+                      term={selectedTerm}
+                      showHeader={false}
+                      blankRows={isLast ? Math.max(0, 6 - pageRows.length) : 0}
+                    />
+
+                    {isLast && (
+                      <>
+                        <table className="report-table transfer-gpa-table">
+                          <tbody>
+                            <tr>
+                              <td colSpan={4} className="text-center font-semibold">ผลการเรียนเฉลี่ย</td>
+                              <td className="text-center font-bold">{rep.gpa !== null ? rep.gpa.toFixed(2) : "-"}</td>
+                              <td className="text-center font-semibold">ลำดับที่</td>
+                              <td className="text-center font-semibold">{ranks.get(student.id) ?? "-"}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <table className="report-table transfer-summary-table mt-9">
+                          <thead>
+                            <tr><th colSpan={3}>สรุปผลการประเมินด้านต่าง ๆ</th></tr>
+                            <tr>
+                              <th>คุณลักษณะอันพึงประสงค์</th>
+                              <th>การอ่านคิดวิเคราะห์และเขียนสื่อความ</th>
+                              <th>กิจกรรมพัฒนาผู้เรียน</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className="text-center">
+                              <td>{rep.characteristicLevel || "-"}</td>
+                              <td>{rep.readWriteLevel || "-"}</td>
+                              <td>{rep.activityOverall || "-"}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <div className="grid grid-cols-2 gap-20 mt-7 text-center">
+                          <div>
+                            <div className="text-left font-semibold">ลงชื่อ ...................................................</div>
+                            <div className="mt-2">( {cls?.homeroom_teacher_name || "..............................."} )</div>
+                            <div>ครูประจำชั้น</div>
+                          </div>
+                          <div>
+                            <div className="text-left font-semibold">ลงชื่อ ...................................................</div>
+                            <div className="mt-2">( {school?.academic_head || "..............................."} )</div>
+                            <div>หัวหน้าฝ่ายวิชาการ</div>
+                          </div>
+                        </div>
+
+                        <div className="text-center mt-10">
+                          <div><span className="font-semibold">ลงชื่อ</span> ว่าที่ ร.ต. ...................................................</div>
+                          <div className="mt-2">( {school?.director || "..............................."} )</div>
+                          <div>{school?.director_position || `ผู้อำนวยการโรงเรียน${school?.name || ""}`}</div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           );
         })}

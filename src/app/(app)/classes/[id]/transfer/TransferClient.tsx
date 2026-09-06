@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Subject, TransferSubject, TransferSource } from "@/lib/types";
@@ -38,8 +39,6 @@ export default function TransferClient({
   const [seeding, setSeeding] = useState(false);
   const [msg, setMsg] = useState<{ t: "ok" | "err"; m: string } | null>(null);
   const { requestDelete, deletePasswordDialog } = usePasswordDelete();
-
-  const subjectName = (id: string) => subjects.find((s) => s.id === id)?.name ?? "?";
 
   function upd(key: string, field: keyof TransferSubject, val: string | number | boolean) {
     setRows((rs) => rs.map((r) => (r._key === key ? { ...r, [field]: val } : r)));
@@ -154,6 +153,12 @@ export default function TransferClient({
         </div>
         <div className="flex items-center gap-2">
           {msg && <span className={`text-sm ${msg.t === "ok" ? "text-emerald-600" : "text-red-600"}`}>{msg.m}</span>}
+          <Link href={`/print/${classId}/transfer-summary?term=1`} target="_blank" className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm text-indigo-700">
+            ภาพรวม / สถิติ ↗
+          </Link>
+          <Link href={`/print/${classId}/report-transfer?term=1`} target="_blank" className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm text-indigo-700">
+            PDF รายบุคคล ↗
+          </Link>
           <button onClick={addRow} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">+ เพิ่มวิชา</button>
           <button onClick={saveAll} disabled={saving} className="rounded-lg bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700 disabled:opacity-50">
             {saving ? "กำลังบันทึก..." : "บันทึก"}
@@ -162,22 +167,31 @@ export default function TransferClient({
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-x-auto">
-        <table className="text-sm min-w-[900px] w-full">
+        <table className="text-sm min-w-[1420px] w-full">
           <thead className="bg-slate-50 text-slate-600">
             <tr>
               <th className="px-2 py-2 w-12">ใช้</th>
               <th className="px-2 py-2 w-12">ที่</th>
               <th className="px-2 py-2 w-24">รหัสวิชา</th>
-              <th className="px-2 py-2">ชื่อวิชาปลายทาง</th>
+              <th className="px-2 py-2 w-52">รายวิชาหลักสูตร 2560</th>
               <th className="px-2 py-2 w-24">ประเภท</th>
               <th className="px-2 py-2 w-20">น้ำหนัก</th>
-              <th className="px-2 py-2">วิชาต้นทาง (ดึงคะแนน)</th>
+              <th className="px-2 py-2 w-24">เทียบโอน<br />รายวิชา</th>
+              <th className="px-2 py-2 w-64">รายวิชาหลักสูตรใหม่ 2568</th>
+              <th className="px-2 py-2 w-28">ประเภท</th>
+              <th className="px-2 py-2 w-24">น้ำหนัก</th>
+              <th className="px-2 py-2 w-28">เพิ่มรายวิชา</th>
+              <th className="px-2 py-2 w-24">ค่าเฉลี่ย</th>
+              <th className="px-2 py-2 w-20">เกรด</th>
               <th className="px-2 py-2 w-10"></th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => {
               const sources = sourceMap[r._key] ?? new Set<string>();
+              const sourceRows = subjects
+                .filter((subject) => sources.has(subject.id))
+                .sort((a, b) => a.order_no - b.order_no);
               return (
                 <tr key={r._key} className="border-t border-slate-100">
                   <td className="px-2 py-1 text-center">
@@ -193,14 +207,26 @@ export default function TransferClient({
                   </td>
                   <td className="px-1 py-1"><input type="number" value={r.credits ?? ""} onChange={(e) => upd(r._key, "credits", e.target.value)} className="w-16 rounded border border-slate-200 px-1 py-1" /></td>
                   <td className="px-1 py-1">
-                    <button onClick={() => setPickFor(r._key)} className="text-left w-full">
-                      {sources.size === 0 ? (
-                        <span className="text-rose-500 text-xs">— เลือกวิชาต้นทาง —</span>
-                      ) : (
-                        <span className="text-xs text-slate-700">{[...sources].map(subjectName).join(", ")}</span>
-                      )}
+                    <span className="block text-center font-semibold text-indigo-700">{sourceRows.length || "-"}</span>
+                  </td>
+                  <td className="px-2 py-2">
+                    {sourceRows.length === 0 ? (
+                      <span className="text-rose-500 text-xs">ยังไม่ได้เลือกวิชา</span>
+                    ) : (
+                      <div className="space-y-1">
+                        {sourceRows.map((subject) => <div key={subject.id} className="text-xs">{subject.order_no}. {subject.name}</div>)}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-2 py-2 text-center text-xs">{sourceRows.map((subject) => subject.category).join(" / ") || "-"}</td>
+                  <td className="px-2 py-2 text-center text-xs">{sourceRows.map((subject) => subject.credits).join(" / ") || "-"}</td>
+                  <td className="px-1 py-1 text-center">
+                    <button onClick={() => setPickFor(r._key)} className="rounded-md border border-indigo-200 px-2 py-1 text-xs text-indigo-700 hover:bg-indigo-50">
+                      + เลือก / เพิ่ม
                     </button>
                   </td>
+                  <td className="px-2 py-2 text-center text-xs text-slate-500">คำนวณ<br />อัตโนมัติ</td>
+                  <td className="px-2 py-2 text-center text-xs text-slate-500">อัตโนมัติ</td>
                   <td className="px-1 py-1 text-center"><button onClick={() => removeRow(r._key)} className="text-rose-500">✕</button></td>
                 </tr>
               );
@@ -210,7 +236,7 @@ export default function TransferClient({
       </div>
 
       <p className="text-xs text-slate-400">
-        หมายเหตุ: หากเลือกวิชาต้นทางมากกว่า 1 วิชา ระบบจะเฉลี่ยคะแนนรายปีของวิชาเหล่านั้นเป็นคะแนนของวิชาปลายทาง
+        หมายเหตุ: หากเลือกวิชาหลักสูตรใหม่มากกว่า 1 วิชา ระบบจะเฉลี่ยคะแนนของวิชาเหล่านั้นแยกตามนักเรียนและภาคเรียน แล้วตัดเกรดให้อัตโนมัติในรายงาน PDF
       </p>
 
       {/* modal เลือกวิชาต้นทาง */}

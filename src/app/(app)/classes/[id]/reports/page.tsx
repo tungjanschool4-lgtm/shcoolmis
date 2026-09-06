@@ -20,9 +20,14 @@ export default async function ReportsHub({
     },
     {
       title: "รายงานผลการพัฒนาฯ (แบบเทียบโอน)",
-      desc: "แบบรายงานรายปีตามโครงสร้างเดิม ดึงคะแนนจากวิชาต้นทางที่จับคู่ไว้ในแท็บ “เทียบโอน”",
+      desc: "แบบรายงานตามโครงสร้างหลักสูตร 2560 ดึงคะแนนจากวิชาหลักสูตรใหม่ที่จับคู่ไว้ พร้อมภาพรวมและสถิติ",
       icon: "🔄",
-      links: [{ href: `/print/${id}/report-transfer`, label: "รายปี (เทียบโอน)" }],
+      links: [
+        { href: `/print/${id}/report-transfer?term=1`, label: "ภาคเรียนที่ 1" },
+        { href: `/print/${id}/report-transfer?term=2`, label: "ภาคเรียนที่ 2" },
+        { href: `/print/${id}/report-transfer?term=year`, label: "รายปี" },
+        { href: `/print/${id}/transfer-summary?term=1`, label: "ภาพรวม / สถิติ" },
+      ],
     },
     {
       title: "ตารางคะแนนรายวิชา",

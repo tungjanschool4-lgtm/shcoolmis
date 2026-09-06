@@ -123,10 +123,21 @@ export type TransferReport = {
   activityOverall: string;
 };
 
-export function computeTransferReport(bundle: ClassBundle, student: Student): TransferReport {
+export type TransferTerm = "1" | "2" | "year";
+
+export function computeTransferReport(
+  bundle: ClassBundle,
+  student: Student,
+  term: TransferTerm = "year"
+): TransferReport {
   const base = computeStudentReport(bundle, student);
   const subjectById = new Map(bundle.subjects.map((s) => [s.id, s]));
-  const yearAvgBySubject = new Map(base.rows.map((r) => [r.subject.id, r.yearAvg]));
+  const scoreBySubject = new Map(
+    base.rows.map((r) => [
+      r.subject.id,
+      term === "1" ? r.sem1Total : term === "2" ? r.sem2Total : r.yearAvg,
+    ])
+  );
 
   const enabled = bundle.transferSubjects.filter((t) => t.enabled);
   const rows: TransferRow[] = enabled.map((ts) => {
@@ -137,7 +148,7 @@ export function computeTransferReport(bundle: ClassBundle, student: Student): Tr
       .map((id) => subjectById.get(id))
       .filter((s): s is Subject => !!s);
     const vals = sourceIds
-      .map((id) => yearAvgBySubject.get(id) ?? null)
+      .map((id) => scoreBySubject.get(id) ?? null)
       .filter((v): v is number => v !== null);
     const score = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
     return { transferSubject: ts, sourceSubjects, score, grade: scoreToGrade(score, bundle.criteria) };
@@ -149,9 +160,24 @@ export function computeTransferReport(bundle: ClassBundle, student: Student): Tr
     student,
     rows,
     gpa,
-    characteristicLevel: base.characteristicLevel,
-    readWriteLevel: base.readWriteLevel,
-    activityOverall: base.activityOverall,
+    characteristicLevel:
+      term === "1"
+        ? base.assessmentLevels.characteristic.sem1
+        : term === "2"
+          ? base.assessmentLevels.characteristic.sem2
+          : base.characteristicLevel,
+    readWriteLevel:
+      term === "1"
+        ? base.assessmentLevels.readWrite.sem1
+        : term === "2"
+          ? base.assessmentLevels.readWrite.sem2
+          : base.readWriteLevel,
+    activityOverall:
+      term === "1"
+        ? base.activityLevels.sem1
+        : term === "2"
+          ? base.activityLevels.sem2
+          : base.activityOverall,
   };
 }
 
