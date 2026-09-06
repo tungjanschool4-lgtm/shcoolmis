@@ -474,6 +474,7 @@ main h3 {
 }
 .print-page .attendance-print-subtitle,
 .print-page .student-heading-line,
+.print-page .document-class-line,
 .print-page .plain-form-context,
 .print-page .score-table tbody td:nth-child(2),
 .print-page .roster-table tbody td:nth-child(4),
