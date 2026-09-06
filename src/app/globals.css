@@ -200,33 +200,33 @@ main h3 {
   margin-left: 8%;
 }
 
-/* รายงานเทียบโอน 2560 ตามแบบแนบ: นักเรียนหนึ่งคนแบ่งเป็น 2 หน้า */
+/* รายงานเทียบโอน 2560 ตามแบบแนบ: นักเรียนหนึ่งคนต่อ 1 หน้า A4 */
 .transfer-sheet {
-  padding: 9mm 12mm;
-  line-height: 1.35;
+  padding: 7mm 10mm;
+  line-height: 1.25;
 }
 .transfer-sheet .sheet-title {
-  font-size: 16px;
-  line-height: 1.45;
+  font-size: 14px;
+  line-height: 1.3;
 }
 .transfer-sheet .sheet-title img {
-  height: 24mm;
-  margin-bottom: 4mm;
+  height: 18mm;
+  margin-bottom: 2mm;
 }
 .transfer-report-table {
   table-layout: fixed;
 }
 .transfer-report-table th,
 .transfer-report-table td {
-  font-size: 14px;
-  line-height: 1.35;
-  padding: 4px 7px;
+  font-size: 11px;
+  line-height: 1.2;
+  padding: 2px 5px;
 }
 .transfer-report-table tbody tr {
-  height: 14mm;
+  height: 7mm;
 }
 .transfer-report-table .vtext {
-  min-height: 22mm;
+  min-height: 15mm;
   display: inline-block;
 }
 .transfer-continuation-sheet {
@@ -236,13 +236,20 @@ main h3 {
   table-layout: fixed;
 }
 .transfer-gpa-table td {
-  font-size: 14px;
-  padding: 8px 6px;
+  font-size: 11px;
+  padding: 3px 5px;
 }
 .transfer-summary-table th,
 .transfer-summary-table td {
-  font-size: 14px;
-  padding: 5px 7px;
+  font-size: 10.5px;
+  padding: 3px 5px;
+}
+.transfer-single-page .student-heading-line {
+  font-size: 12px;
+}
+.transfer-signatures {
+  font-size: 10.5px;
+  line-height: 1.25;
 }
 .transfer-overview-sheet {
   padding: 12mm 14mm;

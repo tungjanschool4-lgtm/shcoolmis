@@ -21,23 +21,15 @@ function termLabel(term: TransferTerm): string {
   return term === "year" ? "รายปี" : `ภาคเรียนที่ ${term}`;
 }
 
-function chunks<T>(items: T[], size: number): T[][] {
-  const result: T[][] = [];
-  for (let i = 0; i < items.length; i += size) result.push(items.slice(i, i + size));
-  return result;
-}
-
 function TransferRowsTable({
   rows,
   year,
   term,
-  showHeader = true,
   blankRows = 0,
 }: {
   rows: TransferRow[];
   year: string;
   term: TransferTerm;
-  showHeader?: boolean;
   blankRows?: number;
 }) {
   return (
@@ -51,23 +43,21 @@ function TransferRowsTable({
         <col style={{ width: "12%" }} />
         <col style={{ width: "11%" }} />
       </colgroup>
-      {showHeader && (
-        <thead>
-          <tr>
-            <th rowSpan={3}>ที่</th>
-            <th rowSpan={3}>ชื่อวิชา</th>
-            <th rowSpan={3}>ประเภท<br />วิชา</th>
-            <th rowSpan={3}><span className="vtext">น้ำหนัก</span></th>
-            <th colSpan={2}>ภาคเรียนที่</th>
-            <th rowSpan={3}><span className="vtext">หมายเหตุ</span></th>
-          </tr>
-          <tr><th colSpan={2}>{term === "year" ? `ปีการศึกษา ${year}` : term}</th></tr>
-          <tr>
-            <th><span className="vtext">คะแนน</span></th>
-            <th><span className="vtext">เกรด</span></th>
-          </tr>
-        </thead>
-      )}
+      <thead>
+        <tr>
+          <th rowSpan={3}>ที่</th>
+          <th rowSpan={3}>ชื่อวิชา</th>
+          <th rowSpan={3}>ประเภท<br />วิชา</th>
+          <th rowSpan={3}><span className="vtext">น้ำหนัก</span></th>
+          <th colSpan={2}>ภาคเรียนที่</th>
+          <th rowSpan={3}><span className="vtext">หมายเหตุ</span></th>
+        </tr>
+        <tr><th colSpan={2}>{term === "year" ? `ปีการศึกษา ${year}` : term}</th></tr>
+        <tr>
+          <th><span className="vtext">คะแนน</span></th>
+          <th><span className="vtext">เกรด</span></th>
+        </tr>
+      </thead>
       <tbody>
         {rows.map((r) => (
           <tr key={r.transferSubject.id}>
@@ -106,7 +96,7 @@ export default async function ReportTransferPage({
 
   const reports = students.map((s) => computeTransferReport(bundle, s, selectedTerm));
   const ranks = rankByGpaTransfer(reports);
-  const reportTitle = `แบบรายงานผลการพัฒนาคุณภาพผู้เรียน${selectedTerm === "year" ? "" : ` (ภาคเรียนที่ ${selectedTerm})`}`;
+  const reportTitle = `แบบเทียบโอนผลการพัฒนาคุณภาพผู้เรียน${selectedTerm === "year" ? "" : ` (ภาคเรียนที่ ${selectedTerm})`}`;
 
   if (bundle.transferSubjects.filter((t) => t.enabled).length === 0) {
     return (
@@ -121,45 +111,24 @@ export default async function ReportTransferPage({
 
   return (
     <>
-      <PrintToolbar title={`รายงานเทียบโอน (${termLabel(selectedTerm)})`} />
+      <PrintToolbar title={`แบบเทียบโอนผลการพัฒนาคุณภาพผู้เรียน (${termLabel(selectedTerm)})`} />
       <div className="py-4 print:py-0">
         {reports.map((rep) => {
           const student = rep.student;
-          const firstRows = rep.rows.slice(0, 6);
-          const remainingPages = chunks(rep.rows.slice(6), 12);
-          if (remainingPages.length === 0) remainingPages.push([]);
-
           return (
-            <div key={student.id} className="contents">
-              <div className="print-page sheet transfer-sheet text-[14px]">
+            <div key={student.id} className="print-page sheet transfer-sheet transfer-single-page">
                 <ReportHeader school={school} cls={cls} title={reportTitle} />
-                <div className="student-heading-line mt-2 mb-4 px-1">
+                <div className="student-heading-line mt-1 mb-2 px-1">
                   <span>เลขที่ <span className="underline px-4">{student.no}</span></span>
                   <span className="student-name">ชื่อ - นามสกุล <span className="underline px-3">{fullName(student)}</span></span>
                 </div>
                 <TransferRowsTable
-                  rows={firstRows}
+                  rows={rep.rows}
                   year={year}
                   term={selectedTerm}
-                  blankRows={Math.max(0, 6 - firstRows.length)}
+                  blankRows={Math.max(0, 12 - rep.rows.length)}
                 />
-              </div>
-
-              {remainingPages.map((pageRows, pageIndex) => {
-                const isLast = pageIndex === remainingPages.length - 1;
-                return (
-                  <div key={`${student.id}-continued-${pageIndex}`} className="print-page sheet transfer-sheet transfer-continuation-sheet text-[14px]">
-                    <TransferRowsTable
-                      rows={pageRows}
-                      year={year}
-                      term={selectedTerm}
-                      showHeader={false}
-                      blankRows={isLast ? Math.max(0, 6 - pageRows.length) : 0}
-                    />
-
-                    {isLast && (
-                      <>
-                        <table className="report-table transfer-gpa-table">
+                <table className="report-table transfer-gpa-table">
                           <tbody>
                             <tr>
                               <td colSpan={4} className="text-center font-semibold">ผลการเรียนเฉลี่ย</td>
@@ -170,7 +139,7 @@ export default async function ReportTransferPage({
                           </tbody>
                         </table>
 
-                        <table className="report-table transfer-summary-table mt-9">
+                <table className="report-table transfer-summary-table mt-3">
                           <thead>
                             <tr><th colSpan={3}>สรุปผลการประเมินด้านต่าง ๆ</th></tr>
                             <tr>
@@ -188,7 +157,7 @@ export default async function ReportTransferPage({
                           </tbody>
                         </table>
 
-                        <div className="grid grid-cols-2 gap-20 mt-7 text-center">
+                <div className="grid grid-cols-2 gap-16 mt-3 text-center transfer-signatures">
                           <div>
                             <div className="text-left font-semibold">ลงชื่อ ...................................................</div>
                             <div className="mt-2">( {cls?.homeroom_teacher_name || "..............................."} )</div>
@@ -201,16 +170,11 @@ export default async function ReportTransferPage({
                           </div>
                         </div>
 
-                        <div className="text-center mt-10">
+                <div className="text-center mt-4 transfer-signatures">
                           <div><span className="font-semibold">ลงชื่อ</span> ว่าที่ ร.ต. ...................................................</div>
                           <div className="mt-2">( {school?.director || "..............................."} )</div>
                           <div>{school?.director_position || `ผู้อำนวยการโรงเรียน${school?.name || ""}`}</div>
                         </div>
-                      </>
-                    )}
-                  </div>
-                );
-              })}
             </div>
           );
         })}
