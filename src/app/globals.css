@@ -11,6 +11,20 @@ body {
   color: #0f172a;
 }
 
+/* หัวข้อบนหน้าจอให้มองเห็นชัดขึ้นทุกหน้า */
+main h1 {
+  font-size: 2rem !important;
+  line-height: 1.25 !important;
+}
+main h2 {
+  font-size: 1.5rem !important;
+  line-height: 1.35 !important;
+}
+main h3 {
+  font-size: 1.25rem !important;
+  line-height: 1.4 !important;
+}
+
 /* ---- สไตล์สำหรับพิมพ์รายงาน (A4) ---- */
 @media print {
   @page {

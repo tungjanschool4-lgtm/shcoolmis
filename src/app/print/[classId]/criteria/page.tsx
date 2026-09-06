@@ -70,10 +70,10 @@ export default async function CriteriaPage({
               </tr>
             </thead>
             <tbody>
-              <tr className="text-center"><td>3</td><td>{qualityLabels.excellent}</td><td>2.5 - 3</td></tr>
-              <tr className="text-center"><td>2</td><td>{qualityLabels.good}</td><td>1.5 - 2.49</td></tr>
-              <tr className="text-center"><td>1</td><td>{qualityLabels.pass}</td><td>1 - 1.49</td></tr>
-              <tr className="text-center"><td>0</td><td>{qualityLabels.fail}</td><td>0 - 0.99</td></tr>
+              <tr className="text-center"><td>3</td><td>{qualityLabels.excellent}</td><td>ตั้งแต่ {qualityLabels.excellentMin}</td></tr>
+              <tr className="text-center"><td>2</td><td>{qualityLabels.good}</td><td>{qualityLabels.goodMin} ถึงต่ำกว่า {qualityLabels.excellentMin}</td></tr>
+              <tr className="text-center"><td>1</td><td>{qualityLabels.pass}</td><td>{qualityLabels.passMin} ถึงต่ำกว่า {qualityLabels.goodMin}</td></tr>
+              <tr className="text-center"><td>0</td><td>{qualityLabels.fail}</td><td>ต่ำกว่า {qualityLabels.passMin}</td></tr>
             </tbody>
           </table>
 

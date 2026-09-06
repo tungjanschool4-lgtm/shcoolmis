@@ -150,7 +150,7 @@ export default function SubjectsClient({ classId, initial }: { classId: string; 
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-x-auto">
-        <table className="text-sm min-w-[980px] w-full">
+        <table className="text-sm min-w-[1280px] w-full">
           <thead className="bg-slate-50 text-slate-600">
             <tr>
               <th className="px-2 py-2 w-12">วิชาที่</th>
@@ -160,7 +160,7 @@ export default function SubjectsClient({ classId, initial }: { classId: string; 
               <th className="px-2 py-2 w-20">เวลาเรียน</th>
               <th className="px-2 py-2 w-20">น้ำหนัก</th>
               <th className="px-2 py-2 w-24">เต็ม (กลาง/ปลาย)</th>
-              <th className="px-2 py-2 w-28">ความสามารถชั้นปี</th>
+              <th className="px-2 py-2 w-[360px]">ความสามารถชั้นปี</th>
               <th className="px-2 py-2 w-10"></th>
             </tr>
           </thead>
@@ -183,8 +183,8 @@ export default function SubjectsClient({ classId, initial }: { classId: string; 
                   <input type="number" value={r.final_max ?? ""} onChange={(e) => update(r._key, "final_max", e.target.value)} className="w-11 rounded border border-slate-200 px-1 py-1" />
                 </td>
                 <td className="px-1 py-1">
-                  <button onClick={() => setEditText(r)} className="text-indigo-600 text-xs hover:underline text-left line-clamp-2">
-                    {r.competency_text ? "แก้ไข…" : "+ เพิ่ม"}
+                  <button onClick={() => setEditText(r)} className="w-full rounded-md px-2 py-1 text-left text-sm leading-5 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700">
+                    {r.competency_text || "+ เพิ่มคำอธิบายความสามารถชั้นปี"}
                   </button>
                 </td>
                 <td className="px-1 py-1 text-center"><button onClick={() => removeRow(r._key)} className="text-rose-500">✕</button></td>

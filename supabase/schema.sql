@@ -38,11 +38,22 @@ create table if not exists public.school (
   director text not null default '',           -- ผู้บริหาร
   director_position text not null default '',  -- ตำแหน่งผู้บริหาร
   quality_excellent_label text not null default 'ดีเยี่ยม',
+  quality_excellent_min numeric not null default 2.5,
   quality_good_label text not null default 'ดี',
+  quality_good_min numeric not null default 1.5,
   quality_pass_label text not null default 'ผ่าน',
+  quality_pass_min numeric not null default 1.0,
   quality_fail_label text not null default 'ไม่ผ่าน',
   logo_url text not null default '',
   updated_at timestamptz not null default now()
+);
+
+alter table public.school drop constraint if exists school_quality_thresholds_check;
+alter table public.school add constraint school_quality_thresholds_check check (
+  quality_pass_min >= 0 and
+  quality_good_min > quality_pass_min and
+  quality_excellent_min > quality_good_min and
+  quality_excellent_min <= 3
 );
 
 insert into public.school (id) values (1) on conflict (id) do nothing;

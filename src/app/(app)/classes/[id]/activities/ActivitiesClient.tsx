@@ -4,11 +4,14 @@ import { Fragment, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Student, Activity, ActivityResult } from "@/lib/types";
 import { fullName } from "@/lib/types";
+import { usePasswordDelete } from "@/components/PasswordDeleteGuard";
 
 type Cell = Partial<ActivityResult> & { _dirty?: boolean };
+type ActivityRow = Partial<Activity> & { _key: string; _dirty?: boolean; _new?: boolean };
 const OPTIONS = ["", "ผ่าน", "ไม่ผ่าน"];
 
 export default function ActivitiesClient({
+  classId,
   activities,
   students,
   results,
@@ -21,6 +24,10 @@ export default function ActivitiesClient({
   const supabase = createClient();
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [activityRows, setActivityRows] = useState<ActivityRow[]>(
+    activities.map((activity) => ({ ...activity, _key: activity.id }))
+  );
+  const { requestDelete, deletePasswordDialog } = usePasswordDelete();
   const [map, setMap] = useState<Record<string, Record<string, Cell>>>(() => {
     const m: Record<string, Record<string, Cell>> = {};
     for (const r of results) {
@@ -41,9 +48,98 @@ export default function ActivitiesClient({
     });
   }
 
+  function updateActivity(key: string, field: keyof Activity, value: string | number) {
+    setActivityRows((current) => current.map((activity) =>
+      activity._key === key ? { ...activity, [field]: value, _dirty: true } : activity
+    ));
+    setMsg(null);
+  }
+
+  function addActivity() {
+    setActivityRows((current) => [...current, {
+      _key: `new-${Date.now()}`,
+      _new: true,
+      _dirty: true,
+      class_id: classId,
+      order_no: current.length + 1,
+      code: "",
+      name: "",
+      hours: 0,
+    }]);
+    setMsg(null);
+  }
+
+  function removeMapActivity(activityKey: string) {
+    setMap((current) => {
+      const copy: typeof current = {};
+      for (const [studentId, row] of Object.entries(current)) {
+        copy[studentId] = { ...row };
+        delete copy[studentId][activityKey];
+      }
+      return copy;
+    });
+  }
+
+  function removeActivity(key: string) {
+    const activity = activityRows.find((row) => row._key === key);
+    if (!activity) return;
+    requestDelete({
+      title: "ยืนยันการลบกิจกรรม",
+      description: `ลบกิจกรรม “${activity.name || "รายการนี้"}” หรือไม่? ผลการประเมินของกิจกรรมนี้จะถูกลบด้วย`,
+      onVerified: async () => {
+        if (!activity._new) {
+          const { error } = await supabase.from("activities").delete().eq("id", activity.id!);
+          if (error) { setMsg("ลบกิจกรรมไม่สำเร็จ: " + error.message); return; }
+        }
+        const remaining = activityRows.filter((row) => row._key !== key).map((row, index) => {
+          const nextNo = index + 1;
+          return {
+            ...row,
+            order_no: nextNo,
+            _dirty: row._new || Number(row.order_no) !== nextNo ? true : row._dirty,
+          };
+        });
+        setActivityRows(remaining);
+        removeMapActivity(key);
+        setMsg("ลบกิจกรรมแล้ว");
+      },
+    });
+  }
+
   async function saveAll() {
     setSaving(true);
     setMsg(null);
+    if (activityRows.some((activity) => !activity.name?.trim())) {
+      setSaving(false);
+      setMsg("กรุณากรอกชื่อกิจกรรมให้ครบ");
+      return;
+    }
+
+    for (let index = 0; index < activityRows.length; index += 1) {
+      const activity = activityRows[index];
+      if (!activity._dirty) continue;
+      const activityPayload = {
+        class_id: classId,
+        order_no: index + 1,
+        code: activity.code?.trim() || "",
+        name: activity.name!.trim(),
+        hours: Number(activity.hours) || 0,
+      };
+      if (activity._new) {
+        const { data, error } = await supabase.from("activities").insert(activityPayload).select("id").single();
+        if (error) { setSaving(false); setMsg("บันทึกกิจกรรมไม่สำเร็จ: " + error.message); return; }
+        activity.id = data.id;
+        activity._key = data.id;
+        activity._new = false;
+      } else {
+        const { error } = await supabase.from("activities").update(activityPayload).eq("id", activity.id!);
+        if (error) { setSaving(false); setMsg("บันทึกกิจกรรมไม่สำเร็จ: " + error.message); return; }
+      }
+      activity.order_no = index + 1;
+      activity._dirty = false;
+    }
+    setActivityRows([...activityRows]);
+
     const payload: { student_id: string; activity_id: string; sem1_result: string; sem2_result: string }[] = [];
     for (const [sid, row] of Object.entries(map)) {
       for (const [aid, c] of Object.entries(row)) {
@@ -51,7 +147,7 @@ export default function ActivitiesClient({
           payload.push({ student_id: sid, activity_id: aid, sem1_result: c.sem1_result ?? "", sem2_result: c.sem2_result ?? "" });
       }
     }
-    if (!payload.length) { setSaving(false); return; }
+    if (!payload.length) { setSaving(false); setMsg("บันทึกกิจกรรมแล้ว"); return; }
     const { error } = await supabase.from("activity_results").upsert(payload, { onConflict: "student_id,activity_id" });
     setSaving(false);
     if (error) { setMsg("บันทึกไม่สำเร็จ: " + error.message); return; }
@@ -66,22 +162,38 @@ export default function ActivitiesClient({
     setMsg("บันทึกแล้ว");
   }
 
-  const dirtyCount = Object.values(map).reduce((a, r) => a + Object.values(r).filter((c) => c._dirty).length, 0);
-
-  if (activities.length === 0) {
-    return (
-      <div className="py-10 text-center space-y-2">
-        <h2 className="text-lg font-semibold text-slate-800">บันทึกกิจกรรมพัฒนาผู้เรียน</h2>
-        <div className="text-slate-400">ยังไม่มีกิจกรรม</div>
-      </div>
-    );
-  }
+  const resultDirtyCount = Object.values(map).reduce((a, r) => a + Object.values(r).filter((c) => c._dirty).length, 0);
+  const activityDirtyCount = activityRows.filter((activity) => activity._dirty).length;
+  const dirtyCount = resultDirtyCount + activityDirtyCount;
 
   return (
     <div className="space-y-4">
+      {deletePasswordDialog}
       <div>
         <h2 className="text-lg font-semibold text-slate-800">บันทึกกิจกรรมพัฒนาผู้เรียน</h2>
         <p className="text-sm text-slate-500">บันทึกผลการประเมินรายภาคเรียนเป็น ผ่าน หรือ ไม่ผ่าน</p>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="font-semibold text-slate-700">รายการกิจกรรมและเวลาเรียน</h3>
+            <p className="text-sm text-slate-500">เพิ่ม ลด หรือแก้ไขชื่อกิจกรรม รหัส และเวลาเรียนได้</p>
+          </div>
+          <button onClick={addActivity} className="rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm text-indigo-700 hover:bg-indigo-100">+ เพิ่มกิจกรรม</button>
+        </div>
+        <div className="mt-3 space-y-2">
+          {activityRows.map((activity, index) => (
+            <div key={activity._key} className={`grid grid-cols-[55px_120px_1fr_110px_80px] items-end gap-2 rounded-lg p-2 ${activity._dirty ? "bg-amber-50" : "bg-slate-50"}`}>
+              <div className="pb-2 text-center text-sm font-medium text-slate-600">{index + 1}</div>
+              <label className="text-xs text-slate-500">รหัสกิจกรรม<input value={activity.code || ""} onChange={(event) => updateActivity(activity._key, "code", event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" /></label>
+              <label className="text-xs text-slate-500">ชื่อกิจกรรม<input value={activity.name || ""} onChange={(event) => updateActivity(activity._key, "name", event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" /></label>
+              <label className="text-xs text-slate-500">เวลาเรียน (ชม.)<input type="number" min={0} value={activity.hours ?? 0} onChange={(event) => updateActivity(activity._key, "hours", event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" /></label>
+              <button onClick={() => removeActivity(activity._key)} className="rounded-lg border border-rose-200 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50">ลบ</button>
+            </div>
+          ))}
+          {activityRows.length === 0 && <div className="py-5 text-center text-sm text-slate-400">ยังไม่มีกิจกรรม กด “+ เพิ่มกิจกรรม” เพื่อเริ่มต้น</div>}
+        </div>
       </div>
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="text-sm text-slate-500">กิจกรรมพัฒนาผู้เรียน · ผลการประเมิน ผ่าน/ไม่ผ่าน</div>
@@ -94,18 +206,18 @@ export default function ActivitiesClient({
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-x-auto">
-        <table className="text-sm w-full" style={{ minWidth: 60 + 220 + activities.length * 160 }}>
+        <table className="text-sm w-full" style={{ minWidth: 60 + 220 + activityRows.length * 160 }}>
           <thead className="bg-slate-50 text-slate-600">
             <tr>
               <th className="px-2 py-2 w-10" rowSpan={2}>ที่</th>
               <th className="px-2 py-2 text-left" rowSpan={2}>ชื่อ - นามสกุล</th>
-              {activities.map((a) => (
-                <th key={a.id} className="px-1 py-2 text-center border-l" colSpan={2}>{a.name}</th>
+              {activityRows.map((a) => (
+                <th key={a._key} className="px-1 py-2 text-center border-l" colSpan={2}>{a.name || `กิจกรรม ${a.order_no}`}</th>
               ))}
             </tr>
             <tr className="text-xs">
-              {activities.map((a) => (
-                <Fragment key={a.id}>
+              {activityRows.map((a) => (
+                <Fragment key={a._key}>
                   <th className="px-1 py-1 border-l">ภาค 1</th>
                   <th className="px-1 py-1">ภาค 2</th>
                 </Fragment>
@@ -119,17 +231,17 @@ export default function ActivitiesClient({
                 <tr key={st.id} className={`border-t border-slate-100 ${rowDirty ? "bg-amber-50" : ""}`}>
                   <td className="px-1 py-1 text-center">{st.no}</td>
                   <td className="px-2 py-1 whitespace-nowrap">{fullName(st)}</td>
-                  {activities.map((a) => {
-                    const c = get(st.id, a.id);
+                  {activityRows.map((a) => {
+                    const c = get(st.id, a._key);
                     return (
-                      <Fragment key={a.id}>
+                      <Fragment key={a._key}>
                         <td className="px-1 py-1 border-l">
-                          <select value={c.sem1_result ?? ""} onChange={(e) => setField(st.id, a.id, "sem1_result", e.target.value)} className="w-full rounded border border-slate-200 px-1 py-1">
+                          <select disabled={a._new} value={c.sem1_result ?? ""} onChange={(e) => setField(st.id, a._key, "sem1_result", e.target.value)} className="w-full rounded border border-slate-200 px-1 py-1 disabled:bg-slate-100">
                             {OPTIONS.map((o) => <option key={o} value={o}>{o || "-"}</option>)}
                           </select>
                         </td>
                         <td className="px-1 py-1">
-                          <select value={c.sem2_result ?? ""} onChange={(e) => setField(st.id, a.id, "sem2_result", e.target.value)} className="w-full rounded border border-slate-200 px-1 py-1">
+                          <select disabled={a._new} value={c.sem2_result ?? ""} onChange={(e) => setField(st.id, a._key, "sem2_result", e.target.value)} className="w-full rounded border border-slate-200 px-1 py-1 disabled:bg-slate-100">
                             {OPTIONS.map((o) => <option key={o} value={o}>{o || "-"}</option>)}
                           </select>
                         </td>
@@ -140,7 +252,7 @@ export default function ActivitiesClient({
               );
             })}
             {students.length === 0 && (
-              <tr><td colSpan={activities.length * 2 + 2} className="px-4 py-8 text-center text-slate-400">ยังไม่มีนักเรียน</td></tr>
+              <tr><td colSpan={activityRows.length * 2 + 2} className="px-4 py-8 text-center text-slate-400">ยังไม่มีนักเรียน</td></tr>
             )}
           </tbody>
         </table>

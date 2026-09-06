@@ -2,23 +2,38 @@ import type { GradeCriterion, School } from "./types";
 
 export type QualityLabels = {
   excellent: string;
+  excellentMin: number;
   good: string;
+  goodMin: number;
   pass: string;
+  passMin: number;
   fail: string;
 };
 
 export const DEFAULT_QUALITY_LABELS: QualityLabels = {
   excellent: "ดีเยี่ยม",
+  excellentMin: 2.5,
   good: "ดี",
+  goodMin: 1.5,
   pass: "ผ่าน",
+  passMin: 1,
   fail: "ไม่ผ่าน",
 };
+
+function qualityThreshold(value: unknown, fallback: number): number {
+  if (value === null || value === undefined || value === "") return fallback;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : fallback;
+}
 
 export function qualityLabelsFromSchool(school: School | null | undefined): QualityLabels {
   return {
     excellent: school?.quality_excellent_label?.trim() || DEFAULT_QUALITY_LABELS.excellent,
+    excellentMin: qualityThreshold(school?.quality_excellent_min, DEFAULT_QUALITY_LABELS.excellentMin),
     good: school?.quality_good_label?.trim() || DEFAULT_QUALITY_LABELS.good,
+    goodMin: qualityThreshold(school?.quality_good_min, DEFAULT_QUALITY_LABELS.goodMin),
     pass: school?.quality_pass_label?.trim() || DEFAULT_QUALITY_LABELS.pass,
+    passMin: qualityThreshold(school?.quality_pass_min, DEFAULT_QUALITY_LABELS.passMin),
     fail: school?.quality_fail_label?.trim() || DEFAULT_QUALITY_LABELS.fail,
   };
 }
@@ -80,12 +95,12 @@ export function computeSubjectResult(
   };
 }
 
-// ระดับคุณภาพจากคะแนนเฉลี่ย (เต็ม 3) ตามเกณฑ์: 2.5-3=ดีเยี่ยม, 1.5-2.49=ดี, 1-1.49=ผ่าน, 0-0.99=ไม่ผ่าน
+// ระดับคุณภาพจากคะแนนเฉลี่ย (เต็ม 3) ตามเกณฑ์ที่โรงเรียนกำหนด
 export function qualityLevel(avg: number | null, labels: QualityLabels = DEFAULT_QUALITY_LABELS): string {
   if (avg === null || Number.isNaN(avg)) return "";
-  if (avg >= 2.5) return labels.excellent;
-  if (avg >= 1.5) return labels.good;
-  if (avg >= 1) return labels.pass;
+  if (avg >= labels.excellentMin) return labels.excellent;
+  if (avg >= labels.goodMin) return labels.good;
+  if (avg >= labels.passMin) return labels.pass;
   return labels.fail;
 }
 

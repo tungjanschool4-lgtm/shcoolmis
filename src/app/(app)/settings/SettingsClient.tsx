@@ -19,11 +19,13 @@ const FIELDS: { key: keyof School; label: string; ph?: string }[] = [
   { key: "academic_head", label: "หัวหน้าฝ่ายวิชาการ" },
   { key: "director", label: "ผู้บริหาร" },
   { key: "director_position", label: "ตำแหน่งผู้บริหาร", ph: "เช่น ผู้อำนวยการโรงเรียน..." },
-  { key: "quality_excellent_label", label: "คำเรียกระดับเฉลี่ย 2.5 ขึ้นไป", ph: "เช่น ดีเยี่ยม" },
-  { key: "quality_good_label", label: "คำเรียกระดับเฉลี่ย 1.5 ขึ้นไป", ph: "เช่น ดี" },
-  { key: "quality_pass_label", label: "คำเรียกระดับเฉลี่ย 1.0 ขึ้นไป", ph: "เช่น ผ่าน" },
-  { key: "quality_fail_label", label: "คำเรียกระดับต่ำกว่า 1.0", ph: "เช่น ไม่ผ่าน" },
 ];
+
+const QUALITY_ROWS = [
+  { labelKey: "quality_excellent_label", minKey: "quality_excellent_min", level: "ระดับสูงสุด", placeholder: "ดีเยี่ยม" },
+  { labelKey: "quality_good_label", minKey: "quality_good_min", level: "ระดับดี", placeholder: "ดี" },
+  { labelKey: "quality_pass_label", minKey: "quality_pass_min", level: "ระดับผ่าน", placeholder: "ผ่าน" },
+] as const;
 
 export default function SettingsClient({
   school,
@@ -47,6 +49,14 @@ export default function SettingsClient({
   async function saveSchool() {
     setSaving(true);
     setMsg(null);
+    const excellentMin = Number(form.quality_excellent_min);
+    const goodMin = Number(form.quality_good_min);
+    const passMin = Number(form.quality_pass_min);
+    if (!(passMin >= 0 && goodMin > passMin && excellentMin > goodMin && excellentMin <= 3)) {
+      setSaving(false);
+      setMsg({ type: "err", text: "คะแนนต้องเรียงจากน้อยไปมาก: ผ่าน < ดี < ดีเยี่ยม และคะแนนสูงสุดไม่เกิน 3" });
+      return;
+    }
     const { error } = await supabase
       .from("school")
       .update({
@@ -64,8 +74,11 @@ export default function SettingsClient({
         director: form.director,
         director_position: form.director_position,
         quality_excellent_label: form.quality_excellent_label,
+        quality_excellent_min: excellentMin,
         quality_good_label: form.quality_good_label,
+        quality_good_min: goodMin,
         quality_pass_label: form.quality_pass_label,
+        quality_pass_min: passMin,
         quality_fail_label: form.quality_fail_label,
         updated_at: new Date().toISOString(),
       })
@@ -209,6 +222,41 @@ export default function SettingsClient({
           className="mt-4 rounded-lg bg-indigo-600 text-white px-5 py-2 text-sm font-medium hover:bg-indigo-700 disabled:opacity-60"
         >
           บันทึกข้อมูลโรงเรียน
+        </button>
+      </div>
+
+      {/* เกณฑ์สรุปผลการประเมิน */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+        <h2 className="font-semibold text-slate-800 mb-1">เกณฑ์สรุปผลการประเมิน</h2>
+        <p className="text-sm text-slate-500 mb-4">กำหนดคะแนนเฉลี่ยขั้นต่ำและคำที่ใช้วัดผล คะแนนเต็ม 3</p>
+        <div className="max-w-2xl space-y-3">
+          {QUALITY_ROWS.map((row) => (
+            <div key={row.labelKey} className="grid grid-cols-[110px_120px_1fr] items-center gap-3">
+              <span className="text-sm font-medium text-slate-600">{row.level}</span>
+              <div>
+                <label className="mb-1 block text-xs text-slate-400">คะแนนตั้งแต่</label>
+                <input type="number" min={0} max={3} step={0.1} value={form[row.minKey] ?? ""} onChange={(event) => up(row.minKey, Number(event.target.value))} className="w-full rounded-lg border border-slate-300 px-3 py-2" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-slate-400">คำที่ใช้วัดผล</label>
+                <input value={form[row.labelKey] || ""} placeholder={row.placeholder} onChange={(event) => up(row.labelKey, event.target.value)} className="w-full rounded-lg border border-slate-300 px-3 py-2" />
+              </div>
+            </div>
+          ))}
+          <div className="grid grid-cols-[110px_120px_1fr] items-end gap-3">
+            <span className="text-sm font-medium text-slate-600">ระดับต่ำสุด</span>
+            <div className="pb-2 text-sm text-slate-500">ต่ำกว่า {form.quality_pass_min ?? 1}</div>
+            <div>
+              <label className="mb-1 block text-xs text-slate-400">คำที่ใช้วัดผล</label>
+              <input value={form.quality_fail_label || ""} placeholder="ไม่ผ่าน" onChange={(event) => up("quality_fail_label", event.target.value)} className="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            </div>
+          </div>
+        </div>
+        <div className="mt-4 text-sm text-slate-500">
+          ตัวอย่างปัจจุบัน: เฉลี่ย ≥ {form.quality_excellent_min ?? 2.5} = {form.quality_excellent_label}, ≥ {form.quality_good_min ?? 1.5} = {form.quality_good_label}, ≥ {form.quality_pass_min ?? 1} = {form.quality_pass_label}, ต่ำกว่านั้น = {form.quality_fail_label}
+        </div>
+        <button onClick={saveSchool} disabled={saving} className="mt-4 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">
+          บันทึกเกณฑ์สรุป
         </button>
       </div>
 

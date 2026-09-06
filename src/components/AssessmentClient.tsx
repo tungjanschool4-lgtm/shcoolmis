@@ -204,7 +204,7 @@ export default function AssessmentClient({
       {deletePasswordDialog}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <div className="font-semibold text-slate-700">{title}</div>
+          <div className="text-xl font-semibold text-slate-700">{title}</div>
           <div className="text-xs text-slate-400">แต่ละข้อให้คะแนน 0–3 (แยกภาคเรียนที่ 1 / 2)</div>
         </div>
         <div className="flex items-center gap-2">
@@ -298,7 +298,7 @@ export default function AssessmentClient({
       </div>
 
       <div className="text-xs text-slate-400">
-        เกณฑ์สรุป: เฉลี่ย ≥ 2.5 = {qualityLabels.excellent}, ≥ 1.5 = {qualityLabels.good}, ≥ 1.0 = {qualityLabels.pass}, ต่ำกว่านั้น = {qualityLabels.fail}
+        เกณฑ์สรุป: เฉลี่ย ≥ {qualityLabels.excellentMin} = {qualityLabels.excellent}, ≥ {qualityLabels.goodMin} = {qualityLabels.good}, ≥ {qualityLabels.passMin} = {qualityLabels.pass}, ต่ำกว่านั้น = {qualityLabels.fail}
       </div>
     </div>
   );
