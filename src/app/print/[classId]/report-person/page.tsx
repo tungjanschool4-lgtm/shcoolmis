@@ -23,7 +23,7 @@ export default async function ReportPersonPage({
   return (
     <>
       <PrintToolbar title={`รายงานรายคน (${t === "year" ? "รายปี" : "ภาคเรียนที่ " + t})`} />
-      <div className="py-4">
+      <div className="py-4 print:py-0">
         {reports.map((rep) => (
           <PersonReportSheet
             key={rep.student.id}

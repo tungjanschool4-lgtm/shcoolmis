@@ -74,9 +74,9 @@ export default function PersonReportSheet({
         <div className="report-page-number">หน้า 1</div>
         <ReportHeader school={school} cls={cls} title={title} />
 
-        <div className="flex justify-center gap-12 mt-2 mb-2 px-1 text-[13px]">
-          <div>เลขที่ <span className="underline px-4">{s.no}</span></div>
-          <div>ชื่อ - สกุล <span className="underline px-3">{fullName(s)}</span></div>
+        <div className="student-heading-line mt-2 mb-2 px-1">
+          <span>เลขที่ <span className="underline px-4">{s.no}</span></span>
+          <span className="student-name">ชื่อ - สกุล <span className="underline px-3">{fullName(s)}</span></span>
         </div>
 
         <table className="report-table evaluation-report-table">
@@ -137,9 +137,9 @@ export default function PersonReportSheet({
           title="แบบรายงานผลการเรียนระดับชั้นประถมศึกษาตอนต้น"
         />
 
-        <div className="flex justify-center gap-12 mt-2 mb-5 px-1 text-[13px]">
-          <div>เลขที่ <span className="underline px-4">{s.no}</span></div>
-          <div>ชื่อ - สกุล <span className="underline px-3">{fullName(s)}</span></div>
+        <div className="student-heading-line mt-2 mb-5 px-1">
+          <span>เลขที่ <span className="underline px-4">{s.no}</span></span>
+          <span className="student-name">ชื่อ - สกุล <span className="underline px-3">{fullName(s)}</span></span>
         </div>
 
         <table className="report-table summary-report-table">

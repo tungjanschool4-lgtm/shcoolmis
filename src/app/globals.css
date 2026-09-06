@@ -15,7 +15,7 @@ body {
 @media print {
   @page {
     size: A4;
-    margin: 12mm 10mm;
+    margin: 0;
   }
   html,
   body {
@@ -40,6 +40,7 @@ body {
   background: #fff;
   width: 210mm;
   min-height: 297mm;
+  box-sizing: border-box;
   margin: 0 auto 16px;
   padding: 12mm 10mm;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
@@ -112,13 +113,25 @@ body {
 }
 .evaluation-report-table th,
 .evaluation-report-table td {
-  padding: 2px 3px;
-  font-size: 9.5px;
-  line-height: 1.25;
+  padding: 3px 4px;
+  font-size: 11px;
+  line-height: 1.3;
   overflow-wrap: anywhere;
 }
 .evaluation-report-table thead th {
-  font-size: 10.5px;
+  font-size: 11.5px;
+}
+
+.student-heading-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 12mm;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.student-heading-line .student-name {
+  min-width: 90mm;
 }
 
 .report-page-number {
@@ -155,7 +168,8 @@ body {
 
 @media print {
   .evaluation-sheet {
-    width: auto;
-    min-height: 190mm;
+    width: 210mm;
+    height: 297mm;
+    min-height: 297mm;
   }
 }

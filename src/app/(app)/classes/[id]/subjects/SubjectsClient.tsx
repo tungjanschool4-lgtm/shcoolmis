@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Subject } from "@/lib/types";
 import { usePasswordDelete } from "@/components/PasswordDeleteGuard";
+import { decodeCsv, downloadCsvTemplate, parseSubjectsCsv } from "@/lib/curriculum-csv";
 
 type Row = Partial<Subject> & { _key: string; _dirty?: boolean; _new?: boolean };
 
@@ -15,6 +16,7 @@ export default function SubjectsClient({ classId, initial }: { classId: string; 
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [editText, setEditText] = useState<Row | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { requestDelete, deletePasswordDialog } = usePasswordDelete();
 
   function update(key: string, field: keyof Subject, value: string | number | boolean) {
@@ -41,6 +43,34 @@ export default function SubjectsClient({ classId, initial }: { classId: string; 
         competency_text: "",
         is_active: true,
       },
+    ]);
+  }
+
+  async function importCsv(file: File) {
+    setMsg(null);
+    try {
+      const imported = parseSubjectsCsv(decodeCsv(await file.arrayBuffer()));
+      setRows((current) => {
+        const next = [...current];
+        for (const item of imported) {
+          const index = next.findIndex((row) => Number(row.order_no) === item.order_no);
+          if (index >= 0) next[index] = { ...next[index], ...item, _dirty: true };
+          else next.push({ ...item, class_id: classId, is_active: true, _key: `csv-${Date.now()}-${item.order_no}`, _new: true, _dirty: true });
+        }
+        return next.sort((a, b) => (Number(a.order_no) || 0) - (Number(b.order_no) || 0));
+      });
+      setMsg(`นำเข้า ${imported.length} วิชาแล้ว กรุณาตรวจสอบและกดบันทึก`);
+    } catch (error) {
+      setMsg(`นำเข้าไม่สำเร็จ: ${error instanceof Error ? error.message : "รูปแบบไฟล์ไม่ถูกต้อง"}`);
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  function downloadTemplate() {
+    downloadCsvTemplate("subjects-2568-template.csv", [
+      ["วิชาที่", "ประเภทวิชา", "ชื่อวิชา", "รหัสวิชา", "เวลาเรียน", "น้ำหนัก", "คะแนนกลางภาค", "คะแนนปลายภาค", "ความสามารถชั้นปี"],
+      ["1", "พื้นฐาน", "ภาษาไทย", "ท16101", "120", "3", "70", "30", "ผู้เรียนวิเคราะห์และเลือกข้อมูลอย่างมีเหตุผล"],
     ]);
   }
 
@@ -105,6 +135,9 @@ export default function SubjectsClient({ classId, initial }: { classId: string; 
         <div className="text-sm text-slate-500">รายวิชา {rows.length} วิชา</div>
         <div className="flex items-center gap-2">
           {msg && <span className="text-sm text-slate-500">{msg}</span>}
+          <input ref={fileInputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importCsv(file); }} />
+          <button onClick={downloadTemplate} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">ดาวน์โหลด CSV ตัวอย่าง</button>
+          <button onClick={() => fileInputRef.current?.click()} className="rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm text-indigo-700 hover:bg-indigo-100">นำเข้า CSV</button>
           <button onClick={addRow} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">+ เพิ่มวิชา</button>
           <button
             onClick={saveAll}

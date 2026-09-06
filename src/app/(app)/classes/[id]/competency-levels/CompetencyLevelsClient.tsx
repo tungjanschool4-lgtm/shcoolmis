@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { SubjectCompetencyLevel } from "@/lib/types";
 import { usePasswordDelete } from "@/components/PasswordDeleteGuard";
+import { decodeCsv, downloadCsvTemplate, parseCompetencyLevelsCsv } from "@/lib/curriculum-csv";
 
 type Row = Partial<SubjectCompetencyLevel> & { _key: string; _dirty?: boolean; _new?: boolean };
 
@@ -26,6 +27,7 @@ export default function CompetencyLevelsClient({
   const [rows, setRows] = useState<Row[]>(initial.map((row) => ({ ...row, _key: row.id })));
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { requestDelete, deletePasswordDialog } = usePasswordDelete();
 
   function update(key: string, field: keyof SubjectCompetencyLevel, value: string | number) {
@@ -50,6 +52,34 @@ export default function CompetencyLevelsClient({
       expert_text: "",
     }]);
     setMessage(null);
+  }
+
+  async function importCsv(file: File) {
+    setMessage(null);
+    try {
+      const imported = parseCompetencyLevelsCsv(decodeCsv(await file.arrayBuffer()));
+      setRows((current) => {
+        const next = [...current];
+        for (const item of imported) {
+          const index = next.findIndex((row) => Number(row.order_no) === item.order_no);
+          if (index >= 0) next[index] = { ...next[index], ...item, _dirty: true };
+          else next.push({ ...item, class_id: classId, _key: `csv-${Date.now()}-${item.order_no}`, _new: true, _dirty: true });
+        }
+        return next.sort((a, b) => (Number(a.order_no) || 0) - (Number(b.order_no) || 0));
+      });
+      setMessage(`นำเข้า ${imported.length} รายวิชาแล้ว กรุณาตรวจสอบและกดบันทึก`);
+    } catch (error) {
+      setMessage(`นำเข้าไม่สำเร็จ: ${error instanceof Error ? error.message : "รูปแบบไฟล์ไม่ถูกต้อง"}`);
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  function downloadTemplate() {
+    downloadCsvTemplate("competency-levels-2568-template.csv", [
+      ["ที่", "รายวิชาหลักสูตรใหม่ 2568", "ความสามารถของผู้เรียนเมื่อจบ ชั้นประถมศึกษาปีที่ 6", "เริ่มต้น", "พัฒนา", "ชำนาญ", "เชี่ยวชาญ"],
+      ["1", "ภาษาไทย", "ผู้เรียนวิเคราะห์และเลือกข้อมูลอย่างมีเหตุผล", "เริ่มสื่อสารความคิดเห็น", "สื่อสารได้เป็นระบบ", "วิเคราะห์และสื่อสารอย่างมีเหตุผล", "ประยุกต์ใช้ได้อย่างเชี่ยวชาญ"],
+    ]);
   }
 
   function removeRow(key: string) {
@@ -136,6 +166,9 @@ export default function CompetencyLevelsClient({
         <span className="text-sm text-slate-500">ทั้งหมด {rows.length} รายวิชา</span>
         <div className="flex items-center gap-2">
           {message && <span className="text-sm text-slate-500">{message}</span>}
+          <input ref={fileInputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importCsv(file); }} />
+          <button onClick={downloadTemplate} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">ดาวน์โหลด CSV ตัวอย่าง</button>
+          <button onClick={() => fileInputRef.current?.click()} className="rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm text-indigo-700 hover:bg-indigo-100">นำเข้า CSV</button>
           <button onClick={addRow} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">
             + เพิ่มแถว
           </button>
