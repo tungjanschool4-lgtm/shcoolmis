@@ -462,6 +462,26 @@ main h3 {
 .print-page .attendance-print-table td {
   padding: .25mm !important;
 }
+
+/* PDF hierarchy requested: headers 20px, names 16px. */
+.print-page .document-school-name,
+.print-page .document-report-title,
+.print-page .plain-form-title,
+.print-page .attendance-print-title,
+.print-page > .text-center .text-lg {
+  font-size: 20px !important;
+  line-height: 1.15;
+}
+.print-page .attendance-print-subtitle,
+.print-page .student-heading-line,
+.print-page .plain-form-context,
+.print-page .score-table tbody td:nth-child(2),
+.print-page .roster-table tbody td:nth-child(4),
+.print-page .transfer-report-table tbody td:nth-child(2),
+.print-page .evaluation-report-table tbody td:nth-child(2) {
+  font-size: 16px !important;
+  line-height: 1.1;
+}
 @media print {
   .print-page { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .print-page:last-child { break-after: auto; }
