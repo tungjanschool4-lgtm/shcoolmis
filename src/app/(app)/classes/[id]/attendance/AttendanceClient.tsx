@@ -118,6 +118,27 @@ export default function AttendanceClient({
     }));
   }
 
+  function markAllPresent() {
+    setRecords((current) => {
+      const next = { ...current };
+      for (const student of students) {
+        const studentRecords = { ...(next[student.id] ?? {}) };
+        for (const day of termDays) {
+          studentRecords[day.id] = {
+            ...(studentRecords[day.id] ?? {}),
+            student_id: student.id,
+            school_day_id: day.id,
+            status: "/",
+            _dirty: true,
+          };
+        }
+        next[student.id] = studentRecords;
+      }
+      return next;
+    });
+    setMessage(`เลือกมาเรียนทั้งหมด ${students.length} คน จำนวน ${termDays.length} วันแล้ว กรุณากดบันทึกเวลาเรียน`);
+  }
+
   async function saveAttendance() {
     setSavingRecords(true);
     setMessage(null);
@@ -198,7 +219,18 @@ export default function AttendanceClient({
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div><span className="font-semibold">ตารางเช็กเวลาเรียน ภาคเรียนที่ {term} ปีการศึกษา {selectedYear}</span> <span className="text-slate-500">({termDays.length} วัน)</span></div>
-          <div className="flex items-center gap-2">{message && <span className="text-sm text-slate-600">{message}</span>}<button onClick={saveAttendance} disabled={savingRecords || !termDays.length} className="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white disabled:opacity-50">{savingRecords ? "กำลังบันทึก..." : "บันทึกเวลาเรียน"}</button></div>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {message && <span className="text-sm text-slate-600">{message}</span>}
+            <button
+              onClick={markAllPresent}
+              disabled={savingRecords || !termDays.length || !students.length}
+              title="กำหนดนักเรียนทุกคนเป็นมาเรียนทุกวันในภาคเรียนที่เลือก"
+              className="rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2 font-medium text-emerald-700 disabled:opacity-50"
+            >
+              มาเรียนทั้งหมด
+            </button>
+            <button onClick={saveAttendance} disabled={savingRecords || !termDays.length} className="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white disabled:opacity-50">{savingRecords ? "กำลังบันทึก..." : "บันทึกเวลาเรียน"}</button>
+          </div>
         </div>
         <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
           <table className="min-w-max text-sm">
