@@ -37,6 +37,10 @@ create table if not exists public.school (
   academic_head text not null default '',      -- หัวหน้าฝ่ายวิชาการ
   director text not null default '',           -- ผู้บริหาร
   director_position text not null default '',  -- ตำแหน่งผู้บริหาร
+  quality_excellent_label text not null default 'ดีเยี่ยม',
+  quality_good_label text not null default 'ดี',
+  quality_pass_label text not null default 'ผ่าน',
+  quality_fail_label text not null default 'ไม่ผ่าน',
   logo_url text not null default '',
   updated_at timestamptz not null default now()
 );

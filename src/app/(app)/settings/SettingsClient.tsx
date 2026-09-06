@@ -19,6 +19,10 @@ const FIELDS: { key: keyof School; label: string; ph?: string }[] = [
   { key: "academic_head", label: "หัวหน้าฝ่ายวิชาการ" },
   { key: "director", label: "ผู้บริหาร" },
   { key: "director_position", label: "ตำแหน่งผู้บริหาร", ph: "เช่น ผู้อำนวยการโรงเรียน..." },
+  { key: "quality_excellent_label", label: "คำเรียกระดับเฉลี่ย 2.5 ขึ้นไป", ph: "เช่น ดีเยี่ยม" },
+  { key: "quality_good_label", label: "คำเรียกระดับเฉลี่ย 1.5 ขึ้นไป", ph: "เช่น ดี" },
+  { key: "quality_pass_label", label: "คำเรียกระดับเฉลี่ย 1.0 ขึ้นไป", ph: "เช่น ผ่าน" },
+  { key: "quality_fail_label", label: "คำเรียกระดับต่ำกว่า 1.0", ph: "เช่น ไม่ผ่าน" },
 ];
 
 export default function SettingsClient({
@@ -59,6 +63,10 @@ export default function SettingsClient({
         academic_head: form.academic_head,
         director: form.director,
         director_position: form.director_position,
+        quality_excellent_label: form.quality_excellent_label,
+        quality_good_label: form.quality_good_label,
+        quality_pass_label: form.quality_pass_label,
+        quality_fail_label: form.quality_fail_label,
         updated_at: new Date().toISOString(),
       })
       .eq("id", 1);

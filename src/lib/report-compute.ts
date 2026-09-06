@@ -5,6 +5,7 @@ import {
   computeGPA,
   scoreToGrade,
   qualityLevel,
+  qualityLabelsFromSchool,
   itemsAverage,
   type SubjectResult,
 } from "@/lib/grading";
@@ -33,6 +34,7 @@ export type TermLevels = {
 };
 
 export function computeStudentReport(bundle: ClassBundle, student: Student): StudentReport {
+  const qualityLabels = qualityLabelsFromSchool(bundle.school);
   const scoreBySubject = new Map(
     bundle.subjectScores.filter((s) => s.student_id === student.id).map((s) => [s.subject_id, s])
   );
@@ -68,9 +70,9 @@ export function computeStudentReport(bundle: ClassBundle, student: Student): Stu
       sem2.push(sc?.sem2 ?? null);
     }
     return {
-      sem1: qualityLevel(itemsAverage(sem1)),
-      sem2: qualityLevel(itemsAverage(sem2)),
-      year: qualityLevel(itemsAverage([...sem1, ...sem2])),
+      sem1: qualityLevel(itemsAverage(sem1), qualityLabels),
+      sem2: qualityLevel(itemsAverage(sem2), qualityLabels),
+      year: qualityLevel(itemsAverage([...sem1, ...sem2]), qualityLabels),
     };
   }
 

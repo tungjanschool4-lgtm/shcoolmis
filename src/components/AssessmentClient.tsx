@@ -4,7 +4,7 @@ import { Fragment, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Student, AssessmentItem, AssessmentScore } from "@/lib/types";
 import { fullName } from "@/lib/types";
-import { itemsAverage, qualityLevel } from "@/lib/grading";
+import { itemsAverage, qualityLevel, type QualityLabels } from "@/lib/grading";
 
 type Cell = Partial<AssessmentScore> & { _dirty?: boolean };
 
@@ -13,11 +13,13 @@ export default function AssessmentClient({
   items,
   students,
   scores,
+  qualityLabels,
 }: {
   title: string;
   items: AssessmentItem[];
   students: Student[];
   scores: AssessmentScore[];
+  qualityLabels: QualityLabels;
 }) {
   const supabase = createClient();
   const [saving, setSaving] = useState(false);
@@ -162,7 +164,7 @@ export default function AssessmentClient({
                     );
                   })}
                   <td className="px-2 py-1 text-center border-l whitespace-nowrap font-medium text-indigo-700">
-                    {qualityLevel(overall) || "-"}
+                    {qualityLevel(overall, qualityLabels) || "-"}
                   </td>
                 </tr>
               );
@@ -175,7 +177,7 @@ export default function AssessmentClient({
       </div>
 
       <div className="text-xs text-slate-400">
-        เกณฑ์สรุป: เฉลี่ย ≥ 2.5 = ดีเยี่ยม, ≥ 1.5 = ดี, ≥ 1.0 = ผ่าน, ต่ำกว่านั้น = ไม่ผ่าน
+        เกณฑ์สรุป: เฉลี่ย ≥ 2.5 = {qualityLabels.excellent}, ≥ 1.5 = {qualityLabels.good}, ≥ 1.0 = {qualityLabels.pass}, ต่ำกว่านั้น = {qualityLabels.fail}
       </div>
     </div>
   );

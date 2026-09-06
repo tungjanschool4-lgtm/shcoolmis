@@ -1,5 +1,5 @@
 import { loadClassBundle } from "@/lib/report-data";
-import { gradeText, gradeMeaning } from "@/lib/grading";
+import { gradeText, gradeMeaning, qualityLabelsFromSchool } from "@/lib/grading";
 import PrintToolbar from "@/components/PrintToolbar";
 
 export const dynamic = "force-dynamic";
@@ -10,8 +10,9 @@ export default async function CriteriaPage({
   params: Promise<{ classId: string }>;
 }) {
   const { classId } = await params;
-  const { criteria } = await loadClassBundle(classId);
+  const { criteria, school } = await loadClassBundle(classId);
   const sorted = [...criteria].sort((a, b) => b.min_score - a.min_score);
+  const qualityLabels = qualityLabelsFromSchool(school);
 
   return (
     <>
@@ -69,10 +70,10 @@ export default async function CriteriaPage({
               </tr>
             </thead>
             <tbody>
-              <tr className="text-center"><td>3</td><td>ดีเยี่ยม</td><td>2.5 - 3</td></tr>
-              <tr className="text-center"><td>2</td><td>ดี</td><td>1.5 - 2.49</td></tr>
-              <tr className="text-center"><td>1</td><td>ผ่าน</td><td>1 - 1.49</td></tr>
-              <tr className="text-center"><td>0</td><td>ไม่ผ่าน</td><td>0 - 0.99</td></tr>
+              <tr className="text-center"><td>3</td><td>{qualityLabels.excellent}</td><td>2.5 - 3</td></tr>
+              <tr className="text-center"><td>2</td><td>{qualityLabels.good}</td><td>1.5 - 2.49</td></tr>
+              <tr className="text-center"><td>1</td><td>{qualityLabels.pass}</td><td>1 - 1.49</td></tr>
+              <tr className="text-center"><td>0</td><td>{qualityLabels.fail}</td><td>0 - 0.99</td></tr>
             </tbody>
           </table>
 

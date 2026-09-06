@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Student, AssessmentItem, AssessmentScore } from "@/lib/types";
 import AssessmentClient from "@/components/AssessmentClient";
+import { qualityLabelsFromSchool } from "@/lib/grading";
+import type { School } from "@/lib/types";
 
 export default async function CompetenciesPage({
   params,
@@ -9,10 +11,11 @@ export default async function CompetenciesPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
-  const [{ data: items }, { data: students }, { data: scores }] = await Promise.all([
+  const [{ data: items }, { data: students }, { data: scores }, { data: school }] = await Promise.all([
     supabase.from("assessment_items").select("*").eq("class_id", id).eq("kind", "competency").order("no"),
     supabase.from("students").select("*").eq("class_id", id).order("no"),
     supabase.from("assessment_scores").select("*, students!inner(class_id)").eq("students.class_id", id),
+    supabase.from("school").select("*").eq("id", 1).single(),
   ]);
 
   const itemList = (items as AssessmentItem[]) ?? [];
@@ -25,6 +28,7 @@ export default async function CompetenciesPage({
       items={itemList}
       students={(students as Student[]) ?? []}
       scores={filteredScores}
+      qualityLabels={qualityLabelsFromSchool(school as School)}
     />
   );
 }

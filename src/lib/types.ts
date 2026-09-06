@@ -25,6 +25,10 @@ export type School = {
   academic_head: string;
   director: string;
   director_position: string;
+  quality_excellent_label: string;
+  quality_good_label: string;
+  quality_pass_label: string;
+  quality_fail_label: string;
   logo_url: string;
   updated_at: string;
 };

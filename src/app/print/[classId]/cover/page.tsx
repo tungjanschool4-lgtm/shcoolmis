@@ -2,17 +2,17 @@ import { loadClassBundle } from "@/lib/report-data";
 import { computeStudentReport } from "@/lib/report-compute";
 import { fullName } from "@/lib/types";
 import PrintToolbar from "@/components/PrintToolbar";
+import { qualityLabelsFromSchool, type QualityLabels } from "@/lib/grading";
 
 export const dynamic = "force-dynamic";
 
 const GRADE_BUCKETS = [4, 3.5, 3, 2.5, 2, 1.5, 1, 0];
 
-function levelToCol(level: string): number {
-  // 3=ดีเยี่ยม 2=ดี 1=ผ่าน 0=ไม่ผ่าน
-  if (level === "ดีเยี่ยม") return 3;
-  if (level === "ดี") return 2;
-  if (level === "ผ่าน") return 1;
-  if (level === "ไม่ผ่าน") return 0;
+function levelToCol(level: string, labels: QualityLabels): number {
+  if (level === labels.excellent) return 3;
+  if (level === labels.good) return 2;
+  if (level === labels.pass) return 1;
+  if (level === labels.fail) return 0;
   return -1;
 }
 
@@ -24,6 +24,7 @@ export default async function CoverPage({
   const { classId } = await params;
   const bundle = await loadClassBundle(classId);
   const { school, cls, students, subjects } = bundle;
+  const qualityLabels = qualityLabelsFromSchool(school);
   const reports = students.map((s) => computeStudentReport(bundle, s));
 
   // นับเกรดรายวิชา
@@ -44,9 +45,9 @@ export default async function CoverPage({
   let male = 0;
   let female = 0;
   for (const rep of reports) {
-    const c = levelToCol(rep.characteristicLevel);
+    const c = levelToCol(rep.characteristicLevel, qualityLabels);
     if (c >= 0) charCount[3 - c]++;
-    const r = levelToCol(rep.readWriteLevel);
+    const r = levelToCol(rep.readWriteLevel, qualityLabels);
     if (r >= 0) rwCount[3 - r]++;
     if (rep.activityOverall === "ผ่าน") actPass++;
     if (rep.student.gender === "ชาย") male++;
