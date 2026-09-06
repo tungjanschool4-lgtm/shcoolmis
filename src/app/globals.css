@@ -347,7 +347,7 @@ main h3 {
 }
 .academic-calendar-table th,
 .academic-calendar-table td {
-  height: 9mm;
+  height: 14mm;
   border: 0.25mm solid #111;
   padding: 0.5mm 0;
   text-align: center;
@@ -381,7 +381,7 @@ main h3 {
   font-size: 10pt;
   font-weight: 700;
 }
-.calendar-signatures { margin-top: 10mm; }
+.calendar-signatures { margin-top: auto; }
 .transfer-overview-table tbody tr {
   height: 11mm;
 }
