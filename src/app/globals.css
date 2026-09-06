@@ -233,6 +233,9 @@ main h3 {
 .transfer-overview-sheet {
   padding: 12mm 14mm;
 }
+.transfer-overview-sheet + .transfer-overview-sheet {
+  padding-top: 36mm;
+}
 .transfer-overview-table {
   table-layout: fixed;
 }
