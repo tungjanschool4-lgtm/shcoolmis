@@ -131,7 +131,7 @@ export default async function ReportTransferPage({
                 <table className="report-table transfer-gpa-table">
                           <tbody>
                             <tr>
-                              <td colSpan={4} className="text-center font-semibold">ผลการเรียนเฉลี่ย</td>
+                              <td colSpan={4} style={{ width: "65%" }} className="text-center font-semibold">ผลการเรียนเฉลี่ย</td>
                               <td className="text-center font-bold">{rep.gpa !== null ? rep.gpa.toFixed(2) : "-"}</td>
                               <td className="text-center font-semibold">ลำดับที่</td>
                               <td className="text-center font-semibold">{ranks.get(student.id) ?? "-"}</td>

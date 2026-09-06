@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { AttendanceRecord, ClassRoom, School, SchoolDay, Student } from "@/lib/types";
-import { fullName } from "@/lib/types";
-import { dateKey, dateParts, daysInMonth, termMonths, THAI_MONTHS, THAI_WEEKDAYS } from "@/lib/academic-calendar";
+
+import { dateKey, dateParts, daysInMonth, termMonths, THAI_MONTHS, THAI_WEEKDAYS, toBuddhistYear } from "@/lib/academic-calendar";
 import PrintToolbar from "@/components/PrintToolbar";
 
 export const dynamic = "force-dynamic";
@@ -11,10 +11,10 @@ export default async function AttendancePrintPage({
   searchParams,
 }: {
   params: Promise<{ classId: string }>;
-  searchParams: Promise<{ term?: string }>;
+  searchParams: Promise<{ term?: string; year?: string }>;
 }) {
   const { classId } = await params;
-  const { term = "1" } = await searchParams;
+  const { term = "1", year } = await searchParams;
   const selectedTerm = term === "2" ? 2 : 1;
   const supabase = await createClient();
   const [{ data: school }, { data: cls }, { data: students }, { data: days }, { data: records }] = await Promise.all([
@@ -28,9 +28,11 @@ export default async function AttendancePrintPage({
   const schoolData = school as School | null;
   const classData = cls as ClassRoom | null;
   const studentRows = (students as Student[]) ?? [];
-  const schoolDays = (days as SchoolDay[]) ?? [];
+  const selectedYear = /^\d{4}$/.test(year || "") ? Number(year) : toBuddhistYear(classData?.academic_year || "");
+  const calendarMonths = termMonths(String(selectedYear), selectedTerm);
+  const monthPrefixes = new Set(calendarMonths.map((month) => `${month.year}-${String(month.month + 1).padStart(2, "0")}`));
+  const schoolDays = ((days as SchoolDay[]) ?? []).filter((day) => monthPrefixes.has(day.school_date.slice(0, 7)));
   const attendance = (records as AttendanceRecord[]) ?? [];
-  const calendarMonths = termMonths(classData?.academic_year || "", selectedTerm);
   const selectedDates = new Set(schoolDays.map((day) => day.school_date));
   const grouped = new Map<string, SchoolDay[]>();
   for (const day of schoolDays) {
@@ -47,7 +49,7 @@ export default async function AttendancePrintPage({
           <div className="attendance-print-title">ปฏิทินกำหนดวันเปิดเรียน</div>
           <div className="attendance-print-subtitle">
             โรงเรียน{schoolData?.name || ""} {classData?.grade_level || ""} {classData?.room ? `ห้อง ${classData.room}` : ""}
-            {` ภาคเรียนที่ ${selectedTerm} ปีการศึกษา ${classData?.academic_year || ""}`}
+            {` ภาคเรียนที่ ${selectedTerm} ปีการศึกษา ${selectedYear}`}
           </div>
           <div className="attendance-legend">ช่องที่มีวันในสัปดาห์ คือ วันที่เปิดเรียน</div>
           <table className="academic-calendar-table">
@@ -88,54 +90,35 @@ export default async function AttendancePrintPage({
             <div>ลงชื่อ ........................................................ หัวหน้าฝ่ายวิชาการ<br />( {schoolData?.academic_head || "................................"} )</div>
           </div>
         </div>
-        {[...grouped.entries()].map(([monthKey, monthDays]) => {
-          const parts = dateParts(`${monthKey}-01`);
-          return (
-            <div key={monthKey} className="print-page landscape attendance-print-page">
-              <div className="attendance-print-title">ตารางบันทึกเวลาเรียน</div>
-              <div className="attendance-print-subtitle">
-                โรงเรียน{schoolData?.name || ""} {classData?.grade_level || ""} {classData?.room ? `ห้อง ${classData.room}` : ""}
-                {` ภาคเรียนที่ ${selectedTerm} เดือน${THAI_MONTHS[parts.month]} พ.ศ. ${parts.year + 543}`}
-              </div>
-              <div className="attendance-legend">/ = มาเรียน &nbsp;&nbsp; ข = ขาดเรียน &nbsp;&nbsp; ล = ลา</div>
-              <table className="attendance-print-table">
+        {calendarMonths.flatMap((month) => {
+          const monthKey = dateKey(month.year, month.month, 1).slice(0, 7);
+          const monthDays = grouped.get(monthKey) ?? [];
+          const dayByNumber = new Map(monthDays.map(day => [dateParts(day.school_date).day, day]));
+          const count = daysInMonth(month.year, month.month);
+          return Array.from({ length: Math.max(1, Math.ceil(studentRows.length / 30)) }, (_, pageIndex) => (
+            <div key={`${monthKey}-${pageIndex}`} className="print-page monthly-attendance">
+              <div className="form-caption">บันทึกเวลาเรียน · {classData?.grade_level} {classData?.room ? `ห้อง ${classData.room}` : ""} · ภาคเรียนที่ {selectedTerm}</div>
+              <table className="monthly-attendance-table">
+                <colgroup><col style={{ width: "10mm" }} />{Array.from({length:31}, (_, i) => <col key={i} />)}<col style={{width:"6mm"}} /></colgroup>
                 <thead>
-                  <tr>
-                    <th rowSpan={2} className="attendance-no">ที่</th>
-                    <th rowSpan={2} className="attendance-name">ชื่อ - นามสกุล</th>
-                    {monthDays.map((day) => { const value = dateParts(day.school_date); return <th key={day.id}>{value.day}</th>; })}
-                    <th colSpan={3}>สรุป</th>
-                  </tr>
-                  <tr>
-                    {monthDays.map((day) => { const value = dateParts(day.school_date); return <th key={day.id}>{THAI_WEEKDAYS[value.weekday]}</th>; })}
-                    <th>/</th><th>ข</th><th>ล</th>
-                  </tr>
+                  <tr><th rowSpan={3}><span className="vtext">เลขที่</span></th><th colSpan={31}>บันทึกเวลาเรียน เดือน {THAI_MONTHS[month.month]} พ.ศ. {month.year + 543}</th><th rowSpan={3}><span className="vtext">รวมมาเรียน</span></th></tr>
+                  <tr>{Array.from({length:31}, (_, i) => <th key={i}>{i+1}</th>)}</tr>
+                  <tr>{Array.from({length:31}, (_, i) => <th key={i}>{dayByNumber.has(i+1) ? THAI_WEEKDAYS[dateParts(dateKey(month.year,month.month,i+1)).weekday] : ""}</th>)}</tr>
                 </thead>
-                <tbody>
-                  {studentRows.map((student) => {
-                    const values = monthDays.map((day) => statusOf(student.id, day.id));
-                    return (
-                      <tr key={student.id}>
-                        <td>{student.no}</td>
-                        <td className="text-left">{fullName(student)}</td>
-                        {monthDays.map((day) => <td key={day.id} className="font-semibold">{statusOf(student.id, day.id)}</td>)}
-                        <td>{values.filter((value) => value === "/").length}</td>
-                        <td>{values.filter((value) => value === "ข").length}</td>
-                        <td>{values.filter((value) => value === "ล").length}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-                <tfoot>
-                  <tr><th colSpan={2}>รวมวันเปิดเรียน</th><th colSpan={monthDays.length}>{monthDays.length} วัน</th><th colSpan={3}></th></tr>
-                </tfoot>
+                <tbody>{Array.from({length:30}, (_, i) => {
+                  const student = studentRows[pageIndex*30+i];
+                  return <tr key={i}><td>{student?.no ?? pageIndex*30+i+1}</td>
+                    {Array.from({length:31}, (_, j) => {
+                      const day = dayByNumber.get(j+1);
+                      return <td key={j} style={j+1 > count ? {background:"#eee"} : undefined}>{student && day ? statusOf(student.id,day.id) : ""}</td>;
+                    })}
+                    <td>{student ? monthDays.filter(day => statusOf(student.id,day.id)==="/").length : ""}</td>
+                  </tr>;
+                })}</tbody>
+                <tfoot><tr><td colSpan={33}>/ = มาเรียน · ข = ขาดเรียน · ล = ลา · รวมวันเปิดเรียน {monthDays.length} วัน</td></tr></tfoot>
               </table>
-              <div className="attendance-signatures">
-                <div>ลงชื่อ ........................................................ ครูประจำชั้น<br />( {classData?.homeroom_teacher_name || "................................"} )</div>
-                <div>ลงชื่อ ........................................................ หัวหน้าฝ่ายวิชาการ<br />( {schoolData?.academic_head || "................................"} )</div>
-              </div>
             </div>
-          );
+          ));
         })}
       </div>
     </>

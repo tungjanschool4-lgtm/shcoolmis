@@ -24,44 +24,19 @@ export default async function SubjectScoresPage({
   return (
     <>
       <PrintToolbar title="ตารางคะแนนรายวิชา" />
-      <div className="py-4">
-        {subjects.map((subject) => (
-          <div key={subject.id} className="print-page text-[12px]">
-            <div className="text-center font-bold text-base">
-              โรงเรียน{school?.name} — {cls?.grade_level} {cls?.room ? `ห้อง ${cls.room}` : ""} ปีการศึกษา {school?.academic_year || cls?.academic_year}
-            </div>
-            <div className="text-center font-semibold mb-2">
-              รายวิชา {subject.category} : {subject.name} ({subject.code})
-            </div>
-            <table className="report-table">
+      <div className="py-4 print:py-0">
+        {subjects.flatMap((subject) => Array.from({ length: Math.max(1, Math.ceil(students.length / 30)) }, (_, pageIndex) => (
+          <div key={`${subject.id}-${pageIndex}`} className="print-page score-sheet">
+            <div className="form-caption">{cls?.grade_level} {cls?.room ? `ห้อง ${cls.room}` : ""} · ปีการศึกษา {cls?.academic_year || school?.academic_year} · รายวิชา {subject.name}</div>
+            <table className="report-table score-table">
+              <colgroup><col style={{width:"4.5%"}} /><col style={{width:"27.5%"}} />{Array.from({length:12}, (_, i) => <col key={i} style={{width:`${68/12}%`}} />)}</colgroup>
               <thead>
-                <tr>
-                  <th rowSpan={3} style={{ width: 26 }}>ที่</th>
-                  <th rowSpan={3}>ชื่อ - นามสกุล</th>
-                  <th colSpan={4}>ภาคเรียนที่ 1</th>
-                  <th colSpan={4}>ภาคเรียนที่ 2</th>
-                  <th rowSpan={2} colSpan={1}>เฉลี่ย</th>
-                  <th rowSpan={2} colSpan={1}>ผลการเรียน</th>
-                </tr>
-                <tr>
-                  <th colSpan={3}>คะแนน</th>
-                  <th rowSpan={2}>ผล</th>
-                  <th colSpan={3}>คะแนน</th>
-                  <th rowSpan={2}>ผล</th>
-                </tr>
-                <tr>
-                  <th style={{ width: 42 }}>ระหว่าง</th>
-                  <th style={{ width: 38 }}>ปลาย</th>
-                  <th style={{ width: 38 }}>รวม</th>
-                  <th style={{ width: 42 }}>ระหว่าง</th>
-                  <th style={{ width: 38 }}>ปลาย</th>
-                  <th style={{ width: 38 }}>รวม</th>
-                  <th style={{ width: 42 }}>2 ภาค</th>
-                  <th style={{ width: 42 }}>ตลอดปี</th>
-                </tr>
+                <tr><th rowSpan={3}>ที่</th><th rowSpan={3}>{subject.category} : {subject.name}<br />ชื่อ - นามสกุล</th><th colSpan={4}>ภาคเรียนที่ 1</th><th colSpan={4}>ภาคเรียนที่ 2</th><th rowSpan={3}><span className="vtext">คะแนนเฉลี่ย 2 ภาคเรียน</span></th><th rowSpan={3}><span className="vtext">ผลการเรียนตลอดปี</span></th><th colSpan={2} rowSpan={2}>สรุปผลการประเมิน</th></tr>
+                <tr>{[1,2].flatMap(term => ["ระหว่างภาค","ปลายภาค","รวม","ผลการเรียน"].map(label => <th key={`${term}-${label}`}><span className="vtext">{label}</span></th>))}</tr>
+                <tr>{[1,2].flatMap(term => [subject.midterm_max,subject.final_max,subject.midterm_max+subject.final_max,""].map((value,i) => <th key={`${term}-${i}`}>{value}</th>))}<th>ผ่าน</th><th>ไม่ผ่าน</th></tr>
               </thead>
               <tbody>
-                {students.map((st) => {
+                {students.slice(pageIndex * 30, (pageIndex + 1) * 30).map((st) => {
                   const sc = scoreOf(st.id, subject.id);
                   const res = computeSubjectResult(
                     {
@@ -87,14 +62,16 @@ export default async function SubjectScoresPage({
                       <td className="text-center font-semibold">{gradeText(res.sem2Grade)}</td>
                       <td className="text-center">{n2(res.yearAvg)}</td>
                       <td className="text-center font-bold">{gradeText(res.yearGrade)}</td>
+                      <td className="text-center">{res.yearGrade !== null && res.yearGrade > 0 ? "✓" : ""}</td>
+                      <td className="text-center">{res.yearGrade === 0 ? "✓" : ""}</td>
                     </tr>
                   );
                 })}
-                {Array.from({ length: Math.max(0, 30 - students.length) }).map((_, i) => (
-                  <tr key={`b${i}`} style={{ height: 20 }}>
-                    <td className="text-center">{students.length + i + 1}</td>
+                {Array.from({ length: Math.max(0, 30 - students.slice(pageIndex * 30, (pageIndex + 1) * 30).length) }).map((_, i) => (
+                  <tr key={`b${i}`}>
+                    <td className="text-center">{pageIndex * 30 + students.slice(pageIndex * 30, (pageIndex + 1) * 30).length + i + 1}</td>
                     <td></td><td></td><td></td><td></td><td></td>
-                    <td></td><td></td><td></td><td></td><td></td><td></td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
                   </tr>
                 ))}
               </tbody>
@@ -103,7 +80,7 @@ export default async function SubjectScoresPage({
               คะแนนเต็ม: ระหว่างภาค {subject.midterm_max} + ปลายภาค {subject.final_max} = {subject.midterm_max + subject.final_max}
             </div>
           </div>
-        ))}
+        )))}
         {subjects.length === 0 && (
           <div className="print-page text-center text-slate-400 pt-20">ยังไม่มีรายวิชา</div>
         )}

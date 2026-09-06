@@ -57,7 +57,7 @@ export default async function CoverPage({
   return (
     <>
       <PrintToolbar title="ปก ปพ.5 + บัญชีรายชื่อ" />
-      <div className="py-4">
+      <div className="py-4 print:py-0">
         {/* ---- หน้าปกสรุป ---- */}
         <div className="print-page text-[12px]">
           <div className="text-right font-semibold">ปพ.5</div>
@@ -181,14 +181,14 @@ export default async function CoverPage({
         </div>
 
         {/* ---- บัญชีรายชื่อนักเรียน ---- */}
-        <div className="print-page text-[13px]">
+        {Array.from({ length: Math.max(1, Math.ceil(students.length / 30)) }, (_, pageIndex) => (<div key={pageIndex} className="print-page roster-sheet">
           <div className="text-center font-bold text-base mb-1">
             บัญชีรายชื่อนักเรียน {cls?.grade_level} {cls?.room ? `ห้อง ${cls.room}` : ""}
           </div>
           <div className="text-center mb-3">
             โรงเรียน{school?.name} ปีการศึกษา {school?.academic_year || cls?.academic_year}
           </div>
-          <table className="report-table">
+          <table className="report-table roster-table">
             <thead>
               <tr>
                 <th style={{ width: 40 }}>เลขที่</th>
@@ -201,7 +201,7 @@ export default async function CoverPage({
               </tr>
             </thead>
             <tbody>
-              {students.map((s) => (
+              {students.slice(pageIndex*30,(pageIndex+1)*30).map((s) => (
                 <tr key={s.id}>
                   <td className="text-center">{s.no}</td>
                   <td className="text-center">{s.student_code}</td>
@@ -212,13 +212,11 @@ export default async function CoverPage({
                   <td className="text-center">{s.status}</td>
                 </tr>
               ))}
-              {students.length === 0 && (
-                <tr><td colSpan={7} className="text-center text-slate-400 py-4">ไม่มีนักเรียน</td></tr>
-              )}
+              {Array.from({length: Math.max(0,30-students.slice(pageIndex*30,(pageIndex+1)*30).length)}, (_, i) => <tr key={`blank-${i}`}><td className="text-center">{pageIndex*30+students.slice(pageIndex*30,(pageIndex+1)*30).length+i+1}</td>{Array.from({length:6},(_,j)=><td key={j}></td>)}</tr>)}
             </tbody>
           </table>
           <div className="mt-2 text-right">รวมนักเรียนทั้งสิ้น {students.length} คน (ชาย {male} · หญิง {female})</div>
-        </div>
+        </div>))}
       </div>
     </>
   );
