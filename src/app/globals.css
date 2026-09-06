@@ -247,12 +247,14 @@ main h3 {
   }
   .transfer-sheet {
     width: 210mm;
-    height: 297mm;
-    min-height: 297mm;
+    height: 296mm;
+    min-height: 296mm;
+    break-inside: avoid;
   }
   .transfer-overview-sheet {
     width: 210mm;
-    height: 297mm;
-    min-height: 297mm;
+    height: 296mm;
+    min-height: 296mm;
+    break-inside: avoid;
   }
 }
