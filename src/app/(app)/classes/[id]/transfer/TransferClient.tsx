@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { Subject, TransferSubject, TransferSource } from "@/lib/types";
+import type { GradeCriterion, Subject, SubjectScore, TransferSubject, TransferSource } from "@/lib/types";
+import { computeSubjectResult, gradeText, scoreToGrade } from "@/lib/grading";
+import { decodeCsv, downloadCsvTemplate } from "@/lib/curriculum-csv";
+import { parseCsv } from "@/lib/student-csv";
 import { seedTransferDefaults } from "./actions";
 import { usePasswordDelete } from "@/components/PasswordDeleteGuard";
 
@@ -16,11 +19,15 @@ export default function TransferClient({
   subjects,
   transferSubjects,
   transferSources,
+  scores,
+  criteria,
 }: {
   classId: string;
   subjects: Subject[];
   transferSubjects: TransferSubject[];
   transferSources: TransferSource[];
+  scores: SubjectScore[];
+  criteria: GradeCriterion[];
 }) {
   const supabase = createClient();
   const router = useRouter();
@@ -37,6 +44,8 @@ export default function TransferClient({
   const [pickFor, setPickFor] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [seeding, setSeeding] = useState(false);
+  const [showCalculated, setShowCalculated] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState<{ t: "ok" | "err"; m: string } | null>(null);
   const { requestDelete, deletePasswordDialog } = usePasswordDelete();
 
@@ -64,6 +73,79 @@ export default function TransferClient({
       else set.add(subjectId);
       return { ...m, [key]: set };
     });
+  }
+
+  function calculatedResult(key: string): { average: number | null; grade: number | null } {
+    const selected = subjects.filter((subject) => (sourceMap[key] ?? new Set()).has(subject.id));
+    if (!selected.length) return { average: null, grade: null };
+    const scoreByStudent = new Map<string, { weighted: number; weight: number }>();
+    for (const subject of selected) {
+      const weight = Number(subject.credits) > 0 ? Number(subject.credits) : 1;
+      for (const score of scores.filter((item) => item.subject_id === subject.id)) {
+        const result = computeSubjectResult(score, criteria);
+        if (result.yearAvg === null) continue;
+        const current = scoreByStudent.get(score.student_id) ?? { weighted: 0, weight: 0 };
+        current.weighted += result.yearAvg * weight;
+        current.weight += weight;
+        scoreByStudent.set(score.student_id, current);
+      }
+    }
+    const studentAverages = [...scoreByStudent.values()]
+      .filter((item) => item.weight > 0)
+      .map((item) => item.weighted / item.weight);
+    const average = studentAverages.length
+      ? studentAverages.reduce((sum, value) => sum + value, 0) / studentAverages.length
+      : null;
+    return { average, grade: scoreToGrade(average, criteria) };
+  }
+
+  async function importCsv(file: File) {
+    try {
+      const table = parseCsv(decodeCsv(await file.arrayBuffer()).replace(/^\uFEFF/, ""));
+      if (table.length < 2) throw new Error("ไฟล์ CSV ไม่มีข้อมูล");
+      const normalize = (value: string) => value.trim().toLowerCase().replace(/[\s_.\-()]/g, "");
+      const headers = table[0].map(normalize);
+      const col = (...aliases: string[]) => headers.findIndex((header) => aliases.some((alias) => header === normalize(alias)));
+      const idx = {
+        order: col("ที่", "ลำดับ"), code: col("รหัสวิชา", "รหัส"),
+        name: col("รายวิชา 2560", "รายวิชาหลักสูตร 2560", "ชื่อวิชา"),
+        category: col("ประเภท"), credits: col("น้ำหนัก", "หน่วยกิต"),
+        sources: col("รหัสวิชาต้นทาง", "วิชาต้นทาง 2568"),
+      };
+      if (idx.name < 0) throw new Error("ไม่พบคอลัมน์รายวิชา 2560");
+      const imported: Row[] = [];
+      const importedMap: Record<string, Set<string>> = {};
+      table.slice(1).forEach((values, index) => {
+        const name = (values[idx.name] ?? "").trim();
+        if (!name) return;
+        const key = `csv-${Date.now()}-${index}`;
+        imported.push({
+          _key: key, _new: true, class_id: classId,
+          order_no: Number(values[idx.order]) || index + 1,
+          code: (values[idx.code] ?? "").trim(), name,
+          category: (values[idx.category] ?? "").trim() || "พื้นฐาน",
+          credits: Number(values[idx.credits]) || 0, enabled: true,
+        });
+        const sourceCodes = (values[idx.sources] ?? "").split(/[|;]+/).map((value) => value.trim()).filter(Boolean);
+        importedMap[key] = new Set(subjects.filter((subject) => sourceCodes.includes(subject.code)).map((subject) => subject.id));
+      });
+      if (!imported.length) throw new Error("ไม่พบรายการที่นำเข้าได้");
+      setRows(imported);
+      setSourceMap(importedMap);
+      setShowCalculated(false);
+      setMsg({ t: "ok", m: `นำเข้า ${imported.length} วิชาแล้ว กรุณาตรวจสอบและกดบันทึก` });
+    } catch (error) {
+      setMsg({ t: "err", m: `นำเข้าไม่สำเร็จ: ${error instanceof Error ? error.message : "รูปแบบไฟล์ไม่ถูกต้อง"}` });
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  function downloadTemplate() {
+    downloadCsvTemplate("transfer-2560-template.csv", [
+      ["ที่", "รหัสวิชา", "รายวิชา 2560", "ประเภท", "น้ำหนัก", "รหัสวิชาต้นทาง"],
+      ["1", "ท16101", "ภาษาไทย", "พื้นฐาน", "3", subjects[0]?.code || "ท16101"],
+    ]);
   }
 
   async function handleSeed() {
@@ -151,7 +233,7 @@ export default function TransferClient({
         <div className="text-sm text-slate-500">
           จับคู่วิชาต้นทาง (หลักสูตรใหม่ 2568) → วิชาปลายทาง (หลักสูตร 2560) · รวมหลายวิชาเป็น 1 ได้
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {msg && <span className={`text-sm ${msg.t === "ok" ? "text-emerald-600" : "text-red-600"}`}>{msg.m}</span>}
           <Link href={`/print/${classId}/transfer-summary?term=1`} target="_blank" className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm text-indigo-700">
             ภาพรวม / สถิติ ↗
@@ -159,6 +241,10 @@ export default function TransferClient({
           <Link href={`/print/${classId}/report-transfer?term=1`} target="_blank" className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm text-indigo-700">
             PDF รายบุคคล ↗
           </Link>
+          <input ref={fileInputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importCsv(file); }} />
+          <button onClick={downloadTemplate} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">CSV ตัวอย่าง</button>
+          <button onClick={() => fileInputRef.current?.click()} className="rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm text-indigo-700">นำเข้า CSV</button>
+          <button onClick={() => setShowCalculated(true)} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">คำนวณค่าเฉลี่ยถ่วงน้ำหนัก</button>
           <button onClick={addRow} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">+ เพิ่มวิชา</button>
           <button onClick={saveAll} disabled={saving} className="rounded-lg bg-indigo-600 text-white px-4 py-2 text-sm font-medium hover:bg-indigo-700 disabled:opacity-50">
             {saving ? "กำลังบันทึก..." : "บันทึก"}
@@ -192,6 +278,7 @@ export default function TransferClient({
               const sourceRows = subjects
                 .filter((subject) => sources.has(subject.id))
                 .sort((a, b) => a.order_no - b.order_no);
+              const calculated = calculatedResult(r._key);
               return (
                 <tr key={r._key} className="border-t border-slate-100">
                   <td className="px-2 py-1 text-center">
@@ -225,8 +312,8 @@ export default function TransferClient({
                       + เลือก / เพิ่ม
                     </button>
                   </td>
-                  <td className="px-2 py-2 text-center text-xs text-slate-500">คำนวณ<br />อัตโนมัติ</td>
-                  <td className="px-2 py-2 text-center text-xs text-slate-500">อัตโนมัติ</td>
+                  <td className="px-2 py-2 text-center font-semibold text-emerald-700">{showCalculated ? (calculated.average === null ? "-" : calculated.average.toFixed(2)) : "กดคำนวณ"}</td>
+                  <td className="px-2 py-2 text-center font-bold text-indigo-700">{showCalculated ? (gradeText(calculated.grade) || "-") : "-"}</td>
                   <td className="px-1 py-1 text-center"><button onClick={() => removeRow(r._key)} className="text-rose-500">✕</button></td>
                 </tr>
               );

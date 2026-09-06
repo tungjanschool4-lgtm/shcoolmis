@@ -9,6 +9,20 @@ body {
   font-family: var(--font-thai);
   background: #f1f5f9;
   color: #0f172a;
+  font-size: 17px;
+}
+
+/* ใช้พื้นที่หน้าจอให้เต็มและทำให้แบบฟอร์มอ่านง่ายสม่ำเสมอทุกหน้า */
+main {
+  width: 100%;
+  max-width: none;
+}
+main input,
+main select,
+main textarea,
+main button,
+main table {
+  font-size: 1rem;
 }
 
 /* หัวข้อบนหน้าจอให้มองเห็นชัดขึ้นทุกหน้า */

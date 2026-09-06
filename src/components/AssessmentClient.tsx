@@ -1,11 +1,13 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Student, AssessmentItem, AssessmentScore } from "@/lib/types";
 import { fullName } from "@/lib/types";
 import { itemsAverage, qualityLevel, type QualityLabels } from "@/lib/grading";
 import { usePasswordDelete } from "@/components/PasswordDeleteGuard";
+import { decodeCsv, downloadCsvTemplate } from "@/lib/curriculum-csv";
+import { parseCsv } from "@/lib/student-csv";
 
 type Cell = Partial<AssessmentScore> & { _dirty?: boolean };
 type ItemRow = Partial<AssessmentItem> & { _key: string; _dirty?: boolean; _new?: boolean };
@@ -30,6 +32,7 @@ export default function AssessmentClient({
   const supabase = createClient();
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [itemRows, setItemRows] = useState<ItemRow[]>(
     items.map((item) => ({ ...item, _key: item.id }))
   );
@@ -199,6 +202,47 @@ export default function AssessmentClient({
     return itemsAverage(itemRows.map((it) => get(studentId, it._key)[sem] ?? null));
   }
 
+  async function importCsv(file: File) {
+    try {
+      const table = parseCsv(decodeCsv(await file.arrayBuffer()).replace(/^\uFEFF/, ""));
+      if (table.length < 2) throw new Error("ไฟล์ CSV ไม่มีข้อมูล");
+      const normalize = (value: string) => value.trim().toLowerCase().replace(/[\s_.\-()]/g, "");
+      const headers = table[0].map(normalize);
+      const noColumn = headers.findIndex((header) => ["เลขที่", "ที่"].includes(header));
+      const codeColumn = headers.findIndex((header) => ["เลขประจำตัว", "รหัสนักเรียน"].includes(header));
+      if (noColumn < 0 && codeColumn < 0) throw new Error("ไม่พบคอลัมน์เลขที่หรือเลขประจำตัว");
+      let imported = 0;
+      setMap((previous) => {
+        const next = { ...previous };
+        for (const values of table.slice(1)) {
+          const student = students.find((item) => (codeColumn >= 0 && item.student_code === (values[codeColumn] ?? "").trim()) || (noColumn >= 0 && item.no === Number(values[noColumn])));
+          if (!student) continue;
+          const studentRow = { ...(next[student.id] ?? {}) };
+          for (const item of itemRows) {
+            if (item._new) continue;
+            const sem1Column = headers.indexOf(normalize(`ข้อ ${item.no} ภาค 1`));
+            const sem2Column = headers.indexOf(normalize(`ข้อ ${item.no} ภาค 2`));
+            const value = (column: number) => column < 0 || (values[column] ?? "").trim() === "" ? null : Number(values[column]);
+            studentRow[item._key] = { ...(studentRow[item._key] ?? {}), student_id: student.id, item_id: item._key, sem1: value(sem1Column), sem2: value(sem2Column), _dirty: true };
+          }
+          next[student.id] = studentRow;
+          imported += 1;
+        }
+        return next;
+      });
+      setMsg(`นำเข้าผลประเมิน ${imported} คนแล้ว กรุณาตรวจสอบและกดบันทึก`);
+    } catch (error) {
+      setMsg(`นำเข้าไม่สำเร็จ: ${error instanceof Error ? error.message : "รูปแบบไฟล์ไม่ถูกต้อง"}`);
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  function downloadTemplate() {
+    const scoreHeaders = itemRows.flatMap((item) => [`ข้อ ${item.no} ภาค 1`, `ข้อ ${item.no} ภาค 2`]);
+    downloadCsvTemplate("assessment-template.csv", [["เลขที่", "เลขประจำตัว", ...scoreHeaders], ["1", students[0]?.student_code || "65001", ...scoreHeaders.map(() => "3")]]);
+  }
+
   return (
     <div className="space-y-4">
       {deletePasswordDialog}
@@ -209,6 +253,9 @@ export default function AssessmentClient({
         </div>
         <div className="flex items-center gap-2">
           {msg && <span className="text-sm text-slate-500">{msg}</span>}
+          <input ref={fileInputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importCsv(file); }} />
+          <button onClick={downloadTemplate} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">CSV ตัวอย่าง</button>
+          <button onClick={() => fileInputRef.current?.click()} className="rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm text-indigo-700">นำเข้า CSV</button>
           <button
             onClick={saveAll}
             disabled={saving || dirtyCount === 0}

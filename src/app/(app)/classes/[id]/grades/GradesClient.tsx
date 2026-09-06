@@ -1,10 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Student, Subject, SubjectScore, GradeCriterion } from "@/lib/types";
 import { fullName } from "@/lib/types";
 import { computeSubjectResult, gradeText } from "@/lib/grading";
+import { decodeCsv, downloadCsvTemplate } from "@/lib/curriculum-csv";
+import { parseCsv } from "@/lib/student-csv";
 
 type ScoreMap = Record<string, Partial<SubjectScore> & { _dirty?: boolean }>;
 
@@ -24,6 +26,7 @@ export default function GradesClient({
   const [subjectId, setSubjectId] = useState(subjects[0]?.id ?? "");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // map[subjectId][studentId] = score
   const [map, setMap] = useState<Record<string, ScoreMap>>(() => {
@@ -48,6 +51,45 @@ export default function GradesClient({
       sub[studentId] = { ...(sub[studentId] ?? {}), [field]: num, _dirty: true, student_id: studentId, subject_id: subjectId };
       return { ...prev, [subjectId]: sub };
     });
+  }
+
+  async function importCsv(file: File) {
+    try {
+      const table = parseCsv(decodeCsv(await file.arrayBuffer()).replace(/^\uFEFF/, ""));
+      if (table.length < 2) throw new Error("ไฟล์ CSV ไม่มีข้อมูลคะแนน");
+      const normalize = (value: string) => value.trim().toLowerCase().replace(/[\s_.\-()]/g, "");
+      const headers = table[0].map(normalize);
+      const col = (...aliases: string[]) => headers.findIndex((header) => aliases.some((alias) => header === normalize(alias)));
+      const idx = {
+        no: col("เลขที่", "ที่"), code: col("เลขประจำตัว", "รหัสนักเรียน"),
+        s1m: col("ภาค1ระหว่าง", "sem1mid"), s1f: col("ภาค1ปลาย", "sem1final"),
+        s2m: col("ภาค2ระหว่าง", "sem2mid"), s2f: col("ภาค2ปลาย", "sem2final"),
+        grade: col("แก้เกรด", "overridegrade"),
+      };
+      if (idx.no < 0 && idx.code < 0) throw new Error("ไม่พบคอลัมน์เลขที่หรือเลขประจำตัว");
+      let imported = 0;
+      setMap((previous) => {
+        const next = { ...previous, [subjectId]: { ...(previous[subjectId] ?? {}) } };
+        table.slice(1).forEach((values) => {
+          const student = students.find((item) => (idx.code >= 0 && item.student_code === (values[idx.code] ?? "").trim()) || (idx.no >= 0 && item.no === Number(values[idx.no])));
+          if (!student) return;
+          const numberOrNull = (index: number) => index < 0 || (values[index] ?? "").trim() === "" ? null : Number(values[index]);
+          next[subjectId][student.id] = { ...(next[subjectId][student.id] ?? {}), student_id: student.id, subject_id: subjectId, sem1_mid: numberOrNull(idx.s1m), sem1_final: numberOrNull(idx.s1f), sem2_mid: numberOrNull(idx.s2m), sem2_final: numberOrNull(idx.s2f), override_grade: numberOrNull(idx.grade), _dirty: true };
+          imported += 1;
+        });
+        return next;
+      });
+      if (!imported) throw new Error("ไม่พบนักเรียนที่ตรงกับข้อมูลในไฟล์");
+      setMsg(`นำเข้าคะแนน ${imported} คนแล้ว กรุณาตรวจสอบและกดบันทึก`);
+    } catch (error) {
+      setMsg(`นำเข้าไม่สำเร็จ: ${error instanceof Error ? error.message : "รูปแบบไฟล์ไม่ถูกต้อง"}`);
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  function downloadTemplate() {
+    downloadCsvTemplate("scores-template.csv", [["เลขที่", "เลขประจำตัว", "ภาค 1 ระหว่าง", "ภาค 1 ปลาย", "ภาค 2 ระหว่าง", "ภาค 2 ปลาย", "แก้เกรด"], ["1", students[0]?.student_code || "65001", "35", "15", "36", "14", ""]]);
   }
 
   async function saveAll() {
@@ -105,6 +147,9 @@ export default function GradesClient({
         </select>
         <div className="flex items-center gap-2">
           {msg && <span className="text-sm text-slate-500">{msg}</span>}
+          <input ref={fileInputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) void importCsv(file); }} />
+          <button onClick={downloadTemplate} className="rounded-lg border border-slate-300 px-3 py-2 text-sm">CSV ตัวอย่าง</button>
+          <button onClick={() => fileInputRef.current?.click()} className="rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-2 text-sm text-indigo-700">นำเข้า CSV</button>
           <button
             onClick={saveAll}
             disabled={saving || dirtyCount === 0}

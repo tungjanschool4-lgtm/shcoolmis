@@ -147,10 +147,14 @@ export function computeTransferReport(
     const sourceSubjects = sourceIds
       .map((id) => subjectById.get(id))
       .filter((s): s is Subject => !!s);
-    const vals = sourceIds
-      .map((id) => scoreBySubject.get(id) ?? null)
-      .filter((v): v is number => v !== null);
-    const score = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+    const weighted = sourceSubjects.flatMap((subject) => {
+      const value = scoreBySubject.get(subject.id) ?? null;
+      return value === null ? [] : [{ value, weight: Number(subject.credits) > 0 ? Number(subject.credits) : 1 }];
+    });
+    const totalWeight = weighted.reduce((sum, item) => sum + item.weight, 0);
+    const score = totalWeight
+      ? weighted.reduce((sum, item) => sum + item.value * item.weight, 0) / totalWeight
+      : null;
     return { transferSubject: ts, sourceSubjects, score, grade: scoreToGrade(score, bundle.criteria) };
   });
 
