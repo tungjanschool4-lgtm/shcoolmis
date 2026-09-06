@@ -54,7 +54,7 @@ export default async function SubjectScoresPage({
                   return (
                     <tr key={st.id}>
                       <td className="text-center">{st.no}</td>
-                      <td className="whitespace-nowrap">{fullName(st)}</td>
+                      <td>{fullName(st)}</td>
                       <td className="text-center">{sc?.sem1_mid ?? ""}</td>
                       <td className="text-center">{sc?.sem1_final ?? ""}</td>
                       <td className="text-center">{res.sem1Total ?? ""}</td>
