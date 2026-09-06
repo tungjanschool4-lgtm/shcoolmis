@@ -401,7 +401,7 @@ main h3 {
 }
 
 /* Reference forms: physical dimensions are shared by preview and print. */
-.print-page { color: #000; font-size: 16px; line-height: 1.15; }
+.print-page { color: #000; font-size: 18px; line-height: 1.08; }
 .print-page .document-letterhead { font-size: 9pt; line-height: 1.25; }
 .print-page .document-letterhead .document-letterhead-logo { display: block; width: 20mm; height: 20mm; object-fit: contain; margin: 0 auto 1.5mm; }
 .document-school-name { font-size: 13pt; font-weight: 700; line-height: 1.15; }
@@ -445,12 +445,12 @@ main h3 {
 .monthly-attendance-table tbody tr { height: 7mm; }
 .monthly-attendance-table tfoot td { height: 8mm; text-align: left; padding-left: 2mm; }
 
-/* PDF table text requested at size 15. Tight spacing keeps 30-row forms on A4. */
+/* Large PDF text with compact spacing keeps the forms within A4. */
 .print-page table th,
 .print-page table td {
-  font-size: 16px !important;
-  line-height: 1.05;
-  padding: .35mm .5mm;
+  font-size: 18px !important;
+  line-height: 1;
+  padding: .2mm .35mm;
 }
 .print-page .monthly-attendance-table th,
 .print-page .monthly-attendance-table td {
@@ -463,14 +463,14 @@ main h3 {
   padding: .25mm !important;
 }
 
-/* PDF hierarchy requested: headers 20px, names 16px. */
+/* PDF hierarchy: headings 22px and body/name text 18px. */
 .print-page .document-school-name,
 .print-page .document-report-title,
 .print-page .plain-form-title,
 .print-page .attendance-print-title,
 .print-page > .text-center .text-lg {
-  font-size: 20px !important;
-  line-height: 1.15;
+  font-size: 22px !important;
+  line-height: 1.1;
 }
 .print-page .attendance-print-subtitle,
 .print-page .student-heading-line,
@@ -480,15 +480,15 @@ main h3 {
 .print-page .roster-table tbody td:nth-child(4),
 .print-page .transfer-report-table tbody td:nth-child(2),
 .print-page .evaluation-report-table tbody td:nth-child(2) {
-  font-size: 16px !important;
-  line-height: 1.1;
+  font-size: 18px !important;
+  line-height: 1.05;
 }
 .print-page .report-signatures,
 .print-page .transfer-signatures,
 .print-page .attendance-signatures,
 .print-page .summary-signature {
-  font-size: 16px !important;
-  line-height: 1.35;
+  font-size: 18px !important;
+  line-height: 1.2;
 }
 @media print {
   .print-page { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
