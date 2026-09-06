@@ -490,6 +490,34 @@ main h3 {
   font-size: 18px !important;
   line-height: 1.2;
 }
+
+/* The detail report contains two long narrative columns. Keep its first page inside A4. */
+.evaluation-sheet:not(.summary-sheet) {
+  width: 210mm;
+  height: 297mm;
+  min-height: 297mm;
+  padding: 6mm 8mm;
+}
+.evaluation-sheet:not(.summary-sheet) .document-letterhead .document-letterhead-logo {
+  width: 16mm;
+  height: 16mm;
+  margin-bottom: .8mm;
+}
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table th,
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table td {
+  font-size: 14px !important;
+  line-height: 1.02;
+  padding: .15mm .35mm;
+}
+.evaluation-sheet:not(.summary-sheet) .student-heading-line,
+.evaluation-sheet:not(.summary-sheet) .report-signatures {
+  font-size: 14px !important;
+  line-height: 1.1;
+}
+.evaluation-sheet:not(.summary-sheet) .report-signatures {
+  margin-top: 2mm !important;
+  gap: 5mm;
+}
 @media print {
   .print-page { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .print-page:last-child { break-after: auto; }
