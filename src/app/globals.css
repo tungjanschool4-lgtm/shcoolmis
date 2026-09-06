@@ -444,6 +444,24 @@ main h3 {
 .monthly-attendance-table thead th { background: #d9d9d9; height: 8mm; }
 .monthly-attendance-table tbody tr { height: 7.3mm; }
 .monthly-attendance-table tfoot td { height: 8mm; text-align: left; padding-left: 2mm; }
+
+/* PDF table text requested at size 15. Tight spacing keeps 30-row forms on A4. */
+.print-page table th,
+.print-page table td {
+  font-size: 15px !important;
+  line-height: 1.05;
+  padding: .35mm .5mm;
+}
+.print-page .monthly-attendance-table th,
+.print-page .monthly-attendance-table td {
+  padding: 0 !important;
+}
+.print-page .academic-calendar-table th,
+.print-page .academic-calendar-table td,
+.print-page .attendance-print-table th,
+.print-page .attendance-print-table td {
+  padding: .25mm !important;
+}
 @media print {
   .print-page { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
   .print-page:last-child { break-after: auto; }
