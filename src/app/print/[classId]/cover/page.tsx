@@ -151,7 +151,7 @@ export default async function CoverPage({
           </div>
 
           {/* ลายเซ็น */}
-          <div className="grid grid-cols-2 gap-8 mt-8 text-center text-[12px]">
+          <div className="grid grid-cols-2 gap-8 mt-8 text-center text-[12px] report-signatures">
             <div>
               <div className="text-left">ลงชื่อ ...............................................</div>
               <div className="mt-1">( {cls?.homeroom_teacher_name || "..............................."} )</div>
@@ -163,7 +163,7 @@ export default async function CoverPage({
               <div>หัวหน้าทะเบียนและวัดผล</div>
             </div>
           </div>
-          <div className="text-center mt-5 text-[12px]">
+          <div className="text-center mt-5 text-[12px] report-signatures">
             <div>ลงชื่อ ...............................................</div>
             <div className="mt-1">( {school?.academic_head || "..............................."} )</div>
             <div>หัวหน้าฝ่ายวิชาการ</div>
@@ -172,7 +172,7 @@ export default async function CoverPage({
             <span>☐ อนุมัติ</span>
             <span>☐ ไม่อนุมัติ</span>
           </div>
-          <div className="text-center mt-3 text-[12px]">
+          <div className="text-center mt-3 text-[12px] report-signatures">
             <div>ลงชื่อ ว่าที่ ร.ต. ...............................................</div>
             <div className="mt-1">( {school?.director || "..............................."} )</div>
             <div>{school?.director_position || "ผู้อำนวยการโรงเรียน"}</div>
