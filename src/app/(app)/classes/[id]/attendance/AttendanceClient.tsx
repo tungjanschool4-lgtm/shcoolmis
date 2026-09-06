@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { AttendanceRecord, SchoolDay, Student } from "@/lib/types";
 import { fullName } from "@/lib/types";
-import { dateKey, dateParts, daysInMonth, termMonths, THAI_MONTHS, THAI_WEEKDAYS } from "@/lib/academic-calendar";
+import { dateKey, dateParts, daysInMonth, termMonths, THAI_MONTHS, THAI_WEEKDAYS, toBuddhistYear } from "@/lib/academic-calendar";
 
 type AttendanceStatus = AttendanceRecord["status"];
 type RecordCell = Partial<AttendanceRecord> & { _dirty?: boolean };
@@ -26,6 +26,8 @@ export default function AttendanceClient({
 }) {
   const supabase = createClient();
   const [term, setTerm] = useState<1 | 2>(1);
+  const defaultBuddhistYear = toBuddhistYear(academicYear);
+  const [selectedYear, setSelectedYear] = useState(defaultBuddhistYear);
   const [days, setDays] = useState(initialDays);
   const [selectedDates, setSelectedDates] = useState<Set<string>>(() => new Set(initialDays.map((day) => day.school_date)));
   const [records, setRecords] = useState<Record<string, Record<string, RecordCell>>>(() => {
@@ -40,10 +42,17 @@ export default function AttendanceClient({
   const [savingRecords, setSavingRecords] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const months = termMonths(academicYear, term);
+  const yearOptions = Array.from({ length: 11 }, (_, index) => defaultBuddhistYear - 5 + index);
+  const months = useMemo(() => termMonths(String(selectedYear), term), [selectedYear, term]);
+  const selectedMonthPrefixes = useMemo(
+    () => new Set(months.map((month) => `${month.year}-${String(month.month + 1).padStart(2, "0")}`)),
+    [months]
+  );
   const termDays = useMemo(
-    () => days.filter((day) => day.term === term).sort((a, b) => a.school_date.localeCompare(b.school_date)),
-    [days, term]
+    () => days
+      .filter((day) => day.term === term && selectedMonthPrefixes.has(day.school_date.slice(0, 7)))
+      .sort((a, b) => a.school_date.localeCompare(b.school_date)),
+    [days, term, selectedMonthPrefixes]
   );
 
   function toggleDate(value: string) {
@@ -78,7 +87,9 @@ export default function AttendanceClient({
     setSavingDays(true);
     setMessage(null);
     const wanted = [...selectedDates].filter((value) => months.some((month) => value.startsWith(`${month.year}-${String(month.month + 1).padStart(2, "0")}`)));
-    const existing = days.filter((day) => day.term === term);
+    const existing = days.filter(
+      (day) => day.term === term && selectedMonthPrefixes.has(day.school_date.slice(0, 7))
+    );
     const removed = existing.filter((day) => !wanted.includes(day.school_date));
     if (removed.length) {
       const { error } = await supabase.from("school_days").delete().in("id", removed.map((day) => day.id));
@@ -94,7 +105,7 @@ export default function AttendanceClient({
     const removedIds = new Set(removed.map((day) => day.id));
     setDays((current) => [...current.filter((day) => !removedIds.has(day.id)), ...created].sort((a, b) => a.school_date.localeCompare(b.school_date)));
     setSavingDays(false);
-    setMessage(`บันทึกวันมาเรียนภาคเรียนที่ ${term} แล้ว ${wanted.length} วัน`);
+    setMessage(`บันทึกวันมาเรียน ภาคเรียนที่ ${term} ปีการศึกษา ${selectedYear} แล้ว ${wanted.length} วัน`);
   }
 
   function setAttendance(studentId: string, schoolDayId: string, status: AttendanceStatus) {
@@ -134,15 +145,26 @@ export default function AttendanceClient({
           <p className="text-slate-500">เลือกวันเปิดเรียน แล้วบันทึกสถานะรายวัน: / = มาเรียน, ข = ขาดเรียน, ล = ลา</p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <label className="flex items-center gap-2 rounded-lg border bg-white px-3 py-2">
+            <span className="text-slate-600">ปีการศึกษา</span>
+            <select
+              aria-label="ปีการศึกษา"
+              value={selectedYear}
+              onChange={(event) => { setSelectedYear(Number(event.target.value)); setMessage(null); }}
+              className="bg-transparent font-semibold text-slate-800 outline-none"
+            >
+              {yearOptions.map((year) => <option key={year} value={year}>{year}</option>)}
+            </select>
+          </label>
           <button onClick={() => setTerm(1)} className={`rounded-lg px-4 py-2 font-medium ${term === 1 ? "bg-indigo-600 text-white" : "border bg-white"}`}>ภาคเรียนที่ 1</button>
           <button onClick={() => setTerm(2)} className={`rounded-lg px-4 py-2 font-medium ${term === 2 ? "bg-indigo-600 text-white" : "border bg-white"}`}>ภาคเรียนที่ 2</button>
-          <Link href={`/print/${classId}/attendance?term=${term}`} target="_blank" className="rounded-lg border border-indigo-300 bg-indigo-50 px-4 py-2 text-indigo-700">PDF เวลาเรียน ↗</Link>
+          <Link href={`/print/${classId}/attendance?term=${term}&year=${selectedYear}`} target="_blank" className="rounded-lg border border-indigo-300 bg-indigo-50 px-4 py-2 text-indigo-700">PDF เวลาเรียน ↗</Link>
         </div>
       </div>
 
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <div className="font-semibold text-slate-700">เลือกวันที่มาโรงเรียน ภาคเรียนที่ {term}</div>
+          <div className="font-semibold text-slate-700">เลือกวันที่มาโรงเรียน ภาคเรียนที่ {term} ปีการศึกษา {selectedYear}</div>
           <div className="flex flex-wrap gap-2">
             <button onClick={selectWeekdays} className="rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-emerald-700">เลือกจันทร์-ศุกร์</button>
             <button onClick={clearTerm} className="rounded-lg border px-3 py-2">ล้างภาคเรียนนี้</button>
@@ -175,7 +197,7 @@ export default function AttendanceClient({
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div><span className="font-semibold">ตารางเช็กเวลาเรียน ภาคเรียนที่ {term}</span> <span className="text-slate-500">({termDays.length} วัน)</span></div>
+          <div><span className="font-semibold">ตารางเช็กเวลาเรียน ภาคเรียนที่ {term} ปีการศึกษา {selectedYear}</span> <span className="text-slate-500">({termDays.length} วัน)</span></div>
           <div className="flex items-center gap-2">{message && <span className="text-sm text-slate-600">{message}</span>}<button onClick={saveAttendance} disabled={savingRecords || !termDays.length} className="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white disabled:opacity-50">{savingRecords ? "กำลังบันทึก..." : "บันทึกเวลาเรียน"}</button></div>
         </div>
         <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">

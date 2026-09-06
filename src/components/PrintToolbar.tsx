@@ -8,7 +8,11 @@ export default function PrintToolbar({ title }: { title: string }) {
         {title}
       </div>
       <button
-        onClick={() => window.print()}
+        onClick={async () => {
+          await document.fonts.ready;
+          await Promise.all(Array.from(document.images).map((image) => image.decode().catch(() => undefined)));
+          window.print();
+        }}
         className="rounded-lg bg-indigo-500 hover:bg-indigo-400 px-4 py-1.5 text-sm font-medium"
       >
         🖨️ พิมพ์ / บันทึกเป็น PDF

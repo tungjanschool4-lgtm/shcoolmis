@@ -16,6 +16,7 @@ export default async function ReportsHub({
         { href: `/print/${id}/report-person?term=1`, label: "ภาคเรียนที่ 1" },
         { href: `/print/${id}/report-person?term=2`, label: "ภาคเรียนที่ 2" },
         { href: `/print/${id}/report-person?term=year`, label: "รายปี" },
+        ...["1", "2", "year"].map(term => ({ href: `/print/${id}/report-person?term=${term}&detail=1`, label: `สมรรถนะและความสามารถ (${term === "year" ? "รายปี" : `ภาค ${term}`})` })),
       ],
     },
     {
@@ -34,8 +35,7 @@ export default async function ReportsHub({
       desc: "วันเปิดเรียนรายภาคเรียน ตารางเช็ก / ข ล และสรุปเวลาเรียนรายเดือน",
       icon: "📅",
       links: [
-        { href: `/print/${id}/attendance?term=1`, label: "ภาคเรียนที่ 1" },
-        { href: `/print/${id}/attendance?term=2`, label: "ภาคเรียนที่ 2" },
+        { href: `/classes/${id}/attendance`, label: "เลือก พ.ศ. และภาคเรียน" },
       ],
     },
     {
@@ -80,7 +80,7 @@ export default async function ReportsHub({
         </div>
       ))}
       <p className="sm:col-span-2 text-xs text-slate-400">
-        เปิดหน้าพิมพ์ → กด “พิมพ์ / บันทึกเป็น PDF” → เลือกปลายทาง “บันทึกเป็น PDF” และตั้งขนาดกระดาษ A4 ขอบ (Margins) เป็นค่าเริ่มต้น
+        เปิดหน้าพิมพ์ → กด “พิมพ์ / บันทึกเป็น PDF” → เลือกปลายทาง “บันทึกเป็น PDF” และตั้งขนาดกระดาษ A4 ขอบ (Margins) เป็นไม่มี (None) · ขนาด 100% · ปิดหัวกระดาษและท้ายกระดาษ
       </p>
     </div>
   );

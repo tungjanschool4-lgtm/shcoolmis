@@ -12,6 +12,12 @@ export function buddhistToGregorian(academicYear: string): number {
   return value > 2400 ? value - 543 : value;
 }
 
+export function toBuddhistYear(academicYear: string): number {
+  const value = Number(academicYear);
+  if (!Number.isFinite(value)) return new Date().getUTCFullYear() + 543;
+  return value > 2400 ? value : value + 543;
+}
+
 export function termMonths(academicYear: string, term: 1 | 2): CalendarMonth[] {
   const year = buddhistToGregorian(academicYear);
   return term === 1
