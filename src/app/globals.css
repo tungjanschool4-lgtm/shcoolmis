@@ -103,8 +103,12 @@ main h3 {
 .report-table td {
   border: 1px solid #000;
   padding: 2px 4px;
-  font-size: 13px;
+  font-size: 9pt;
+  line-height: 1.15;
   vertical-align: middle;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 .report-table thead th {
   background: #d9d9d9;
@@ -121,6 +125,7 @@ main h3 {
   transform: rotate(180deg);
   white-space: nowrap;
   padding: 3px 0;
+  line-height: 1.05;
 }
 
 /* หน้ารายงานแบบเต็ม A4 : ดันลายเซ็นไปล่างสุด */
@@ -264,7 +269,8 @@ main h3 {
 }
 .transfer-overview-table th,
 .transfer-overview-table td {
-  font-size: 11pt;
+  font-size: 9pt;
+  line-height: 1.2;
   padding: 5px 7px;
 }
 
@@ -407,19 +413,22 @@ main h3 {
 .print-page .report-table { table-layout: fixed; }
 .print-page .report-table th, .print-page .report-table td { border-width: .2mm; font-weight: 400; }
 .transfer-sheet { padding: 8mm 16mm; }
-.transfer-report-table th, .transfer-report-table td { font-size: 8pt; padding: .7mm .8mm; }
+.transfer-report-table th, .transfer-report-table td { font-size: 8.5pt; line-height: 1.15; padding: .7mm .8mm; }
+.transfer-report-table td:nth-child(2) { overflow-wrap: anywhere; }
 .transfer-report-table tbody tr { height: 7mm; }
 .transfer-gpa-table td { height: 8mm; }
 .transfer-summary-table { margin-top: 1.5mm; }
-.transfer-summary-table th, .transfer-summary-table td { height: 7mm; padding: .5mm; font-size: 7.5pt; }
-.transfer-signatures { font-size: 8pt; line-height: 1.8; }
+.transfer-summary-table th, .transfer-summary-table td { height: 7mm; padding: .5mm 1mm; font-size: 8pt; line-height: 1.15; }
+.transfer-signatures { font-size: 8.5pt; line-height: 1.65; }
 .evaluation-sheet { padding: 10mm 16mm; }
-.evaluation-report-table th, .evaluation-report-table td { font-size: 7.5pt; line-height: 1.35; padding: 1mm; }
+.evaluation-report-table th, .evaluation-report-table td { font-size: 8pt; line-height: 1.25; padding: .8mm 1mm; }
+.evaluation-report-table td:nth-child(3), .evaluation-report-table td:nth-child(6) { font-size: 7.5pt; overflow-wrap: anywhere; }
 .student-heading-line { gap: 8mm; font-size: 9pt; }
 .student-heading-line .student-name { min-width: 0; }
 .score-sheet { padding: 8mm 17mm; }
 .form-caption { text-align: right; font-size: 8pt; margin-bottom: 1.5mm; }
-.score-table th, .score-table td { font-size: 7pt; padding: .4mm; }
+.score-table th, .score-table td { font-size: 7.5pt; line-height: 1.1; padding: .35mm; }
+.score-table tbody td:nth-child(2) { font-size: 8pt; overflow-wrap: anywhere; }
 .score-table tbody tr { height: 7.1mm; }
 .score-table tbody td:first-child { background: #b3b3b3; }
 .score-table tbody td:nth-child(2) { background: #f2f2f2; }
@@ -428,9 +437,9 @@ main h3 {
 .roster-sheet { padding: 9mm 10mm; }
 .roster-form-header { margin-bottom: 2mm; }
 .roster-table tbody tr { height: 7.3mm; }
-.roster-table th, .roster-table td { font-size: 7.5pt; padding: .6mm; overflow-wrap: anywhere; }
+.roster-table th, .roster-table td { font-size: 8pt; line-height: 1.1; padding: .55mm; overflow-wrap: anywhere; }
 .monthly-attendance { page: auto; width: 210mm; min-height: 297mm; padding: 9mm 7mm; }
-.monthly-attendance-table { border-collapse: collapse; table-layout: fixed; width: 100%; font-size: 7pt; }
+.monthly-attendance-table { border-collapse: collapse; table-layout: fixed; width: 100%; font-size: 7.5pt; line-height: 1.05; }
 .monthly-attendance-table th, .monthly-attendance-table td { border: .2mm solid #000; padding: 0; text-align: center; font-weight: 400; }
 .monthly-attendance-table thead th { background: #d9d9d9; height: 8mm; }
 .monthly-attendance-table tbody tr { height: 7.3mm; }
