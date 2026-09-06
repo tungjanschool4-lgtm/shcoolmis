@@ -29,6 +29,8 @@ export default async function CharacteristicsPage({
       students={(students as Student[]) ?? []}
       scores={filteredScores}
       qualityLabels={qualityLabelsFromSchool(school as School)}
+      classId={id}
+      kind="characteristic"
     />
   );
 }
