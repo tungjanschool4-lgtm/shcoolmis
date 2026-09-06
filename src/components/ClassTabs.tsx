@@ -14,7 +14,7 @@ export default function ClassTabs({ classId }: { classId: string }) {
     { href: `${base}/grades`, label: "กรอกคะแนน" },
     { href: `${base}/competencies`, label: "สมรรถนะผู้เรียน" },
     { href: `${base}/characteristics`, label: "คุณลักษณะฯ" },
-    { href: `${base}/readwrite`, label: "อ่านคิดเขียน" },
+    { href: `${base}/readwrite`, label: "ความสามารถและกิจกรรม" },
     { href: `${base}/activities`, label: "กิจกรรมพัฒนาผู้เรียน" },
     { href: `${base}/transfer`, label: "เทียบโอน 2560" },
     { href: `${base}/reports`, label: "รายงาน/PDF" },
