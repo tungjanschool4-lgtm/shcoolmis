@@ -27,7 +27,10 @@ export default async function SubjectScoresPage({
       <div className="py-4 print:py-0">
         {subjects.flatMap((subject) => Array.from({ length: Math.max(1, Math.ceil(students.length / 30)) }, (_, pageIndex) => (
           <div key={`${subject.id}-${pageIndex}`} className="print-page score-sheet">
-            <div className="form-caption">{cls?.grade_level} {cls?.room ? `ห้อง ${cls.room}` : ""} · ปีการศึกษา {cls?.academic_year || school?.academic_year} · รายวิชา {subject.name}</div>
+            <header className="plain-form-header">
+              <div className="plain-form-title">รายวิชา{subject.category === "เพิ่มเติม" ? "เพิ่มเติม" : "พื้นฐาน"} : {subject.name} คะแนนเฉลี่ย</div>
+              <div className="plain-form-context">{cls?.grade_level} {cls?.room ? `ห้อง ${cls.room}` : ""} ปีการศึกษา {cls?.academic_year || school?.academic_year}</div>
+            </header>
             <table className="report-table score-table">
               <colgroup><col style={{width:"4.5%"}} /><col style={{width:"27.5%"}} />{Array.from({length:12}, (_, i) => <col key={i} style={{width:`${68/12}%`}} />)}</colgroup>
               <thead>
@@ -76,7 +79,7 @@ export default async function SubjectScoresPage({
                 ))}
               </tbody>
             </table>
-            <div className="text-[11px] mt-1 text-slate-600">
+            <div className="score-note">
               คะแนนเต็ม: ระหว่างภาค {subject.midterm_max} + ปลายภาค {subject.final_max} = {subject.midterm_max + subject.final_max}
             </div>
           </div>

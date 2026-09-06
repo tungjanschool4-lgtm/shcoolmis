@@ -97,7 +97,10 @@ export default async function AttendancePrintPage({
           const count = daysInMonth(month.year, month.month);
           return Array.from({ length: Math.max(1, Math.ceil(studentRows.length / 30)) }, (_, pageIndex) => (
             <div key={`${monthKey}-${pageIndex}`} className="print-page monthly-attendance">
-              <div className="form-caption">บันทึกเวลาเรียน · {classData?.grade_level} {classData?.room ? `ห้อง ${classData.room}` : ""} · ภาคเรียนที่ {selectedTerm}</div>
+              <header className="plain-form-header attendance-form-header">
+                <div className="plain-form-title">บันทึกเวลาเรียน</div>
+                <div className="plain-form-context">{classData?.grade_level} {classData?.room ? `ห้อง ${classData.room}` : ""} ภาคเรียนที่ {selectedTerm}</div>
+              </header>
               <table className="monthly-attendance-table">
                 <colgroup><col style={{ width: "10mm" }} />{Array.from({length:31}, (_, i) => <col key={i} />)}<col style={{width:"6mm"}} /></colgroup>
                 <thead>

@@ -13,16 +13,16 @@ export default function ReportHeader({
 }) {
   const year = cls?.academic_year || school?.academic_year || "";
   return (
-    <div className="sheet-title">
+    <header className="sheet-title document-letterhead">
       {showLogo && school?.logo_url ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={school.logo_url} alt="" className="mx-auto h-16 object-contain mb-1" />
+        <img src={school.logo_url} alt="ตราโรงเรียน" className="document-letterhead-logo" />
       ) : null}
-      <div className="text-lg font-bold">โรงเรียน{school?.name || "..............."}</div>
-      <div className="text-base font-semibold">{title}</div>
-      <div>
+      <div className="document-school-name">โรงเรียน{school?.name || "..............."}</div>
+      <div className="document-report-title">{title}</div>
+      <div className="document-class-line">
         {cls?.grade_level} {cls?.room ? `ห้อง ${cls.room}` : ""} ปีการศึกษา {year}
       </div>
-    </div>
+    </header>
   );
 }

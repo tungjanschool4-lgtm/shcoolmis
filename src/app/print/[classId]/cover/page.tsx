@@ -182,12 +182,10 @@ export default async function CoverPage({
 
         {/* ---- บัญชีรายชื่อนักเรียน ---- */}
         {Array.from({ length: Math.max(1, Math.ceil(students.length / 30)) }, (_, pageIndex) => (<div key={pageIndex} className="print-page roster-sheet">
-          <div className="text-center font-bold text-base mb-1">
-            บัญชีรายชื่อนักเรียน {cls?.grade_level} {cls?.room ? `ห้อง ${cls.room}` : ""}
-          </div>
-          <div className="text-center mb-3">
-            โรงเรียน{school?.name} ปีการศึกษา {school?.academic_year || cls?.academic_year}
-          </div>
+          <header className="plain-form-header roster-form-header">
+            <div className="plain-form-title">รายชื่อนักเรียน</div>
+            <div className="plain-form-context">{cls?.grade_level} {cls?.room ? `ห้อง ${cls.room}` : ""} โรงเรียน{school?.name} ปีการศึกษา {school?.academic_year || cls?.academic_year}</div>
+          </header>
           <table className="report-table roster-table">
             <thead>
               <tr>
