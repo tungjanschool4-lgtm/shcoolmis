@@ -127,7 +127,7 @@ export default async function CoverPage({
             <table className="report-table" style={{ width: 300 }}>
               <colgroup>
                 <col style={{ width: "15%" }} /><col style={{ width: "8.5%" }} /><col style={{ width: "8.5%" }} /><col style={{ width: "8.5%" }} />
-                <col style={{ width: "8.5%" }} /><col style={{ width: "12.6%" }} /><col style={{ width: "12.6%" }} /><col style={{ width: "12.6%" }} /><col style={{ width: "12.6%" }} />
+                <col style={{ width: "14.875%" }} /><col style={{ width: "14.875%" }} /><col style={{ width: "14.875%" }} /><col style={{ width: "14.875%" }} />
               </colgroup>
               <thead>
                 <tr><th colSpan={4}>ผลการประเมิน</th><th colSpan={4}>อ่าน คิดวิเคราะห์ เขียน</th></tr>
