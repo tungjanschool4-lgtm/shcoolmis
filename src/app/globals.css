@@ -815,3 +815,21 @@ main h3 {
 .cover-sheet {
   overflow: clip !important;
 }
+
+/* Cover summary: readable 30px rows while preserving exact A4 bounds */
+.cover-sheet .cover-summary-grid .report-table tr {
+  min-height: 30px;
+  height: 30px;
+}
+
+.cover-sheet .cover-summary-grid .report-table th,
+.cover-sheet .cover-summary-grid .report-table td {
+  padding: 3px 2px !important;
+  font-size: 17px !important;
+  line-height: 1.15 !important;
+  vertical-align: middle;
+}
+
+.cover-sheet .cover-summary-grid .report-table thead tr:first-child th {
+  height: 30px;
+}
