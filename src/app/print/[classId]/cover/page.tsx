@@ -116,11 +116,11 @@ export default async function CoverPage({
 
           <div className="flex gap-2 cover-summary-grid items-start">
             {/* ตารางระดับผลการเรียนรายวิชา */}
-            <table className="report-table" style={{ flex: 1 }}>
+            <table className="report-table" style={{ width: 334, flex: "none" }}>
               <colgroup>
                 <col style={{ width: 24 }} />
-                <col />
-                {GRADE_BUCKETS.map((g) => <col key={g} style={{ width: 14 }} />)}
+                <col style={{ width: 150 }} />
+                {GRADE_BUCKETS.map((g) => <col key={g} style={{ width: 20 }} />)}
               </colgroup>
               <thead>
                 <tr>
@@ -130,7 +130,7 @@ export default async function CoverPage({
                 </tr>
                 <tr>
                   {GRADE_BUCKETS.map((g) => (
-                    <th key={g} style={{ width: 14 }}>{g}</th>
+                    <th key={g} style={{ width: 20 }}>{g}</th>
                   ))}
                 </tr>
               </thead>
@@ -148,14 +148,13 @@ export default async function CoverPage({
             </table>
 
             {/* แผงสรุปด้านขวา — ตารางเดียวตามแบบ ปพ.5 */}
-            <table className="report-table" style={{ width: 230 }}>
+            <table className="report-table" style={{ width: 360 }}>
               <colgroup>
-                <col style={{ width: "15%" }} /><col style={{ width: "8.5%" }} /><col style={{ width: "8.5%" }} /><col style={{ width: "8.5%" }} />
-                <col style={{ width: "14.875%" }} /><col style={{ width: "14.875%" }} /><col style={{ width: "14.875%" }} /><col style={{ width: "14.875%" }} />
+                <col style={{ width: 40 }} /><col style={{ width: 20 }} /><col style={{ width: 20 }} /><col style={{ width: 20 }} />
+                <col style={{ width: 65 }} /><col style={{ width: 65 }} /><col style={{ width: 65 }} /><col style={{ width: 65 }} />
               </colgroup>
               <thead>
-                <tr><th colSpan={4}>ผลการประเมิน</th><th colSpan={4}>อ่าน คิดวิเคราะห์ เขียน</th></tr>
-                <tr><th>3</th><th>2</th><th>1</th><th>0</th><th>3</th><th>2</th><th>1</th><th>0</th></tr>
+                <tr><th colSpan={4} style={{ fontSize: 20, fontWeight: 700 }}>ผลการประเมิน</th><th colSpan={4} style={{ fontSize: 20, fontWeight: 700 }}>ผลการประเมิน</th></tr>
               </thead>
               <tbody>
                 <tr>
@@ -204,12 +203,12 @@ export default async function CoverPage({
           {/* ลายเซ็น */}
           <div className="grid grid-cols-2 gap-8 mt-8 text-center text-[12px] report-signatures">
             <div>
-              <div className="text-left">ลงชื่อ ...............................................</div>
+              <div>ลงชื่อ ...............................................</div>
               <div className="mt-1">( {cls?.homeroom_teacher_name || "..............................."} )</div>
               <div>ครูประจำชั้น</div>
             </div>
             <div>
-              <div className="text-left">ลงชื่อ ...............................................</div>
+              <div>ลงชื่อ ...............................................</div>
               <div className="mt-1">( {school?.registrar_head || "..............................."} )</div>
               <div>หัวหน้าทะเบียนและวัดผล</div>
             </div>
@@ -224,7 +223,7 @@ export default async function CoverPage({
             <span>☐ ไม่อนุมัติ</span>
           </div>
           <div className="text-center mt-3 text-[12px] report-signatures">
-            <div>ลงชื่อ ว่าที่ ร.ต. ...............................................</div>
+            <div>ลงชื่อ ...............................................</div>
             <div className="mt-1">( {school?.director || "..............................."} )</div>
             <div>{school?.director_position || "ผู้อำนวยการโรงเรียน"}</div>
             <div className="mt-2">............../.........................../....................</div>
