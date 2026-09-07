@@ -125,7 +125,7 @@ export default async function CoverPage({
                 </tr>
                 <tr>
                   {GRADE_BUCKETS.map((g) => (
-                    <th key={g} style={{ width: 18 }}>{g}</th>
+                    <th key={g} style={{ width: 14 }}>{g}</th>
                   ))}
                 </tr>
               </thead>
