@@ -682,3 +682,13 @@ main h3 {
     border-bottom-style: solid;
   }
 }
+
+/* Requested emphasis for student identity and teacher comments. */
+.evaluation-sheet .student-heading-line {
+  font-size: 20px !important;
+  font-weight: 700;
+}
+.teacher-comment-title {
+  font-size: 20px !important;
+  font-weight: 700;
+}
