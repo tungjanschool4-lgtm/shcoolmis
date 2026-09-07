@@ -125,7 +125,7 @@ export default async function CoverPage({
                 </tr>
                 <tr>
                   {GRADE_BUCKETS.map((g) => (
-                    <th key={g} style={{ width: 26 }}>{g}</th>
+                    <th key={g} style={{ width: 22 }}>{g}</th>
                   ))}
                 </tr>
               </thead>
@@ -143,7 +143,7 @@ export default async function CoverPage({
             </table>
 
             {/* แผงสรุปด้านขวา — ตารางเดียวตามแบบ ปพ.5 */}
-            <table className="report-table" style={{ width: 300 }}>
+            <table className="report-table" style={{ width: 250 }}>
               <colgroup>
                 <col style={{ width: "15%" }} /><col style={{ width: "8.5%" }} /><col style={{ width: "8.5%" }} /><col style={{ width: "8.5%" }} />
                 <col style={{ width: "14.875%" }} /><col style={{ width: "14.875%" }} /><col style={{ width: "14.875%" }} /><col style={{ width: "14.875%" }} />
@@ -251,7 +251,7 @@ export default async function CoverPage({
                   <td className="text-center">{s.student_code}</td>
                   <td className="text-center">{s.national_id}</td>
                   <td>{fullName(s)}</td>
-                  <td className="text-center">{s.blood_type}</td>
+                  <td className="text-center">{/^[ABO+\-]+$/i.test(s.blood_type || "") ? s.blood_type : ""}</td>
                   <td className="text-center">{formatThaiBirthDate(s.birth_date)}</td>
                   <td className="text-center">{calculateAge(s.birth_date)}</td>
                 </tr>
