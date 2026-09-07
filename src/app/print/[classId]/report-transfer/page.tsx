@@ -148,7 +148,7 @@ export default async function ReportTransferPage({
                             <tr><th colSpan={3}>สรุปผลการประเมินด้านต่าง ๆ</th></tr>
                             <tr>
                               <th>คุณลักษณะอันพึงประสงค์</th>
-                              <th>สมรรถนะ 5 ด้าน</th>
+                              <th>สมรรถนะของผู้เรียน</th>
                               <th>กิจกรรมพัฒนาผู้เรียน</th>
                             </tr>
                           </thead>
