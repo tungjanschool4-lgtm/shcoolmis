@@ -793,3 +793,9 @@ main h3 {
 .cover-summary-grid > .report-table:first-child td {
   line-height: 1 !important;
 }
+
+.cover-summary-grid .report-table th,
+.cover-summary-grid .report-table td {
+  line-height: 0.82 !important;
+  padding: 0 1px !important;
+}
