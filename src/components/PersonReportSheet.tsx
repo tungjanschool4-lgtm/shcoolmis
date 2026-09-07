@@ -194,7 +194,7 @@ export default function PersonReportSheet({
             </tr>
             <tr>
               <td className="text-center">5</td>
-              <td colSpan={2}>สมรรถนะผู้เรียน</td>
+              <td colSpan={2}>สมรรถนะของผู้เรียน</td>
               <td></td>
               <td className="text-center font-semibold">{competencyLevel}</td>
               <td></td>

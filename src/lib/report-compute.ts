@@ -120,6 +120,7 @@ export type TransferReport = {
   gpa: number | null;
   characteristicLevel: string;
   readWriteLevel: string;
+  competencyLevel: string;
   activityOverall: string;
 };
 
@@ -176,6 +177,12 @@ export function computeTransferReport(
         : term === "2"
           ? base.assessmentLevels.readWrite.sem2
           : base.readWriteLevel,
+    competencyLevel:
+      term === "1"
+        ? base.assessmentLevels.competency.sem1
+        : term === "2"
+          ? base.assessmentLevels.competency.sem2
+          : base.assessmentLevels.competency.year,
     activityOverall:
       term === "1"
         ? base.activityLevels.sem1

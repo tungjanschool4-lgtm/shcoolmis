@@ -85,7 +85,7 @@ export default async function CoverPage({
                 <td className="border-b border-dotted border-slate-500">{school?.province}</td>
               </tr>
               <tr>
-                <td className="py-0.5">สนง.เขตพื้นที่ฯ</td>
+                <td className="py-0.5">สำนักงานเขตพื้นที่การศึกษา</td>
                 <td className="border-b border-dotted border-slate-500">{school?.area}</td>
                 <td className="py-0.5 pl-3">ปีการศึกษา</td>
                 <td className="border-b border-dotted border-slate-500">
@@ -123,31 +123,58 @@ export default async function CoverPage({
               </tbody>
             </table>
 
-            {/* แผงสรุปด้านขวา */}
-            <div style={{ width: 230 }} className="space-y-2">
-              <StatTable title="คุณลักษณะอันพึงประสงค์" cols={["3", "2", "1", "0"]} values={charCount} />
-              <StatTable title="อ่าน คิดวิเคราะห์ เขียน" cols={["3", "2", "1", "0"]} values={rwCount} />
-              <table className="report-table">
-                <tbody>
-                  <tr><td className="shade">กิจกรรมพัฒนาผู้เรียน (ผ่าน)</td><td className="text-center" style={{ width: 50 }}>{actPass}</td></tr>
-                </tbody>
-              </table>
-              <table className="report-table">
-                <thead><tr><th colSpan={2}>การอนุมัติผลการเรียน</th></tr></thead>
-                <tbody>
-                  <tr><td className="text-center shade">ชาย</td><td className="text-center shade">หญิง</td></tr>
-                  <tr><td className="text-center">{male}</td><td className="text-center">{female}</td></tr>
-                </tbody>
-              </table>
-              <table className="report-table">
-                <tbody>
-                  <tr><td>จำนวนนักเรียนในบัญชี</td><td className="text-center" style={{ width: 50 }}>{students.length}</td></tr>
-                  <tr><td>เข้าระหว่างปี</td><td className="text-center"></td></tr>
-                  <tr><td>ออกระหว่างปี</td><td className="text-center"></td></tr>
-                  <tr><td>ตัดสินเลื่อนชั้นปลายปี</td><td className="text-center"></td></tr>
-                </tbody>
-              </table>
-            </div>
+            {/* แผงสรุปด้านขวา — ตารางเดียวตามแบบ ปพ.5 */}
+            <table className="report-table" style={{ width: 300 }}>
+              <colgroup>
+                <col style={{ width: "15%" }} /><col style={{ width: "8.5%" }} /><col style={{ width: "8.5%" }} /><col style={{ width: "8.5%" }} />
+                <col style={{ width: "8.5%" }} /><col style={{ width: "12.6%" }} /><col style={{ width: "12.6%" }} /><col style={{ width: "12.6%" }} /><col style={{ width: "12.6%" }} />
+              </colgroup>
+              <thead>
+                <tr><th colSpan={4}>ผลการประเมิน</th><th colSpan={4}>อ่าน คิดวิเคราะห์ เขียน</th></tr>
+                <tr><th>3</th><th>2</th><th>1</th><th>0</th><th>3</th><th>2</th><th>1</th><th>0</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colSpan={4} className="text-left font-semibold">คุณลักษณะอันพึงประสงค์</td>
+                  {charCount.map((v, i) => <td key={i} className="text-center">{v || ""}</td>)}
+                </tr>
+                <tr>
+                  <td colSpan={4} className="text-left font-semibold">อ่าน คิดวิเคราะห์ เขียน</td>
+                  {rwCount.map((v, i) => <td key={i} className="text-center">{v || ""}</td>)}
+                </tr>
+                <tr>
+                  <td colSpan={4} className="text-left font-semibold">ผลการประเมิน</td>
+                  <td colSpan={2} className="text-center">ผ่าน</td>
+                  <td colSpan={2} className="text-center">ไม่ผ่าน</td>
+                </tr>
+                <tr>
+                  <td colSpan={4} className="text-left font-semibold">กิจกรรมพัฒนาผู้เรียน</td>
+                  <td colSpan={4} className="text-center">{actPass || ""}</td>
+                </tr>
+                <tr>
+                  <td colSpan={4} className="text-left shade font-semibold">การอนุมัติผลการเรียน</td>
+                  <td colSpan={2} className="text-center shade">ชาย</td>
+                  <td colSpan={2} className="text-center shade">หญิง</td>
+                </tr>
+                <tr>
+                  <td colSpan={4} className="text-left">จำนวนนักเรียนในบัญชี</td>
+                  <td colSpan={2} className="text-center">{male || ""}</td>
+                  <td colSpan={2} className="text-center">{female || ""}</td>
+                </tr>
+                <tr>
+                  <td colSpan={4} className="text-left">เข้าระหว่างปี</td>
+                  <td colSpan={2}></td><td colSpan={2}></td>
+                </tr>
+                <tr>
+                  <td colSpan={4} className="text-left">ออกระหว่างปี</td>
+                  <td colSpan={2}></td><td colSpan={2}></td>
+                </tr>
+                <tr>
+                  <td colSpan={4} className="text-left">ตัดสินเลื่อนชั้นปลายปี</td>
+                  <td colSpan={2}></td><td colSpan={2}></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
           {/* ลายเซ็น */}
@@ -217,19 +244,5 @@ export default async function CoverPage({
         </div>))}
       </div>
     </>
-  );
-}
-
-function StatTable({ title, cols, values }: { title: string; cols: string[]; values: number[] }) {
-  return (
-    <table className="report-table">
-      <thead>
-        <tr><th colSpan={cols.length}>{title}</th></tr>
-        <tr>{cols.map((c) => <th key={c} style={{ width: 40 }}>{c}</th>)}</tr>
-      </thead>
-      <tbody>
-        <tr>{values.map((v, i) => <td key={i} className="text-center">{v || ""}</td>)}</tr>
-      </tbody>
-    </table>
   );
 }

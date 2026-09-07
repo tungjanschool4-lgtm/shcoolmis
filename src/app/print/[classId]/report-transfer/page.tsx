@@ -32,27 +32,30 @@ function TransferRowsTable({
   term: TransferTerm;
   blankRows?: number;
 }) {
+  const showCode = term === "year";
   return (
     <table className="report-table transfer-report-table">
       <colgroup>
-        <col style={{ width: "7%" }} />
-        <col style={{ width: "37%" }} />
+        <col style={{ width: showCode ? "6%" : "7%" }} />
+        {showCode && <col style={{ width: "11%" }} />}
+        <col style={{ width: showCode ? "29%" : "37%" }} />
         <col style={{ width: "11%" }} />
         <col style={{ width: "10%" }} />
-        <col style={{ width: "12%" }} />
-        <col style={{ width: "12%" }} />
+        <col style={{ width: showCode ? "11%" : "12%" }} />
+        <col style={{ width: showCode ? "11%" : "12%" }} />
         <col style={{ width: "11%" }} />
       </colgroup>
       <thead>
         <tr>
           <th rowSpan={3}>ที่</th>
+          {showCode && <th rowSpan={3}>รหัสวิชา</th>}
           <th rowSpan={3}>ชื่อวิชา</th>
           <th rowSpan={3}>ประเภท<br />วิชา</th>
           <th rowSpan={3}><span className="vtext">น้ำหนัก</span></th>
-          <th colSpan={2}>ภาคเรียนที่</th>
-          <th rowSpan={3}><span className="vtext">หมายเหตุ</span></th>
+          <th colSpan={2}>{term === "year" ? "ปีการศึกษา" : "ภาคเรียนที่"}</th>
+          <th rowSpan={3}><span className="vtext">ผลเทียบโอน</span></th>
         </tr>
-        <tr><th colSpan={2}>{term === "year" ? `ปีการศึกษา ${year}` : term}</th></tr>
+        <tr><th colSpan={2}>{term === "year" ? year : term}</th></tr>
         <tr>
           <th><span className="vtext">คะแนน</span></th>
           <th><span className="vtext">เกรด</span></th>
@@ -62,6 +65,7 @@ function TransferRowsTable({
         {rows.map((r) => (
           <tr key={r.transferSubject.id}>
             <td className="text-center">{r.transferSubject.order_no}</td>
+            {showCode && <td className="text-center">{r.transferSubject.code}</td>}
             <td>{r.transferSubject.name}</td>
             <td className="text-center">{r.transferSubject.category}</td>
             <td className="text-center">{r.transferSubject.credits}</td>
@@ -72,7 +76,7 @@ function TransferRowsTable({
         ))}
         {Array.from({ length: blankRows }).map((_, i) => (
           <tr key={`blank-${i}`}>
-            <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td>
+            <td>&nbsp;</td>{showCode && <td></td>}<td></td><td></td><td></td><td></td><td></td><td></td>
           </tr>
         ))}
       </tbody>
@@ -144,14 +148,14 @@ export default async function ReportTransferPage({
                             <tr><th colSpan={3}>สรุปผลการประเมินด้านต่าง ๆ</th></tr>
                             <tr>
                               <th>คุณลักษณะอันพึงประสงค์</th>
-                              <th>การอ่านคิดวิเคราะห์และเขียนสื่อความ</th>
+                              <th>สมรรถนะ 5 ด้าน</th>
                               <th>กิจกรรมพัฒนาผู้เรียน</th>
                             </tr>
                           </thead>
                           <tbody>
                             <tr className="text-center">
                               <td>{rep.characteristicLevel || "-"}</td>
-                              <td>{rep.readWriteLevel || "-"}</td>
+                              <td>{rep.competencyLevel || "-"}</td>
                               <td>{rep.activityOverall || "-"}</td>
                             </tr>
                           </tbody>
