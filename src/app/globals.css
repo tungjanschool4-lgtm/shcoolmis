@@ -799,3 +799,15 @@ main h3 {
   line-height: 0.82 !important;
   padding: 0 1px !important;
 }
+
+/* Final vertical fit: preserve 20px titles and 16px table text. */
+.cover-sheet {
+  padding-top: 5mm !important;
+  padding-bottom: 5mm !important;
+}
+.cover-sheet > .text-center img {
+  height: 15mm !important;
+}
+.cover-sheet .report-signatures {
+  line-height: 1 !important;
+}
