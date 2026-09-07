@@ -525,3 +525,53 @@ main h3 {
   .print-page.landscape { page: landscape; }
   .evaluation-sheet, .transfer-sheet { height: auto; min-height: 297mm; }
 }
+
+
+/* Readable student report and transfer report typography, sized to remain within A4. */
+.transfer-sheet .document-school-name,
+.transfer-sheet .document-report-title {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  line-height: 1.08;
+}
+.transfer-sheet .document-class-line,
+.transfer-sheet .student-heading-line {
+  font-size: 20px !important;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.transfer-sheet .transfer-report-table th {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  line-height: 1.05;
+}
+.transfer-sheet .transfer-report-table td,
+.transfer-sheet .transfer-gpa-table td {
+  font-size: 19px !important;
+  line-height: 1.08;
+}
+.transfer-sheet .transfer-report-table tbody tr {
+  height: 7.2mm;
+}
+.transfer-sheet .transfer-summary-table {
+  margin-top: 2mm;
+}
+.transfer-sheet .transfer-summary-table th {
+  height: 8mm;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  line-height: 1.08;
+}
+.transfer-sheet .transfer-summary-table thead tr:first-child th {
+  font-size: 21px !important;
+}
+.transfer-sheet .transfer-summary-table td {
+  height: 8mm;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  line-height: 1.08;
+}
+.transfer-sheet .transfer-signatures {
+  font-size: 20px !important;
+  line-height: 1.2;
+}
