@@ -175,7 +175,7 @@ export default async function ReportTransferPage({
                         </div>
 
                 <div className="text-center mt-4 transfer-signatures">
-                          <div><span className="font-semibold">ลงชื่อ</span> ว่าที่ ร.ต. ...................................................</div>
+                          <div><span className="font-semibold">ลงชื่อ</span> ...................................................</div>
                           <div className="mt-2">( {school?.director || "..............................."} )</div>
                           <div>{school?.director_position || `ผู้อำนวยการโรงเรียน${school?.name || ""}`}</div>
                         </div>
