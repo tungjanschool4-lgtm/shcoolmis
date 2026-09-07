@@ -122,7 +122,7 @@ export default function PersonReportSheet({
           <div>หัวหน้าวิชาการ</div>
         </div>
         <div>
-          <div>ลงชื่อ ว่าที่ ร.ต. ...................................................</div>
+          <div>ลงชื่อ ...................................................</div>
           <div className="mt-1">( {school?.director || "..............................."} )</div>
           <div>{school?.director_position || `ผู้อำนวยการโรงเรียน${school?.name || ""}`}</div>
         </div>
