@@ -758,3 +758,28 @@ main h3 {
   padding: 1px 3px !important;
   font-size: 16px !important;
 }
+
+/* Final A4 constraints for the cover and attached roster format. */
+.cover-sheet,
+.roster-sheet {
+  width: 210mm !important;
+  height: 297mm !important;
+  min-height: 297mm !important;
+  max-height: 297mm !important;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.cover-sheet .report-table th,
+.cover-sheet .report-table td {
+  font-size: 16px !important;
+  line-height: 1.05 !important;
+}
+.cover-sheet > .grid.mt-8 { margin-top: 5mm !important; }
+.cover-sheet > .text-center.mt-5 { margin-top: 3mm !important; }
+.cover-sheet > .flex.mt-4 { margin-top: 3mm !important; }
+.cover-sheet > .text-center.mt-3 { margin-top: 2mm !important; }
+.roster-sheet .roster-table th,
+.roster-sheet .roster-table td {
+  font-size: 16px !important;
+  line-height: 1.05 !important;
+}
