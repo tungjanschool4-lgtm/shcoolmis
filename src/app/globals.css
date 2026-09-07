@@ -811,3 +811,7 @@ main h3 {
 .cover-sheet .report-signatures {
   line-height: 1 !important;
 }
+
+.cover-sheet {
+  overflow: clip !important;
+}
