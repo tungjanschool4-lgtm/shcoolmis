@@ -692,3 +692,69 @@ main h3 {
   font-size: 20px !important;
   font-weight: 700;
 }
+
+
+/* Cover and roster layout matched to the attached A4 references. */
+.cover-sheet {
+  font-size: 16px !important;
+  padding: 10mm 11mm !important;
+  overflow: hidden;
+}
+.cover-main-title,
+.cover-grade-title {
+  font-size: 20px !important;
+  line-height: 1.2;
+  font-weight: 700;
+}
+.cover-info-table {
+  margin-top: 8px;
+  font-size: 16px !important;
+  line-height: 1.2;
+}
+.cover-summary-grid {
+  margin-top: 8px;
+}
+.cover-sheet .report-table {
+  font-size: 16px !important;
+  line-height: 1.05;
+}
+.cover-sheet .report-table th,
+.cover-sheet .report-table td {
+  padding: 1px 2px !important;
+}
+.cover-sheet .report-signatures {
+  font-size: 16px !important;
+  line-height: 1.15;
+}
+.roster-sheet {
+  padding: 10mm 11mm !important;
+  overflow: hidden;
+}
+.roster-sheet .plain-form-title {
+  font-size: 20px !important;
+  line-height: 1.2;
+  font-weight: 700;
+}
+.roster-sheet .plain-form-context {
+  font-size: 16px !important;
+  line-height: 1.2;
+}
+.roster-table {
+  width: 100%;
+  table-layout: fixed;
+  font-size: 16px !important;
+  line-height: 1.1;
+}
+.roster-table th {
+  height: 18mm;
+  padding: 2px !important;
+  font-size: 16px !important;
+  font-weight: 700;
+}
+.roster-table tbody tr {
+  height: 7.7mm;
+}
+.roster-table td {
+  padding: 1px 3px !important;
+  font-size: 16px !important;
+}
