@@ -154,7 +154,7 @@ export default async function CoverPage({
                 <col style={{ width: 65 }} /><col style={{ width: 65 }} /><col style={{ width: 65 }} /><col style={{ width: 65 }} />
               </colgroup>
               <thead>
-                <tr><th colSpan={4} style={{ fontSize: 20, fontWeight: 700 }}>ผลการประเมิน</th><th colSpan={4} style={{ fontSize: 20, fontWeight: 700 }}>ผลการประเมิน</th></tr>
+                <tr><th colSpan={4}><span style={{ fontSize: 20, fontWeight: 700 }}>ผลการประเมิน</span></th><th colSpan={4}><span style={{ fontSize: 20, fontWeight: 700 }}>ผลการประเมิน</span></th></tr>
               </thead>
               <tbody>
                 <tr>
