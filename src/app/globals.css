@@ -575,3 +575,110 @@ main h3 {
   font-size: 20px !important;
   line-height: 1.2;
 }
+
+/* Expanded two-page individual report, fitted to one A4 sheet per page. */
+.evaluation-sheet {
+  width: 210mm;
+  height: 297mm;
+  min-height: 297mm;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.evaluation-sheet .document-school-name,
+.evaluation-sheet .document-report-title {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  line-height: 1.08;
+}
+.evaluation-sheet .document-class-line,
+.evaluation-sheet .student-heading-line {
+  font-size: 18px !important;
+  font-weight: 600;
+  line-height: 1.08;
+}
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table {
+  width: 100%;
+  height: auto;
+}
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table thead th {
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  line-height: 1.05;
+  padding: 1mm .6mm;
+}
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody tr {
+  height: 15.5mm;
+}
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td,
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(2),
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(3),
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(6) {
+  font-size: 16px !important;
+  line-height: 1.08;
+  padding: .7mm .8mm;
+}
+.evaluation-sheet:not(.summary-sheet) .report-signatures {
+  margin-top: 3mm !important;
+  font-size: 16px !important;
+  line-height: 1.15;
+}
+.summary-sheet {
+  padding: 9mm 12mm;
+}
+.summary-sheet .summary-report-table {
+  width: 100%;
+  margin-top: 3mm;
+}
+.summary-sheet .summary-report-table th {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  line-height: 1.1;
+  padding: 1.2mm 1mm;
+}
+.summary-sheet .summary-report-table td {
+  font-size: 17px !important;
+  line-height: 1.15;
+  padding: 1.5mm 1.2mm;
+}
+.summary-sheet .summary-report-table tbody tr {
+  height: 17mm;
+}
+.print-editable {
+  display: inline-block;
+  min-width: 18mm;
+  padding: 0 1mm;
+  border-bottom: .25mm dashed #555;
+  outline: none;
+}
+.teacher-comment {
+  margin-top: 6mm;
+  font-size: 17px;
+  line-height: 1.2;
+}
+.teacher-comment-title {
+  font-weight: 700;
+}
+.teacher-comment-line {
+  height: 9mm;
+  border-bottom: .25mm dotted #555;
+}
+.summary-sheet .summary-signature {
+  width: 48%;
+  margin-top: 5mm;
+  margin-left: auto;
+  font-size: 17px !important;
+  line-height: 1.2;
+}
+@media print {
+  .evaluation-sheet {
+    height: 297mm;
+    min-height: 297mm;
+    break-after: page;
+  }
+  .evaluation-sheet:last-child {
+    break-after: auto;
+  }
+  .print-editable {
+    border-bottom-style: solid;
+  }
+}
