@@ -783,3 +783,13 @@ main h3 {
   font-size: 16px !important;
   line-height: 1.05 !important;
 }
+
+.cover-summary-grid > .report-table:first-child td:nth-child(2) {
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  letter-spacing: -0.2px;
+}
+.cover-summary-grid > .report-table:first-child th,
+.cover-summary-grid > .report-table:first-child td {
+  line-height: 1 !important;
+}
