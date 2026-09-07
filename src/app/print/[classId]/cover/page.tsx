@@ -16,6 +16,25 @@ function levelToCol(level: string, labels: QualityLabels): number {
   return -1;
 }
 
+function formatThaiBirthDate(value: string): string {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("th-TH", { day: "numeric", month: "short", year: "2-digit" }).format(date);
+}
+
+function calculateAge(value: string): string {
+  if (!value) return "";
+  const birth = new Date(value);
+  if (Number.isNaN(birth.getTime())) return "";
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const beforeBirthday = today.getMonth() < birth.getMonth() ||
+    (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate());
+  if (beforeBirthday) age--;
+  return String(Math.max(0, age));
+}
+
 export default async function CoverPage({
   params,
 }: {
@@ -59,18 +78,18 @@ export default async function CoverPage({
       <PrintToolbar title="ปก ปพ.5 + บัญชีรายชื่อ" />
       <div className="py-4 print:py-0">
         {/* ---- หน้าปกสรุป ---- */}
-        <div className="print-page text-[12px]">
+        <div className="print-page cover-sheet">
           <div className="text-right font-semibold">ปพ.5</div>
           <div className="text-center">
             {school?.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={school.logo_url} alt="" className="mx-auto h-16 object-contain" />
             ) : null}
-            <div className="text-lg font-bold mt-1">สมุดบันทึกการพัฒนาคุณภาพผู้เรียน</div>
-            <div className="text-base font-semibold">{cls?.grade_level}</div>
+            <div className="cover-main-title">สมุดบันทึกการพัฒนาคุณภาพผู้เรียน</div>
+            <div className="cover-grade-title">{cls?.grade_level}</div>
           </div>
 
-          <table className="w-full mt-3 text-[12px]">
+          <table className="w-full cover-info-table">
             <tbody>
               <tr>
                 <td className="py-0.5 w-24">โรงเรียน</td>
@@ -95,7 +114,7 @@ export default async function CoverPage({
             </tbody>
           </table>
 
-          <div className="flex gap-2 mt-3 items-start">
+          <div className="flex gap-2 cover-summary-grid items-start">
             {/* ตารางระดับผลการเรียนรายวิชา */}
             <table className="report-table" style={{ flex: 1 }}>
               <thead>
@@ -216,13 +235,13 @@ export default async function CoverPage({
           <table className="report-table roster-table">
             <thead>
               <tr>
-                <th style={{ width: 40 }}>เลขที่</th>
-                <th style={{ width: 90 }}>เลขประจำตัว</th>
-                <th style={{ width: 130 }}>เลขบัตรประชาชน</th>
+                <th style={{ width: 46 }}>เลขที่</th>
+                <th style={{ width: 92 }}>เลขประจำตัว<br />นักเรียน</th>
+                <th style={{ width: 138 }}>เลขประจำตัวประชาชน</th>
                 <th>ชื่อ - นามสกุล</th>
-                <th style={{ width: 50 }}>เพศ</th>
-                <th style={{ width: 60 }}>หมู่เลือด</th>
-                <th style={{ width: 90 }}>สถานะ</th>
+                <th style={{ width: 62 }}>หมู่เลือด</th>
+                <th style={{ width: 122 }}>วัน/เดือน/ปี เกิด</th>
+                <th style={{ width: 54 }}>อายุ</th>
               </tr>
             </thead>
             <tbody>
@@ -232,9 +251,9 @@ export default async function CoverPage({
                   <td className="text-center">{s.student_code}</td>
                   <td className="text-center">{s.national_id}</td>
                   <td>{fullName(s)}</td>
-                  <td className="text-center">{s.gender}</td>
                   <td className="text-center">{s.blood_type}</td>
-                  <td className="text-center">{s.status}</td>
+                  <td className="text-center">{formatThaiBirthDate(s.birth_date)}</td>
+                  <td className="text-center">{calculateAge(s.birth_date)}</td>
                 </tr>
               ))}
               {Array.from({length: Math.max(0,30-students.slice(pageIndex*30,(pageIndex+1)*30).length)}, (_, i) => <tr key={`blank-${i}`}><td className="text-center">{pageIndex*30+students.slice(pageIndex*30,(pageIndex+1)*30).length+i+1}</td>{Array.from({length:6},(_,j)=><td key={j}></td>)}</tr>)}
