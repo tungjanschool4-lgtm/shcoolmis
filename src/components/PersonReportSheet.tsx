@@ -1,6 +1,5 @@
 import type { School, ClassRoom, SubjectCompetencyLevel } from "@/lib/types";
 import type { StudentReport } from "@/lib/report-compute";
-import { gradeText } from "@/lib/grading";
 import { fullName } from "@/lib/types";
 import ReportHeader from "@/components/ReportHeader";
 
@@ -93,13 +92,14 @@ export default function PersonReportSheet({
         <tbody>
           {report.rows.map((r) => {
             const grade = isYear ? r.yearGrade : term === "1" ? r.sem1Grade : r.sem2Grade;
+            const score = isYear ? r.yearAvg : term === "1" ? r.sem1Total : r.sem2Total;
             const rubric = rubricByOrder.get(r.subject.order_no);
             return (
               <tr key={r.subject.id}>
                 <td className="text-center">{r.subject.order_no}</td>
                 <td>{r.subject.name}</td>
                 <td>{rubric?.competency_text || r.subject.competency_text || "-"}</td>
-                <td className="text-center font-semibold">{gradeText(grade) || "-"}</td>
+                <td className="text-center font-semibold">{score ?? "-"}</td>
                 <td className="text-center font-semibold">{abilityForGrade(grade)}</td>
                 <td>{behaviorForGrade(grade, rubric)}</td>
               </tr>
@@ -157,7 +157,7 @@ export default function PersonReportSheet({
               <td rowSpan={3} className="text-center">1</td>
               <td rowSpan={3} className="text-center font-semibold">ความสามารถพื้นฐาน<br />ด้านการเรียนรู้</td>
               <td>การอ่าน</td>
-              <td rowSpan={3} className="text-center font-semibold">ชำนาญ</td>
+              <td rowSpan={3} className="text-center font-semibold"><span className="print-editable" contentEditable suppressContentEditableWarning>ชำนาญ</span></td>
               <td className="text-center font-semibold">{readingLevel}</td>
               <td></td>
             </tr>
@@ -174,33 +174,40 @@ export default function PersonReportSheet({
             <tr>
               <td className="text-center">2</td>
               <td colSpan={2}>ความสามารถในการประยุกต์ใช้ในชีวิตประจำวัน</td>
-              <td className="text-center font-semibold">ชำนาญ</td>
+              <td className="text-center font-semibold"><span className="print-editable" contentEditable suppressContentEditableWarning>ชำนาญ</span></td>
               <td className="text-center font-semibold">{appliedLevel}</td>
               <td></td>
             </tr>
             <tr>
               <td className="text-center">3</td>
               <td colSpan={2}>กิจกรรมพัฒนาผู้เรียน</td>
-              <td className="text-center font-semibold">ผ่าน</td>
+              <td className="text-center font-semibold"><span className="print-editable" contentEditable suppressContentEditableWarning>ผ่าน</span></td>
               <td className="text-center font-semibold">{activityLevel}</td>
               <td></td>
             </tr>
             <tr>
               <td className="text-center">4</td>
               <td colSpan={2}>คุณลักษณะอันพึงประสงค์</td>
-              <td></td>
+              <td className="text-center"><span className="print-editable" contentEditable suppressContentEditableWarning>กำหนด</span></td>
               <td className="text-center font-semibold">{characteristicLevel}</td>
               <td></td>
             </tr>
             <tr>
               <td className="text-center">5</td>
               <td colSpan={2}>สมรรถนะของผู้เรียน</td>
-              <td></td>
+              <td className="text-center"><span className="print-editable" contentEditable suppressContentEditableWarning>กำหนด</span></td>
               <td className="text-center font-semibold">{competencyLevel}</td>
               <td></td>
             </tr>
           </tbody>
         </table>
+
+        <div className="teacher-comment">
+          <div className="teacher-comment-title">ความคิดเห็นครูประจำชั้น</div>
+          <div className="teacher-comment-line"></div>
+          <div className="teacher-comment-line"></div>
+          <div className="teacher-comment-line"></div>
+        </div>
 
         <div className="summary-signature text-center text-[13px]">
           <div>ลงชื่อ ..................................................................</div>
