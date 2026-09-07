@@ -125,7 +125,7 @@ export default async function CoverPage({
                 </tr>
                 <tr>
                   {GRADE_BUCKETS.map((g) => (
-                    <th key={g} style={{ width: 22 }}>{g}</th>
+                    <th key={g} style={{ width: 18 }}>{g}</th>
                   ))}
                 </tr>
               </thead>
@@ -143,7 +143,7 @@ export default async function CoverPage({
             </table>
 
             {/* แผงสรุปด้านขวา — ตารางเดียวตามแบบ ปพ.5 */}
-            <table className="report-table" style={{ width: 250 }}>
+            <table className="report-table" style={{ width: 230 }}>
               <colgroup>
                 <col style={{ width: "15%" }} /><col style={{ width: "8.5%" }} /><col style={{ width: "8.5%" }} /><col style={{ width: "8.5%" }} />
                 <col style={{ width: "14.875%" }} /><col style={{ width: "14.875%" }} /><col style={{ width: "14.875%" }} /><col style={{ width: "14.875%" }} />
