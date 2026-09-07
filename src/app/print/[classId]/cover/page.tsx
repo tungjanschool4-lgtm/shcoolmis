@@ -117,6 +117,11 @@ export default async function CoverPage({
           <div className="flex gap-2 cover-summary-grid items-start">
             {/* ตารางระดับผลการเรียนรายวิชา */}
             <table className="report-table" style={{ flex: 1 }}>
+              <colgroup>
+                <col style={{ width: 24 }} />
+                <col />
+                {GRADE_BUCKETS.map((g) => <col key={g} style={{ width: 14 }} />)}
+              </colgroup>
               <thead>
                 <tr>
                   <th rowSpan={2} style={{ width: 24 }}>ที่</th>
