@@ -834,3 +834,7 @@ main h3 {
 .cover-sheet .cover-summary-grid .report-table thead tr:first-child th {
   height: 30px;
 }
+
+
+/* Use Sarabun so print reports render 0-9 as Arabic numerals. */
+.print-page { font-family: var(--font-thai); }
