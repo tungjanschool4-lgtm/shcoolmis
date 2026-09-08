@@ -685,6 +685,9 @@ main h3 {
   font-size: 14px !important;
   line-height: 1.2;
 }
+.summary-sheet .summary-signature .signature-line {
+  white-space: nowrap;
+}
 @media print {
   .evaluation-sheet {
     height: 297mm;
@@ -705,7 +708,7 @@ main h3 {
   font-weight: 400;
 }
 .teacher-comment-title {
-  font-size: 20px !important;
+  font-size: 16px !important;
   font-weight: 700;
 }
 

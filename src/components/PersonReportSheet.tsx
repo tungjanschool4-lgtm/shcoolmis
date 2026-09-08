@@ -208,7 +208,7 @@ export default function PersonReportSheet({
         </div>
 
         <div className="summary-signature text-center text-[13px]">
-          <div>ลงชื่อ ..................................................................</div>
+          <div className="signature-line">ลงชื่อ ...................................................</div>
           <div className="mt-1">( {cls?.homeroom_teacher_name || "..............................."} )</div>
           <div>ครูประจำชั้น</div>
         </div>
