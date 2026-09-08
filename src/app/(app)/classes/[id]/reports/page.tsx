@@ -35,7 +35,9 @@ export default async function ReportsHub({
       desc: "วันเปิดเรียนรายภาคเรียน ตารางเช็ก / ข ล และสรุปเวลาเรียนรายเดือน",
       icon: "📅",
       links: [
-        { href: `/classes/${id}/attendance`, label: "เลือก พ.ศ. และภาคเรียน" },
+        { href: `/print/${id}/attendance?term=1`, label: "PDF เวลาเรียน ภาคเรียนที่ 1" },
+        { href: `/print/${id}/attendance?term=2`, label: "PDF เวลาเรียน ภาคเรียนที่ 2" },
+        { href: `/classes/${id}/attendance`, label: "ตั้งค่าปฏิทิน/เลือกปี" },
       ],
     },
     {
