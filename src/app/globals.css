@@ -80,6 +80,7 @@ main h3 {
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
   font-family: "TH SarabunPSK", "TH Sarabun New", var(--font-thai);
   font-size: 14pt;
+    font-feature-settings: "locl" 0;
 }
 .print-page.landscape {
   width: 297mm;
