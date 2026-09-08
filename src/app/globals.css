@@ -635,7 +635,7 @@ main h3 {
 }
 .evaluation-sheet:not(.summary-sheet) .report-signatures {
   margin-top: 3mm !important;
-  font-size: 16px !important;
+  font-size: 14px !important;
   line-height: 1.15;
 }
 .summary-sheet {
@@ -682,7 +682,7 @@ main h3 {
   width: 48%;
   margin-top: 5mm;
   margin-left: auto;
-  font-size: 16px !important;
+  font-size: 14px !important;
   line-height: 1.2;
 }
 @media print {
@@ -701,8 +701,8 @@ main h3 {
 
 /* Requested emphasis for student identity and teacher comments. */
 .evaluation-sheet .student-heading-line {
-  font-size: 18px !important;
-  font-weight: 700;
+  font-size: 16px !important;
+  font-weight: 400;
 }
 .teacher-comment-title {
   font-size: 20px !important;
