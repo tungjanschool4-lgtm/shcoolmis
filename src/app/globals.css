@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Embedded TH SarabunPSK";
+  src: url("/fonts/THSarabun.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  unicode-range: U+0E00-0E7F;
+}
+
 :root {
   --font-thai: var(--font-sarabun), "Sarabun", "TH Sarabun New", system-ui, sans-serif;
 }
@@ -836,5 +845,5 @@ main h3 {
 }
 
 
-/* Use Sarabun so print reports render 0-9 as Arabic numerals. */
-.print-page { font-family: var(--font-thai); }
+/* Thai glyphs use the embedded report font; ASCII digits fall through to Sarabun. */
+.print-page { font-family: "Embedded TH SarabunPSK", var(--font-thai); }
