@@ -202,18 +202,18 @@ export default async function CoverPage({
           {/* ลายเซ็น */}
           <div className="grid grid-cols-2 gap-8 mt-8 text-center text-[12px] report-signatures">
             <div>
-              <div>ลงชื่อ ...............................................</div>
+              <div>ลงชื่อ ...................................................</div>
               <div className="mt-1">( {cls?.homeroom_teacher_name || "..............................."} )</div>
               <div>ครูประจำชั้น</div>
             </div>
             <div>
-              <div>ลงชื่อ ...............................................</div>
+              <div>ลงชื่อ ...................................................</div>
               <div className="mt-1">( {school?.registrar_head || "..............................."} )</div>
               <div>หัวหน้าทะเบียนและวัดผล</div>
             </div>
           </div>
           <div className="text-center mt-5 text-[12px] report-signatures">
-            <div>ลงชื่อ ...............................................</div>
+            <div>ลงชื่อ ...................................................</div>
             <div className="mt-1">( {school?.academic_head || "..............................."} )</div>
             <div>หัวหน้าฝ่ายวิชาการ</div>
           </div>
@@ -222,7 +222,7 @@ export default async function CoverPage({
             <span>☐ ไม่อนุมัติ</span>
           </div>
           <div className="text-center mt-3 text-[12px] report-signatures">
-            <div>ลงชื่อ ...............................................</div>
+            <div>ลงชื่อ ...................................................</div>
             <div className="mt-1">( {school?.director || "..............................."} )</div>
             <div>{school?.director_position || "ผู้อำนวยการโรงเรียน"}</div>
             <div className="mt-2">............../.........................../....................</div>

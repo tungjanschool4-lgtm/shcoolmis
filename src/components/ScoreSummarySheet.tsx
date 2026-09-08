@@ -23,9 +23,9 @@ export default function ScoreSummarySheet({school, cls, report, term, rank}: {
     </table>
     <table className="report-table transfer-summary-table"><thead><tr><th colSpan={3}>สรุปผลการประเมินด้านต่าง ๆ</th></tr><tr><th>คุณลักษณะอันพึงประสงค์</th><th>สมรรถนะของผู้เรียน</th><th>กิจกรรมพัฒนาผู้เรียน</th></tr></thead><tbody><tr className="text-center"><td>{report.assessmentLevels.characteristic[key] || "-"}</td><td>{report.assessmentLevels.competency[key] || "-"}</td><td>{report.activityLevels[key] || "-"}</td></tr></tbody></table>
     <div className="grid grid-cols-2 gap-8 mt-3 text-center transfer-signatures">
-      <div><div>ลงชื่อ ............................................</div><div>( {cls?.homeroom_teacher_name || "........................"} )</div><div>ครูประจำชั้น</div></div>
-      <div><div>ลงชื่อ ............................................</div><div>( {school?.academic_head || "........................"} )</div><div>หัวหน้าฝ่ายวิชาการ</div></div>
+      <div><div>ลงชื่อ ...................................................</div><div>( {cls?.homeroom_teacher_name || "........................"} )</div><div>ครูประจำชั้น</div></div>
+      <div><div>ลงชื่อ ...................................................</div><div>( {school?.academic_head || "........................"} )</div><div>หัวหน้าฝ่ายวิชาการ</div></div>
     </div>
-    <div className="mt-4 text-center transfer-signatures"><div>ลงชื่อ ............................................</div><div>( {school?.director || "........................"} )</div><div>{school?.director_position || `ผู้อำนวยการโรงเรียน${school?.name || ""}`}</div></div>
+    <div className="mt-4 text-center transfer-signatures"><div>ลงชื่อ ...................................................</div><div>( {school?.director || "........................"} )</div><div>{school?.director_position || `ผู้อำนวยการโรงเรียน${school?.name || ""}`}</div></div>
   </div>;
 }

@@ -86,8 +86,8 @@ export default async function AttendancePrintPage({
             </tfoot>
           </table>
           <div className="attendance-signatures calendar-signatures">
-            <div>ลงชื่อ ........................................................ ครูประจำชั้น<br />( {classData?.homeroom_teacher_name || "................................"} )</div>
-            <div>ลงชื่อ ........................................................ หัวหน้าฝ่ายวิชาการ<br />( {schoolData?.academic_head || "................................"} )</div>
+            <div>ลงชื่อ ................................................... ครูประจำชั้น<br />( {classData?.homeroom_teacher_name || "................................"} )</div>
+            <div>ลงชื่อ ................................................... หัวหน้าฝ่ายวิชาการ<br />( {schoolData?.academic_head || "................................"} )</div>
           </div>
         </div>
         {calendarMonths.flatMap((month) => {

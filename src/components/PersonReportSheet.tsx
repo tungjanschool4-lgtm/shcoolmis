@@ -110,12 +110,12 @@ export default function PersonReportSheet({
 
         <div className="grid grid-cols-3 gap-8 mt-5 text-center text-[12px] report-signatures">
         <div>
-          <div>ลงชื่อ ..................................................................</div>
+          <div>ลงชื่อ ...................................................</div>
           <div className="mt-1">( {cls?.homeroom_teacher_name || "..............................."} )</div>
           <div>ครูประจำชั้น</div>
         </div>
         <div>
-          <div>ลงชื่อ .................................................................</div>
+          <div>ลงชื่อ ...................................................</div>
           <div className="mt-1">( {school?.academic_head || "..............................."} )</div>
           <div>หัวหน้าวิชาการ</div>
         </div>
