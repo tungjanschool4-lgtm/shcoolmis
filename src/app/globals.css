@@ -712,7 +712,7 @@ main h3 {
 }
 .cover-main-title,
 .cover-grade-title {
-  font-size: 20px !important;
+  font-size: 16px !important;
   line-height: 1.2;
   font-weight: 700;
 }
@@ -720,6 +720,10 @@ main h3 {
   margin-top: 8px;
   font-size: 16px !important;
   line-height: 1.2;
+}
+.cover-info-table th,
+.cover-info-table td {
+  font-size: 16px !important;
 }
 .cover-summary-grid {
   margin-top: 8px;
@@ -835,7 +839,7 @@ main h3 {
 .cover-sheet .cover-summary-grid .report-table th,
 .cover-sheet .cover-summary-grid .report-table td {
   padding: 3px 2px !important;
-  font-size: 17px !important;
+  font-size: 16px !important;
   line-height: 1.15 !important;
   vertical-align: middle;
 }
