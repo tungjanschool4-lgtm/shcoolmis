@@ -81,11 +81,11 @@ export default function PersonReportSheet({
         <table className="report-table evaluation-report-table">
         <thead>
           <tr>
-            <th style={{ width: "3%" }}>ที่</th>
+            <th style={{ width: "5%" }}>ที่</th>
             <th style={{ width: "17%" }}>รายวิชา</th>
             <th style={{ width: "10%" }}>ผลการเรียน</th>
             <th style={{ width: "18%" }}>ความสามารถที่ได้</th>
-            <th style={{ width: "52%" }}>คำอธิบายพฤติกรรม</th>
+            <th style={{ width: "50%" }}>คำอธิบายพฤติกรรม</th>
           </tr>
         </thead>
         <tbody>
