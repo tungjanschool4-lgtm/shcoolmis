@@ -721,7 +721,7 @@ main h3 {
 }
 .cover-main-title,
 .cover-grade-title {
-  font-size: 16px !important;
+  font-size: 20px !important;
   line-height: 1.3;
   font-weight: 700;
 }
@@ -875,6 +875,17 @@ main h3 {
 
 .roster-sheet > .text-right {
   line-height: 1.3 !important;
+}
+
+/* Final cover typography requested by the school. */
+.cover-sheet .cover-main-title,
+.cover-sheet .cover-grade-title {
+  font-size: 20px !important;
+}
+.cover-sheet .cover-document-code,
+.cover-sheet .cover-summary-grid > .report-table:first-child th:nth-child(2),
+.cover-sheet .cover-summary-grid > .report-table:first-child tbody td:nth-child(2) {
+  font-size: 16px !important;
 }
 
 

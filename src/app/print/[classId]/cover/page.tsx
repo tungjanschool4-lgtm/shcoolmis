@@ -116,10 +116,10 @@ export default async function CoverPage({
 
           <div className="flex gap-2 cover-summary-grid items-start">
             {/* ตารางระดับผลการเรียนรายวิชา */}
-            <table className="report-table" style={{ width: 414, flex: "none" }}>
+            <table className="report-table" style={{ width: 440, flex: "none" }}>
               <colgroup>
                 <col style={{ width: 24 }} />
-                <col style={{ width: 150 }} />
+                <col style={{ width: 176 }} />
                 {GRADE_BUCKETS.map((g) => <col key={g} style={{ width: 30 }} />)}
               </colgroup>
               <thead>
@@ -148,9 +148,11 @@ export default async function CoverPage({
             </table>
 
             {/* แผงสรุปด้านขวา — ตารางเดียวตามแบบ ปพ.5 */}
-            <table className="report-table" style={{ width: 240 }}>
+            <table className="report-table" style={{ width: 260 }}>
               <colgroup>
-                {Array.from({ length: 8 }, (_, i) => <col key={i} style={{ width: 30 }} />)}
+                {Array.from({ length: 8 }, (_, i) => (
+                  <col key={i} style={{ width: i < 4 ? 37.5 : 27.5 }} />
+                ))}
               </colgroup>
               <thead>
                 <tr><th colSpan={4}><span style={{ fontSize: 20, fontWeight: 700 }}>ผลการประเมิน</span></th><th colSpan={4}><span style={{ fontSize: 20, fontWeight: 700 }}>ผลการประเมิน</span></th></tr>
