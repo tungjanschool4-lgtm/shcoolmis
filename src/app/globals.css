@@ -855,5 +855,5 @@ main h3 {
 }
 
 
-/* Thai glyphs use the embedded report font; ASCII digits fall through to Sarabun. */
-.print-page { font-family: "Embedded TH SarabunPSK", var(--font-thai); }
+/* Use Sarabun consistently for all PDF text, including Thai and Arabic digits. */
+.print-page { font-family: var(--font-thai); }
