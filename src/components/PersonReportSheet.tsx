@@ -82,11 +82,10 @@ export default function PersonReportSheet({
         <thead>
           <tr>
             <th style={{ width: "3%" }}>ที่</th>
-            <th style={{ width: "12%" }}>รายวิชา</th>
-            <th style={{ width: "29%" }}>ความสามารถชั้นปี</th>
-            <th style={{ width: "7%" }}>ผลการเรียน</th>
-            <th style={{ width: "10%" }}>ความสามารถที่ได้</th>
-            <th style={{ width: "39%" }}>คำอธิบายพฤติกรรม</th>
+            <th style={{ width: "17%" }}>รายวิชา</th>
+            <th style={{ width: "10%" }}>ผลการเรียน</th>
+            <th style={{ width: "18%" }}>ความสามารถที่ได้</th>
+            <th style={{ width: "52%" }}>คำอธิบายพฤติกรรม</th>
           </tr>
         </thead>
         <tbody>
@@ -98,7 +97,6 @@ export default function PersonReportSheet({
               <tr key={r.subject.id}>
                 <td className="text-center">{r.subject.order_no}</td>
                 <td>{r.subject.name}</td>
-                <td>{rubric?.competency_text || r.subject.competency_text || "-"}</td>
                 <td className="text-center font-semibold">{score ?? "-"}</td>
                 <td className="text-center font-semibold">{abilityForGrade(grade)}</td>
                 <td>{behaviorForGrade(grade, rubric)}</td>
@@ -137,7 +135,7 @@ export default function PersonReportSheet({
           title="แบบรายงานผลการเรียนระดับชั้นประถมศึกษาตอนต้น"
         />
 
-        <div className="student-heading-line mt-2 mb-5 px-1">
+        <div className="student-heading-line mt-2 mb-2 px-1">
           <span>เลขที่ <span className="underline px-4">{s.no}</span></span>
           <span className="student-name">ชื่อ - สกุล <span className="underline px-3">{fullName(s)}</span></span>
         </div>

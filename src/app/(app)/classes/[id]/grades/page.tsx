@@ -9,6 +9,7 @@ export default async function GradesPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
+  const { data: classroom } = await supabase.from("classes").select("school_id").eq("id", id).single();
 
   const [{ data: subjects }, { data: students }, { data: scores }, { data: criteria }] =
     await Promise.all([
@@ -18,7 +19,7 @@ export default async function GradesPage({
         .from("subject_scores")
         .select("*, students!inner(class_id)")
         .eq("students.class_id", id),
-      supabase.from("grade_criteria").select("*").order("sort"),
+      supabase.from("grade_criteria").select("*").eq("school_id", classroom?.school_id ?? -1).order("sort"),
     ]);
 
   return (

@@ -183,7 +183,7 @@ export default function AttendanceClient({
         </div>
       </div>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div className="font-semibold text-slate-700">เลือกวันที่มาโรงเรียน ภาคเรียนที่ {term} ปีการศึกษา {selectedYear}</div>
           <div className="flex flex-wrap gap-2">
@@ -192,22 +192,22 @@ export default function AttendanceClient({
             <button onClick={saveCalendar} disabled={savingDays} className="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white disabled:opacity-50">{savingDays ? "กำลังบันทึก..." : "บันทึกปฏิทิน"}</button>
           </div>
         </div>
-        <div className="grid gap-4 xl:grid-cols-3 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {months.map((month) => {
             const count = daysInMonth(month.year, month.month);
             const firstDay = new Date(Date.UTC(month.year, month.month, 1)).getUTCDay();
             return (
-              <div key={`${month.year}-${month.month}`} className="rounded-xl border border-slate-200 p-3">
-                <div className="mb-2 text-center font-semibold">{THAI_MONTHS[month.month]} {month.year + 543}</div>
-                <div className="grid grid-cols-7 gap-1 text-center">
-                  {THAI_WEEKDAYS.map((weekday, index) => <div key={weekday} className={`py-1 text-sm font-medium ${index === 0 || index === 6 ? "text-rose-500" : "text-slate-500"}`}>{weekday}</div>)}
+              <div key={`${month.year}-${month.month}`} className="rounded-lg border border-slate-200 p-2">
+                <div className="mb-1.5 text-center text-sm font-semibold">{THAI_MONTHS[month.month]} {month.year + 543}</div>
+                <div className="grid grid-cols-7 gap-0.5 text-center">
+                  {THAI_WEEKDAYS.map((weekday, index) => <div key={weekday} className={`py-0.5 text-xs font-medium ${index === 0 || index === 6 ? "text-rose-500" : "text-slate-500"}`}>{weekday}</div>)}
                   {Array.from({ length: firstDay }).map((_, index) => <div key={`blank-${index}`} />)}
                   {Array.from({ length: count }).map((_, index) => {
                     const day = index + 1;
                     const value = dateKey(month.year, month.month, day);
                     const selected = selectedDates.has(value);
                     const weekend = [0, 6].includes(dateParts(value).weekday);
-                    return <button key={value} onClick={() => toggleDate(value)} className={`aspect-square rounded-lg text-sm font-medium ${selected ? "bg-emerald-500 text-white shadow-sm" : weekend ? "bg-rose-50 text-rose-500" : "bg-slate-100 text-slate-700 hover:bg-indigo-100"}`}>{day}</button>;
+                    return <button key={value} onClick={() => toggleDate(value)} className={`aspect-square rounded-md text-xs font-medium ${selected ? "bg-emerald-500 text-white shadow-sm" : weekend ? "bg-rose-50 text-rose-500" : "bg-slate-100 text-slate-700 hover:bg-indigo-100"}`}>{day}</button>;
                   })}
                 </div>
               </div>

@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { usernameToEmail } from "@/lib/username";
 import { revalidatePath } from "next/cache";
+import { requireAdmin } from "@/lib/auth";
+import { getActiveSchool } from "@/lib/school-context";
 
 async function assertAdmin() {
   const supabase = await createClient();
@@ -20,7 +22,9 @@ export type ActionResult = { ok: boolean; error?: string };
 
 export async function createTeacher(formData: FormData): Promise<ActionResult> {
   try {
-    await assertAdmin();
+    const profile = await requireAdmin();
+    const activeSchool = await getActiveSchool(profile);
+    if (!activeSchool) return { ok: false, error: "กรุณาเลือกโรงเรียนก่อนเพิ่มครู" };
     const username = String(formData.get("username") || "").trim().toLowerCase();
     const full_name = String(formData.get("full_name") || "").trim();
     const position = String(formData.get("position") || "").trim();
@@ -47,6 +51,7 @@ export async function createTeacher(formData: FormData): Promise<ActionResult> {
 
     const { error: profErr } = await admin.from("profiles").insert({
       id: created.user.id,
+      school_id: activeSchool.id,
       username,
       full_name,
       position,

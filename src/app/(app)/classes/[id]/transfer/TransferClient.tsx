@@ -4,7 +4,8 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { GradeCriterion, Subject, SubjectScore, TransferSubject, TransferSource } from "@/lib/types";
+import type { GradeCriterion, Student, Subject, SubjectScore, TransferSubject, TransferSource } from "@/lib/types";
+import { fullName } from "@/lib/types";
 import { computeSubjectResult, gradeText, scoreToGrade } from "@/lib/grading";
 import { decodeCsv, downloadCsvTemplate } from "@/lib/curriculum-csv";
 import { parseCsv } from "@/lib/student-csv";
@@ -16,6 +17,7 @@ const CATS = ["พื้นฐาน", "ประยุกต์", "เพิ่
 
 export default function TransferClient({
   classId,
+  students,
   subjects,
   transferSubjects,
   transferSources,
@@ -23,6 +25,7 @@ export default function TransferClient({
   criteria,
 }: {
   classId: string;
+  students: Student[];
   subjects: Subject[];
   transferSubjects: TransferSubject[];
   transferSources: TransferSource[];
@@ -45,6 +48,8 @@ export default function TransferClient({
   const [saving, setSaving] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [showCalculated, setShowCalculated] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.id ?? "");
+  const [calculatedStudentId, setCalculatedStudentId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState<{ t: "ok" | "err"; m: string } | null>(null);
   const { requestDelete, deletePasswordDialog } = usePasswordDelete();
@@ -97,6 +102,34 @@ export default function TransferClient({
       ? studentAverages.reduce((sum, value) => sum + value, 0) / studentAverages.length
       : null;
     return { average, grade: scoreToGrade(average, criteria) };
+  }
+
+  function studentCalculation(key: string, studentId: string) {
+    const sourceRows = subjects
+      .filter((subject) => (sourceMap[key] ?? new Set()).has(subject.id))
+      .sort((a, b) => a.order_no - b.order_no)
+      .map((subject) => {
+        const score = scores.find((item) => item.subject_id === subject.id && item.student_id === studentId);
+        const result = score ? computeSubjectResult(score, criteria) : null;
+        return {
+          subject,
+          weight: Number(subject.credits) > 0 ? Number(subject.credits) : 1,
+          sem1: result?.sem1Total ?? null,
+          sem2: result?.sem2Total ?? null,
+          year: result?.yearAvg ?? null,
+        };
+      });
+
+    const resultFor = (field: "sem1" | "sem2" | "year") => {
+      const available = sourceRows.filter((item) => item[field] !== null);
+      const totalWeight = available.reduce((sum, item) => sum + item.weight, 0);
+      const average = totalWeight
+        ? available.reduce((sum, item) => sum + (item[field] ?? 0) * item.weight, 0) / totalWeight
+        : null;
+      return { average, grade: scoreToGrade(average, criteria) };
+    };
+
+    return { sourceRows, sem1: resultFor("sem1"), sem2: resultFor("sem2"), year: resultFor("year") };
   }
 
   async function importCsv(file: File) {
@@ -251,6 +284,90 @@ export default function TransferClient({
           </button>
         </div>
       </div>
+
+      <section className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 shadow-sm">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="min-w-64 flex-1">
+            <label htmlFor="transfer-student" className="mb-1 block text-sm font-medium text-slate-700">
+              ตรวจสอบการคำนวณเทียบโอนรายนักเรียน
+            </label>
+            <select
+              id="transfer-student"
+              value={selectedStudentId}
+              onChange={(event) => {
+                setSelectedStudentId(event.target.value);
+                setCalculatedStudentId(null);
+              }}
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+            >
+              {students.length === 0 && <option value="">— ยังไม่มีนักเรียน —</option>}
+              {students.map((student) => (
+                <option key={student.id} value={student.id}>
+                  {student.no}. {fullName(student)}{student.student_code ? ` (${student.student_code})` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            type="button"
+            disabled={!selectedStudentId}
+            onClick={() => setCalculatedStudentId(selectedStudentId)}
+            className="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+          >
+            คำนวณและตรวจสอบ
+          </button>
+        </div>
+
+        {calculatedStudentId && (
+          <div className="mt-4 overflow-x-auto rounded-lg border border-emerald-200 bg-white">
+            <div className="border-b border-emerald-100 px-4 py-2 text-sm font-semibold text-slate-700">
+              ผลการตรวจสอบ: {fullName(students.find((student) => student.id === calculatedStudentId)!)}
+            </div>
+            <table className="min-w-[1100px] w-full text-sm">
+              <thead className="bg-slate-50 text-slate-600">
+                <tr>
+                  <th className="px-3 py-2 text-left">วิชาปลายทาง 2560</th>
+                  <th className="px-3 py-2 text-left">คะแนนวิชาต้นทาง 2568 (น้ำหนัก)</th>
+                  <th className="px-2 py-2">ภาค 1</th>
+                  <th className="px-2 py-2">เกรด</th>
+                  <th className="px-2 py-2">ภาค 2</th>
+                  <th className="px-2 py-2">เกรด</th>
+                  <th className="px-2 py-2">รายปี</th>
+                  <th className="px-2 py-2">เกรด</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.filter((row) => row.enabled ?? true).map((row) => {
+                  const calculation = studentCalculation(row._key, calculatedStudentId);
+                  const resultCell = (result: { average: number | null; grade: number | null }) =>
+                    result.average === null ? "-" : result.average.toFixed(2);
+                  return (
+                    <tr key={row._key} className="border-t border-slate-100 align-top">
+                      <td className="px-3 py-2 font-medium text-slate-800">{row.order_no}. {row.name || "-"}</td>
+                      <td className="px-3 py-2">
+                        {calculation.sourceRows.length ? calculation.sourceRows.map((item) => (
+                          <div key={item.subject.id} className="mb-1 last:mb-0">
+                            {item.subject.name}: ภ1 {item.sem1?.toFixed(2) ?? "-"} · ภ2 {item.sem2?.toFixed(2) ?? "-"} · ปี {item.year?.toFixed(2) ?? "-"} <span className="text-slate-400">(น้ำหนัก {item.weight})</span>
+                          </div>
+                        )) : <span className="text-rose-500">ยังไม่ได้เลือกวิชาต้นทาง</span>}
+                      </td>
+                      <td className="px-2 py-2 text-center font-semibold text-emerald-700">{resultCell(calculation.sem1)}</td>
+                      <td className="px-2 py-2 text-center font-bold text-indigo-700">{gradeText(calculation.sem1.grade) || "-"}</td>
+                      <td className="px-2 py-2 text-center font-semibold text-emerald-700">{resultCell(calculation.sem2)}</td>
+                      <td className="px-2 py-2 text-center font-bold text-indigo-700">{gradeText(calculation.sem2.grade) || "-"}</td>
+                      <td className="px-2 py-2 text-center font-semibold text-emerald-700">{resultCell(calculation.year)}</td>
+                      <td className="px-2 py-2 text-center font-bold text-indigo-700">{gradeText(calculation.year.grade) || "-"}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <p className="border-t border-emerald-100 px-4 py-2 text-xs text-slate-500">
+              สูตร: รวม (คะแนนวิชาต้นทาง × น้ำหนัก) ÷ ผลรวมน้ำหนักของวิชาที่มีคะแนน แล้วตัดเกรดตามเกณฑ์ของโรงเรียน
+            </p>
+          </div>
+        )}
+      </section>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-x-auto">
         <table className="text-sm min-w-[1420px] w-full">

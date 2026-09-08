@@ -3,17 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import type { Profile } from "@/lib/types";
+import type { Profile, School } from "@/lib/types";
 import { signOut } from "@/app/(app)/actions";
 
 const nav = [
   { href: "/dashboard", label: "แดชบอร์ด", icon: "🏠", adminOnly: false },
+  { href: "/schools", label: "จัดการโรงเรียน", icon: "🏢", adminOnly: true },
   { href: "/classes", label: "ห้องเรียน", icon: "🏫", adminOnly: false },
   { href: "/teachers", label: "จัดการครู", icon: "👩‍🏫", adminOnly: true },
   { href: "/settings", label: "ข้อมูลโรงเรียน", icon: "⚙️", adminOnly: true },
 ];
 
-export default function Sidebar({ profile }: { profile: Profile }) {
+export default function Sidebar({ profile, activeSchool }: { profile: Profile; activeSchool: School | null }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -42,6 +43,7 @@ export default function Sidebar({ profile }: { profile: Profile }) {
         <div className="px-5 py-5 border-b border-slate-700">
           <div className="font-bold text-lg">ระบบตัดเกรด ปพ.5</div>
           <div className="text-xs text-slate-400 mt-1">หลักสูตรใหม่ 2568</div>
+          <div className="mt-2 truncate text-xs text-indigo-200">{activeSchool?.name ? `โรงเรียน${activeSchool.name}` : "ยังไม่ได้เลือกโรงเรียน"}</div>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">

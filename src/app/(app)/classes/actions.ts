@@ -12,6 +12,7 @@ import {
 } from "@/lib/template";
 import { SUBJECT_COMPETENCY_TEMPLATE } from "@/lib/subject-competency-template";
 import { revalidatePath } from "next/cache";
+import { getActiveSchool } from "@/lib/school-context";
 
 export type ActionResult = { ok: boolean; error?: string; id?: string };
 
@@ -20,6 +21,8 @@ export async function createClassRoom(formData: FormData): Promise<ActionResult>
   if (profile.role !== "admin") return { ok: false, error: "ต้องเป็นผู้ดูแลระบบ" };
 
   const supabase = await createClient();
+  const activeSchool = await getActiveSchool(profile);
+  if (!activeSchool) return { ok: false, error: "กรุณาเลือกโรงเรียนก่อนสร้างห้องเรียน" };
   const academic_year = String(formData.get("academic_year") || "").trim();
   const grade_level = String(formData.get("grade_level") || "").trim();
   const room = String(formData.get("room") || "").trim();
@@ -33,6 +36,7 @@ export async function createClassRoom(formData: FormData): Promise<ActionResult>
   const { data: cls, error } = await supabase
     .from("classes")
     .insert({
+      school_id: activeSchool.id,
       academic_year,
       grade_level,
       room,

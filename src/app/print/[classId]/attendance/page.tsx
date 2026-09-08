@@ -17,16 +17,16 @@ export default async function AttendancePrintPage({
   const { term = "1", year } = await searchParams;
   const selectedTerm = term === "2" ? 2 : 1;
   const supabase = await createClient();
-  const [{ data: school }, { data: cls }, { data: students }, { data: days }, { data: records }] = await Promise.all([
-    supabase.from("school").select("*").eq("id", 1).single(),
-    supabase.from("classes").select("*").eq("id", classId).single(),
+  const { data: cls } = await supabase.from("classes").select("*").eq("id", classId).single();
+  const classData = cls as ClassRoom | null;
+  const [{ data: school }, { data: students }, { data: days }, { data: records }] = await Promise.all([
+    supabase.from("school").select("*").eq("id", classData?.school_id ?? -1).single(),
     supabase.from("students").select("*").eq("class_id", classId).order("no"),
     supabase.from("school_days").select("*").eq("class_id", classId).eq("term", selectedTerm).order("school_date"),
     supabase.from("attendance_records").select("*, students!inner(class_id)").eq("students.class_id", classId),
   ]);
 
   const schoolData = school as School | null;
-  const classData = cls as ClassRoom | null;
   const studentRows = (students as Student[]) ?? [];
   const selectedYear = /^\d{4}$/.test(year || "") ? Number(year) : toBuddhistYear(classData?.academic_year || "");
   const calendarMonths = termMonths(String(selectedYear), selectedTerm);

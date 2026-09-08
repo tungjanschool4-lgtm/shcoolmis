@@ -2,27 +2,30 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { requireProfile } from "@/lib/auth";
 import type { School } from "@/lib/types";
+import { getActiveSchool } from "@/lib/school-context";
 
 export default async function DashboardPage() {
   const profile = await requireProfile();
   const supabase = await createClient();
 
-  const { data: school } = await supabase.from("school").select("*").eq("id", 1).single();
-  const s = school as School | null;
+  const s = (await getActiveSchool(profile)) as School | null;
 
-  const { count: classCount } = await supabase
+  const { data: schoolClasses, count: classCount } = await supabase
     .from("classes")
-    .select("*", { count: "exact", head: true });
-  const { count: studentCount } = await supabase
-    .from("students")
-    .select("*", { count: "exact", head: true });
+    .select("id", { count: "exact" })
+    .eq("school_id", s?.id ?? -1);
+  const classIds = (schoolClasses ?? []).map((item) => item.id);
+  const { count: studentCount } = classIds.length
+    ? await supabase.from("students").select("*", { count: "exact", head: true }).in("class_id", classIds)
+    : { count: 0 };
 
   let teacherCount: number | null = null;
   if (profile.role === "admin") {
     const { count } = await supabase
       .from("profiles")
       .select("*", { count: "exact", head: true })
-      .eq("role", "teacher");
+      .eq("role", "teacher")
+      .eq("school_id", s?.id ?? -1);
     teacherCount = count ?? 0;
   }
 

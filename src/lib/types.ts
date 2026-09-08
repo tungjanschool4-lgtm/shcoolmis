@@ -2,6 +2,7 @@ export type Role = "admin" | "teacher";
 
 export type Profile = {
   id: string;
+  school_id: number | null;
   username: string;
   full_name: string;
   role: Role;
@@ -38,6 +39,7 @@ export type School = {
 
 export type GradeCriterion = {
   id: string;
+  school_id: number;
   min_score: number;
   grade_point: number;
   sort: number;
@@ -45,6 +47,7 @@ export type GradeCriterion = {
 
 export type ClassRoom = {
   id: string;
+  school_id: number;
   academic_year: string;
   grade_level: string;
   room: string;

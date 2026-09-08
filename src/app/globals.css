@@ -508,7 +508,7 @@ main h3 {
   min-height: 297mm;
   padding: 6mm 8mm;
 }
-.evaluation-sheet:not(.summary-sheet) .document-letterhead .document-letterhead-logo {
+.evaluation-sheet .document-letterhead .document-letterhead-logo {
   width: 16mm;
   height: 16mm;
   margin-bottom: .8mm;
@@ -596,15 +596,15 @@ main h3 {
 }
 .evaluation-sheet .document-school-name,
 .evaluation-sheet .document-report-title {
-  font-size: 24px !important;
+  font-size: 22px !important;
   font-weight: 700 !important;
-  line-height: 1.08;
+  line-height: 1.15;
 }
 .evaluation-sheet .document-class-line,
 .evaluation-sheet .student-heading-line {
-  font-size: 18px !important;
+  font-size: 22px !important;
   font-weight: 600;
-  line-height: 1.08;
+  line-height: 1.15;
 }
 .evaluation-sheet:not(.summary-sheet) .evaluation-report-table {
   width: 100%;
@@ -621,10 +621,9 @@ main h3 {
 }
 .evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td,
 .evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(2),
-.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(3),
-.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(6) {
+.evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(5) {
   font-size: 16px !important;
-  line-height: 1.08;
+  line-height: 1.15;
   padding: .7mm .8mm;
 }
 .evaluation-sheet:not(.summary-sheet) .report-signatures {
@@ -633,7 +632,7 @@ main h3 {
   line-height: 1.15;
 }
 .summary-sheet {
-  padding: 9mm 12mm;
+  padding: 6mm 8mm;
 }
 .summary-sheet .summary-report-table {
   width: 100%;

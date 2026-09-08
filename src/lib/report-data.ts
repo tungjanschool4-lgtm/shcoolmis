@@ -33,10 +33,12 @@ export type ClassBundle = {
 
 export async function loadClassBundle(classId: string): Promise<ClassBundle> {
   const supabase = await createClient();
+  const { data: classRow } = await supabase.from("classes").select("*").eq("id", classId).single();
+  const cls = (classRow as ClassRoom | null) ?? null;
+  const schoolId = cls?.school_id ?? -1;
 
   const [
     { data: school },
-    { data: cls },
     { data: students },
     { data: subjects },
     { data: subjectScores },
@@ -49,12 +51,11 @@ export async function loadClassBundle(classId: string): Promise<ClassBundle> {
     { data: transferSources },
     { data: subjectCompetencyLevels },
   ] = await Promise.all([
-    supabase.from("school").select("*").eq("id", 1).single(),
-    supabase.from("classes").select("*").eq("id", classId).single(),
+    supabase.from("school").select("*").eq("id", schoolId).single(),
     supabase.from("students").select("*").eq("class_id", classId).order("no"),
     supabase.from("subjects").select("*").eq("class_id", classId).order("order_no"),
     supabase.from("subject_scores").select("*, students!inner(class_id)").eq("students.class_id", classId),
-    supabase.from("grade_criteria").select("*").order("sort"),
+    supabase.from("grade_criteria").select("*").eq("school_id", schoolId).order("sort"),
     supabase.from("assessment_items").select("*").eq("class_id", classId).order("no"),
     supabase.from("assessment_scores").select("*, students!inner(class_id)").eq("students.class_id", classId),
     supabase.from("activities").select("*").eq("class_id", classId).order("order_no"),
@@ -66,7 +67,7 @@ export async function loadClassBundle(classId: string): Promise<ClassBundle> {
 
   return {
     school: (school as School) ?? null,
-    cls: (cls as ClassRoom) ?? null,
+    cls,
     students: (students as Student[]) ?? [],
     subjects: (subjects as Subject[]) ?? [],
     subjectScores: (subjectScores as SubjectScore[]) ?? [],

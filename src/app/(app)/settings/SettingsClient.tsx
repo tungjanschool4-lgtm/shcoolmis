@@ -82,7 +82,7 @@ export default function SettingsClient({
         quality_fail_label: form.quality_fail_label,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", 1);
+      .eq("id", form.id);
     setSaving(false);
     setMsg(error ? { type: "err", text: error.message } : { type: "ok", text: "บันทึกข้อมูลโรงเรียนแล้ว" });
   }
@@ -93,7 +93,7 @@ export default function SettingsClient({
     setUploading(true);
     setMsg(null);
     const ext = file.name.split(".").pop();
-    const path = `logo/school-${Date.now()}.${ext}`;
+    const path = `logo/school-${form.id}-${Date.now()}.${ext}`;
     const { error: upErr } = await supabase.storage.from("assets").upload(path, file, { upsert: true });
     if (upErr) {
       setUploading(false);
@@ -102,7 +102,7 @@ export default function SettingsClient({
     }
     const { data } = supabase.storage.from("assets").getPublicUrl(path);
     const url = data.publicUrl;
-    await supabase.from("school").update({ logo_url: url }).eq("id", 1);
+    await supabase.from("school").update({ logo_url: url }).eq("id", form.id);
     setForm((f) => ({ ...f, logo_url: url }));
     setUploading(false);
     setMsg({ type: "ok", text: "อัปโหลดโลโก้แล้ว" });
@@ -113,7 +113,7 @@ export default function SettingsClient({
       title: "ยืนยันการลบโลโก้",
       description: "ลบโลโก้โรงเรียนออกจากรายงานและหน้าระบบ?",
       onVerified: async () => {
-        await supabase.from("school").update({ logo_url: "" }).eq("id", 1);
+        await supabase.from("school").update({ logo_url: "" }).eq("id", form.id);
         setForm((f) => ({ ...f, logo_url: "" }));
       },
     });
@@ -125,7 +125,7 @@ export default function SettingsClient({
   function addRow() {
     setRows((r) => [
       ...r,
-      { id: `new-${Date.now()}`, min_score: 0, grade_point: 0, sort: r.length },
+      { id: `new-${Date.now()}`, school_id: form.id, min_score: 0, grade_point: 0, sort: r.length },
     ]);
   }
   function removeRow(i: number) {
@@ -141,9 +141,9 @@ export default function SettingsClient({
     setMsg(null);
     // ลบทั้งหมดแล้วเขียนใหม่ (เรียงคะแนนน้อย -> มาก)
     const sorted = [...rows].sort((a, b) => a.min_score - b.min_score);
-    await supabase.from("grade_criteria").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    await supabase.from("grade_criteria").delete().eq("school_id", form.id);
     const { error } = await supabase.from("grade_criteria").insert(
-      sorted.map((r, i) => ({ min_score: r.min_score, grade_point: r.grade_point, sort: i }))
+      sorted.map((r, i) => ({ school_id: form.id, min_score: r.min_score, grade_point: r.grade_point, sort: i }))
     );
     setSaving(false);
     setMsg(error ? { type: "err", text: error.message } : { type: "ok", text: "บันทึกเกณฑ์การตัดเกรดแล้ว" });
