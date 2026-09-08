@@ -79,7 +79,7 @@ export default async function CoverPage({
       <div className="py-4 print:py-0">
         {/* ---- หน้าปกสรุป ---- */}
         <div className="print-page cover-sheet">
-          <div className="text-right font-semibold">ปพ.5</div>
+          <div className="cover-document-code text-right font-semibold">ปพ.5</div>
           <div className="text-center">
             {school?.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
