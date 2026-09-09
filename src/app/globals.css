@@ -974,3 +974,10 @@ main h3 {
   line-height: 1.15 !important;
   white-space: nowrap;
 }
+
+/* Attendance PDF sheets use a compact, uniform 13px Sarabun typeface. */
+.print-page.monthly-attendance,
+.print-page.monthly-attendance * {
+  font-family: var(--font-thai) !important;
+  font-size: 13px !important;
+}
