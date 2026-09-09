@@ -727,12 +727,15 @@ main h3 {
 }
 .cover-info-table {
   margin-top: 8px;
-  font-size: 16px !important;
-  line-height: 1.2;
+  font-size: 14px !important;
+  line-height: 1.4;
 }
 .cover-sheet .cover-info-table th,
 .cover-sheet .cover-info-table td {
-  font-size: 16px !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
 }
 .cover-summary-grid {
   margin-top: 8px;
@@ -865,6 +868,11 @@ main h3 {
   padding: 1px 2px !important;
 }
 
+.cover-sheet .cover-summary-grid > .report-table:nth-child(2) tbody td:first-child {
+  font-size: 14px !important;
+  line-height: 1.25 !important;
+}
+
 .cover-sheet .cover-summary-grid .report-table thead tr:first-child th {
   height: 30px;
 }
@@ -913,10 +921,13 @@ main h3 {
 }
 .roster-sheet .plain-form-title,
 .roster-sheet .plain-form-context,
-.roster-sheet .roster-table th,
-.roster-sheet .roster-table td,
 .roster-sheet > .text-right {
   font-size: 16px !important;
+}
+.roster-sheet .roster-table th,
+.roster-sheet .roster-table td {
+  font-size: 14px !important;
+  line-height: 1.25 !important;
 }
 .roster-sheet .plain-form-title,
 .roster-sheet .plain-form-context {
