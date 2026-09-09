@@ -956,5 +956,6 @@ main h3 {
 /* Subject score sheets use a uniform print size. */
 .score-sheet,
 .score-sheet * {
+  font-family: var(--font-thai) !important;
   font-size: 14px !important;
 }
