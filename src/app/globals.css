@@ -461,7 +461,7 @@ main h3 {
 /* Large PDF text with compact spacing keeps the forms within A4. */
 .print-page table th,
 .print-page table td {
-  font-size: 18px !important;
+  font-size: 16px !important;
   line-height: 1;
   padding: .2mm .35mm;
 }
@@ -518,7 +518,7 @@ main h3 {
 }
 .evaluation-sheet:not(.summary-sheet) .evaluation-report-table th,
 .evaluation-sheet:not(.summary-sheet) .evaluation-report-table td {
-  font-size: 14px !important;
+  font-size: 16px !important;
   line-height: 1.02;
   padding: .15mm .35mm;
 }
@@ -554,13 +554,13 @@ main h3 {
   line-height: 1.1;
 }
 .transfer-sheet .transfer-report-table th {
-  font-size: 20px !important;
+  font-size: 16px !important;
   font-weight: 700 !important;
   line-height: 1.05;
 }
 .transfer-sheet .transfer-report-table td,
 .transfer-sheet .transfer-gpa-table td {
-  font-size: 19px !important;
+  font-size: 16px !important;
   line-height: 1.08;
 }
 .transfer-sheet .transfer-report-table tbody tr {
@@ -571,16 +571,16 @@ main h3 {
 }
 .transfer-sheet .transfer-summary-table th {
   height: 8mm;
-  font-size: 20px !important;
+  font-size: 16px !important;
   font-weight: 700 !important;
   line-height: 1.08;
 }
 .transfer-sheet .transfer-summary-table thead tr:first-child th {
-  font-size: 21px !important;
+  font-size: 16px !important;
 }
 .transfer-sheet .transfer-summary-table td {
   height: 8mm;
-  font-size: 20px !important;
+  font-size: 16px !important;
   font-weight: 700 !important;
   line-height: 1.08;
 }
@@ -617,7 +617,7 @@ main h3 {
   height: auto;
 }
 .evaluation-sheet:not(.summary-sheet) .evaluation-report-table thead th {
-  font-size: 15px !important;
+  font-size: 16px !important;
   font-weight: 700 !important;
   line-height: 1.05;
   padding: 1mm .6mm;
@@ -628,7 +628,7 @@ main h3 {
 .evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td,
 .evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(2),
 .evaluation-sheet:not(.summary-sheet) .evaluation-report-table tbody td:nth-child(5) {
-  font-size: 15px !important;
+  font-size: 16px !important;
   line-height: 1.15;
   padding: .7mm .8mm;
 }
@@ -649,13 +649,13 @@ main h3 {
   margin-top: 3mm;
 }
 .summary-sheet .summary-report-table th {
-  font-size: 15px !important;
+  font-size: 16px !important;
   font-weight: 700 !important;
   line-height: 1.1;
   padding: 1.2mm 1mm;
 }
 .summary-sheet .summary-report-table td {
-  font-size: 15px !important;
+  font-size: 16px !important;
   line-height: 1.15;
   padding: 1.5mm 1.2mm;
 }
@@ -929,7 +929,7 @@ main h3 {
 }
 .roster-sheet .roster-table th,
 .roster-sheet .roster-table td {
-  font-size: 15px !important;
+  font-size: 16px !important;
   line-height: 1.25 !important;
 }
 .roster-sheet .plain-form-title,
@@ -950,7 +950,7 @@ main h3 {
 .score-summary-sheet .transfer-report-table td,
 .score-summary-sheet .transfer-summary-table th,
 .score-summary-sheet .transfer-summary-table td {
-  font-size: 14px !important;
+  font-size: 16px !important;
 }
 .score-summary-sheet .transfer-signatures {
   font-size: 15px !important;
@@ -964,7 +964,7 @@ main h3 {
 .print-page.score-sheet .score-table th,
 .print-page.score-sheet .score-table td {
   font-family: var(--font-print-thai) !important;
-  font-size: 14px !important;
+  font-size: 16px !important;
 }
 
 /* Give score cells more breathing room and keep student names compact. */
@@ -972,8 +972,11 @@ main h3 {
 .print-page.score-sheet .score-table td {
   padding: .35mm .5mm !important;
 }
+.print-page.score-sheet .score-table tbody tr {
+  height: 7.6mm;
+}
 .print-page.score-sheet .score-table tbody td:nth-child(2) {
-  font-size: 12px !important;
+  font-size: 14px !important;
   line-height: 1.15 !important;
   white-space: nowrap;
 }
@@ -1002,12 +1005,15 @@ main h3 {
   margin-top: 2mm !important;
 }
 .transfer-single-page .transfer-report-table td.transfer-subject-name {
-  font-size: 13px !important;
+  font-size: 16px !important;
   line-height: 1.2 !important;
 }
 .transfer-single-page .transfer-gpa-table td,
 .transfer-single-page .transfer-summary-table th,
-.transfer-single-page .transfer-summary-table td,
+.transfer-single-page .transfer-summary-table td {
+  font-size: 16px !important;
+  line-height: 1.3 !important;
+}
 .transfer-single-page .transfer-signatures,
 .transfer-single-page .transfer-signatures * {
   font-size: 14px !important;
