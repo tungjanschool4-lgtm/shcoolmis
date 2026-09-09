@@ -57,18 +57,20 @@ export default async function CoverPage({
     }
   }
 
-  // นับคุณลักษณะ / อ่านคิดเขียน / กิจกรรม / เพศ
+  // นับคุณลักษณะ / สมรรถนะ / กิจกรรม / เพศ
   const charCount = [0, 0, 0, 0]; // index = col 3,2,1,0 -> store as [3,2,1,0]
-  const rwCount = [0, 0, 0, 0];
+  const competencyCount = [0, 0, 0, 0];
   let actPass = 0;
+  let actFail = 0;
   let male = 0;
   let female = 0;
   for (const rep of reports) {
     const c = levelToCol(rep.characteristicLevel, qualityLabels);
     if (c >= 0) charCount[3 - c]++;
-    const r = levelToCol(rep.readWriteLevel, qualityLabels);
-    if (r >= 0) rwCount[3 - r]++;
+    const competency = levelToCol(rep.assessmentLevels.competency.year, qualityLabels);
+    if (competency >= 0) competencyCount[3 - competency]++;
     if (rep.activityOverall === "ผ่าน") actPass++;
+    else if (rep.activityOverall === "ไม่ผ่าน") actFail++;
     if (rep.student.gender === "ชาย") male++;
     else if (rep.student.gender === "หญิง") female++;
   }
@@ -156,15 +158,19 @@ export default async function CoverPage({
               </colgroup>
               <thead>
                 <tr><th colSpan={4}><span style={{ fontSize: 20, fontWeight: 700 }}>ผลการประเมิน</span></th><th colSpan={4}><span style={{ fontSize: 20, fontWeight: 700 }}>ผลการประเมิน</span></th></tr>
+                <tr className="cover-assessment-scale">
+                  <th colSpan={4}></th>
+                  {[3, 2, 1, 0].map((level) => <th key={level}>{level}</th>)}
+                </tr>
               </thead>
               <tbody>
                 <tr>
                   <td colSpan={4} className="text-left font-semibold">คุณลักษณะอันพึงประสงค์</td>
-                  {charCount.map((v, i) => <td key={i} className="text-center">{v || ""}</td>)}
+                  {charCount.map((v, i) => <td key={i} className="text-center">{v}</td>)}
                 </tr>
                 <tr>
-                  <td colSpan={4} className="text-left font-semibold">อ่าน คิดวิเคราะห์ เขียน</td>
-                  {rwCount.map((v, i) => <td key={i} className="text-center">{v || ""}</td>)}
+                  <td colSpan={4} className="text-left font-semibold">สมรรถนะของผู้เรียน</td>
+                  {competencyCount.map((v, i) => <td key={i} className="text-center">{v}</td>)}
                 </tr>
                 <tr>
                   <td colSpan={4} className="text-left font-semibold">ผลการประเมิน</td>
@@ -173,7 +179,8 @@ export default async function CoverPage({
                 </tr>
                 <tr>
                   <td colSpan={4} className="text-left font-semibold">กิจกรรมพัฒนาผู้เรียน</td>
-                  <td colSpan={4} className="text-center">{actPass || ""}</td>
+                  <td colSpan={2} className="text-center">{actPass}</td>
+                  <td colSpan={2} className="text-center">{actFail}</td>
                 </tr>
                 <tr>
                   <td colSpan={4} className="text-left shade font-semibold">การอนุมัติผลการเรียน</td>
@@ -244,7 +251,6 @@ export default async function CoverPage({
                 <th style={{ width: 92 }}>เลขประจำตัว<br />นักเรียน</th>
                 <th style={{ width: 138 }}>เลขประจำตัวประชาชน</th>
                 <th>ชื่อ - นามสกุล</th>
-                <th style={{ width: 62 }}>หมู่เลือด</th>
                 <th style={{ width: 122 }}>วัน/เดือน/ปี เกิด</th>
                 <th style={{ width: 54 }}>อายุ</th>
               </tr>
@@ -256,12 +262,11 @@ export default async function CoverPage({
                   <td className="text-center">{s.student_code}</td>
                   <td className="text-center">{s.national_id}</td>
                   <td>{fullName(s)}</td>
-                  <td className="text-center">{/^[ABO+\-]+$/i.test(s.blood_type || "") ? s.blood_type : ""}</td>
                   <td className="text-center">{formatThaiBirthDate(s.birth_date)}</td>
                   <td className="text-center">{calculateAge(s.birth_date)}</td>
                 </tr>
               ))}
-              {Array.from({length: Math.max(0,30-students.slice(pageIndex*30,(pageIndex+1)*30).length)}, (_, i) => <tr key={`blank-${i}`}><td className="text-center">{pageIndex*30+students.slice(pageIndex*30,(pageIndex+1)*30).length+i+1}</td>{Array.from({length:6},(_,j)=><td key={j}></td>)}</tr>)}
+              {Array.from({length: Math.max(0,30-students.slice(pageIndex*30,(pageIndex+1)*30).length)}, (_, i) => <tr key={`blank-${i}`}><td className="text-center">{pageIndex*30+students.slice(pageIndex*30,(pageIndex+1)*30).length+i+1}</td>{Array.from({length:5},(_,j)=><td key={j}></td>)}</tr>)}
             </tbody>
           </table>
           <div className="mt-2 text-right">รวมนักเรียนทั้งสิ้น {students.length} คน (ชาย {male} · หญิง {female})</div>
