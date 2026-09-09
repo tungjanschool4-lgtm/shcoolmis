@@ -810,9 +810,9 @@ main h3 {
 }
 
 .cover-summary-grid > .report-table:first-child td:nth-child(2) {
-  overflow-wrap: anywhere;
-  word-break: break-all;
-  letter-spacing: -0.2px;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  letter-spacing: -0.3px;
 }
 .cover-summary-grid > .report-table:first-child th,
 .cover-summary-grid > .report-table:first-child td {
@@ -821,7 +821,7 @@ main h3 {
 
 .cover-summary-grid .report-table th,
 .cover-summary-grid .report-table td {
-  line-height: 0.82 !important;
+  line-height: 1.2 !important;
   padding: 0 1px !important;
 }
 
@@ -851,8 +851,18 @@ main h3 {
 .cover-sheet .cover-summary-grid .report-table td {
   padding: 3px 2px !important;
   font-size: 16px !important;
-  line-height: 1.15 !important;
+  line-height: 1.3 !important;
   vertical-align: middle;
+}
+
+.cover-sheet .cover-summary-grid > .report-table:first-child tbody td:nth-child(2) {
+  font-size: 14px !important;
+}
+
+.cover-sheet .cover-assessment-scale th {
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 1px 2px !important;
 }
 
 .cover-sheet .cover-summary-grid .report-table thead tr:first-child th {
@@ -883,9 +893,12 @@ main h3 {
   font-size: 20px !important;
 }
 .cover-sheet .cover-document-code,
-.cover-sheet .cover-summary-grid > .report-table:first-child th:nth-child(2),
-.cover-sheet .cover-summary-grid > .report-table:first-child tbody td:nth-child(2) {
+.cover-sheet .cover-summary-grid > .report-table:first-child th:nth-child(2) {
   font-size: 16px !important;
+}
+
+.cover-sheet .cover-summary-grid > .report-table:first-child tbody td:nth-child(2) {
+  font-size: 14px !important;
 }
 
 
