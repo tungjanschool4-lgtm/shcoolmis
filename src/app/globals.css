@@ -1,19 +1,10 @@
 @import "tailwindcss";
 
-@font-face {
-  font-family: "Embedded TH SarabunPSK";
-  src: url("/fonts/THSarabun.ttf") format("truetype");
-  font-style: normal;
-  font-weight: 400;
-  font-display: block;
-  unicode-range: U+0E00-0E7F;
-}
-
 :root {
   --font-thai: var(--font-sarabun), "Sarabun", "TH Sarabun New", system-ui, sans-serif;
-  /* Print pages only: force the embedded TH SarabunPSK so every printed/PDF page renders identically,
-     regardless of which fonts happen to be installed on the printing computer. */
-  --font-print-thai: "Embedded TH SarabunPSK", var(--font-thai);
+  /* Print pages use the same Sarabun web font as the rest of the site, for both
+     Thai text and Arabic numerals, so every printed/PDF page matches consistently. */
+  --font-print-thai: var(--font-thai);
 }
 
 html,
@@ -476,12 +467,15 @@ main h3 {
   padding: .25mm !important;
 }
 
-/* PDF hierarchy: headings 22px and body/name text 18px. */
+/* PDF typography scale: prominent headings 20px, secondary lines 18px, signatures 15px. */
 .print-page .document-school-name,
 .print-page .document-report-title,
 .print-page .plain-form-title,
-.print-page .attendance-print-title,
 .print-page > .text-center .text-lg {
+  font-size: 20px !important;
+  line-height: 1.1;
+}
+.print-page .attendance-print-title {
   font-size: 22px !important;
   line-height: 1.1;
 }
@@ -498,8 +492,11 @@ main h3 {
 }
 .print-page .report-signatures,
 .print-page .transfer-signatures,
-.print-page .attendance-signatures,
 .print-page .summary-signature {
+  font-size: 15px !important;
+  line-height: 1.2;
+}
+.print-page .attendance-signatures {
   font-size: 18px !important;
   line-height: 1.2;
 }
@@ -522,9 +519,8 @@ main h3 {
   line-height: 1.02;
   padding: .15mm .35mm;
 }
-.evaluation-sheet:not(.summary-sheet) .student-heading-line,
 .evaluation-sheet:not(.summary-sheet) .report-signatures {
-  font-size: 14px !important;
+  font-size: 15px !important;
   line-height: 1.1;
 }
 .evaluation-sheet:not(.summary-sheet) .report-signatures {
@@ -543,13 +539,13 @@ main h3 {
 /* Readable student report and transfer report typography, sized to remain within A4. */
 .transfer-sheet .document-school-name,
 .transfer-sheet .document-report-title {
-  font-size: 24px !important;
+  font-size: 20px !important;
   font-weight: 700 !important;
   line-height: 1.08;
 }
 .transfer-sheet .document-class-line,
 .transfer-sheet .student-heading-line {
-  font-size: 20px !important;
+  font-size: 18px !important;
   font-weight: 600;
   line-height: 1.1;
 }
@@ -585,7 +581,7 @@ main h3 {
   line-height: 1.08;
 }
 .transfer-sheet .transfer-signatures {
-  font-size: 20px !important;
+  font-size: 15px !important;
   line-height: 1.2;
 }
 
@@ -638,7 +634,7 @@ main h3 {
 }
 .evaluation-sheet:not(.summary-sheet) .report-signatures {
   margin-top: 3mm !important;
-  font-size: 14px !important;
+  font-size: 15px !important;
   line-height: 1.15;
 }
 .summary-sheet {
@@ -685,7 +681,7 @@ main h3 {
   width: 48%;
   margin-top: 5mm;
   margin-left: auto;
-  font-size: 14px !important;
+  font-size: 15px !important;
   line-height: 1.2;
 }
 .summary-sheet .summary-signature .signature-line {
@@ -707,7 +703,7 @@ main h3 {
 
 /* Requested emphasis for student identity and teacher comments. */
 .evaluation-sheet .student-heading-line {
-  font-size: 16px !important;
+  font-size: 18px !important;
   font-weight: 400;
 }
 .teacher-comment-title {
@@ -752,7 +748,7 @@ main h3 {
   padding: 1px 2px !important;
 }
 .cover-sheet .report-signatures {
-  font-size: 16px !important;
+  font-size: 15px !important;
   line-height: 1.3;
 }
 .roster-sheet {
@@ -940,11 +936,12 @@ main h3 {
 /* Individual score summary typography requested for the ปพ.5 report. */
 .score-summary-sheet .document-school-name,
 .score-summary-sheet .document-report-title {
-  font-size: 18px !important;
+  font-size: 24px !important;
 }
 .score-summary-sheet .document-class-line,
 .score-summary-sheet .student-heading-line {
-  font-size: 16px !important;
+  font-size: 22px !important;
+  font-weight: 400 !important;
 }
 .score-summary-sheet .transfer-report-table th,
 .score-summary-sheet .transfer-report-table td,
@@ -952,8 +949,12 @@ main h3 {
 .score-summary-sheet .transfer-summary-table td {
   font-size: 16px !important;
 }
+.score-summary-sheet .transfer-report-table tfoot td {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+}
 .score-summary-sheet .transfer-signatures {
-  font-size: 15px !important;
+  font-size: 22px !important;
 }
 
 /* Match every subject-score label, heading and table cell to the score note. */
@@ -966,6 +967,13 @@ main h3 {
   font-family: var(--font-print-thai) !important;
   font-size: 16px !important;
 }
+/* Same heading hierarchy as the rest of the report pages: title 20px, class line 18px. */
+.print-page.score-sheet .plain-form-title {
+  font-size: 20px !important;
+}
+.print-page.score-sheet .plain-form-context {
+  font-size: 18px !important;
+}
 
 /* Give score cells more breathing room and keep student names compact. */
 .print-page.score-sheet .score-table th,
@@ -976,7 +984,6 @@ main h3 {
   height: 7.6mm;
 }
 .print-page.score-sheet .score-table tbody td:nth-child(2) {
-  font-size: 14px !important;
   line-height: 1.15 !important;
   white-space: nowrap;
 }
@@ -989,12 +996,15 @@ main h3 {
 }
 
 /* Transfer report typography requested by the school. */
-.transfer-single-page .document-letterhead,
 .transfer-single-page .document-school-name,
-.transfer-single-page .document-report-title,
+.transfer-single-page .document-report-title {
+  font-size: 20px !important;
+  line-height: 1.4 !important;
+}
+.transfer-single-page .document-letterhead,
 .transfer-single-page .document-class-line,
 .transfer-single-page .student-heading-line {
-  font-size: 16px !important;
+  font-size: 18px !important;
   line-height: 1.4 !important;
 }
 .transfer-single-page .document-report-title,
@@ -1008,14 +1018,19 @@ main h3 {
   font-size: 16px !important;
   line-height: 1.2 !important;
 }
-.transfer-single-page .transfer-gpa-table td,
 .transfer-single-page .transfer-summary-table th,
 .transfer-single-page .transfer-summary-table td {
   font-size: 16px !important;
   line-height: 1.3 !important;
 }
+/* Emphasize the ผลการเรียนเฉลี่ย / ลำดับที่ summary row, matching the score-summary report. */
+.transfer-single-page .transfer-gpa-table td {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+}
 .transfer-single-page .transfer-signatures,
 .transfer-single-page .transfer-signatures * {
-  font-size: 14px !important;
+  font-size: 15px !important;
   line-height: 1.3 !important;
 }
