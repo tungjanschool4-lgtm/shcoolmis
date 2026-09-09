@@ -933,3 +933,22 @@ main h3 {
 .roster-sheet .plain-form-context {
   line-height: 1.4 !important;
 }
+
+/* Individual score summary typography requested for the ปพ.5 report. */
+.score-summary-sheet .document-school-name,
+.score-summary-sheet .document-report-title {
+  font-size: 18px !important;
+}
+.score-summary-sheet .document-class-line,
+.score-summary-sheet .student-heading-line {
+  font-size: 16px !important;
+}
+.score-summary-sheet .transfer-report-table th,
+.score-summary-sheet .transfer-report-table td,
+.score-summary-sheet .transfer-summary-table th,
+.score-summary-sheet .transfer-summary-table td {
+  font-size: 14px !important;
+}
+.score-summary-sheet .transfer-signatures {
+  font-size: 15px !important;
+}
