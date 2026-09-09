@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const THAI_DIGIT_ZERO = "๐".charCodeAt(0);
 
@@ -28,12 +28,28 @@ function useArabicDigitsForPrint() {
 
 export default function PrintToolbar({ title }: { title: string }) {
   useArabicDigitsForPrint();
+  const [pageCount, setPageCount] = useState(0);
+
+  useEffect(() => {
+    const updatePageCount = () =>
+      setPageCount(document.querySelectorAll(".print-page").length);
+
+    updatePageCount();
+    const observer = new MutationObserver(updatePageCount);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="no-print sticky top-0 z-10 bg-slate-800 text-white px-4 py-2.5 flex items-center justify-between">
       <div className="text-sm">
         <button onClick={() => window.close()} className="text-slate-300 hover:text-white mr-3">✕ ปิด</button>
-        {title}
+        <span>{title}</span>
+        {pageCount > 0 && (
+          <span className="ml-3 rounded-full bg-slate-700 px-2 py-0.5 text-xs text-slate-200">
+            ตัวอย่าง {pageCount} หน้า
+          </span>
+        )}
       </div>
       <button
         onClick={async () => {
@@ -44,7 +60,7 @@ export default function PrintToolbar({ title }: { title: string }) {
         }}
         className="rounded-lg bg-indigo-500 hover:bg-indigo-400 px-4 py-1.5 text-sm font-medium"
       >
-        🖨️ พิมพ์ / บันทึกเป็น PDF
+        🖨️ พิมพ์ทุกหน้า / บันทึกเป็น PDF
       </button>
     </div>
   );
