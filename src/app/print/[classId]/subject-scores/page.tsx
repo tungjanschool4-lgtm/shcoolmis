@@ -32,7 +32,15 @@ export default async function SubjectScoresPage({
               <div className="plain-form-context">{cls?.grade_level} {cls?.room ? `ห้อง ${cls.room}` : ""} ปีการศึกษา {cls?.academic_year || school?.academic_year}</div>
             </header>
             <table className="report-table score-table">
-              <colgroup><col style={{width:"4.5%"}} /><col style={{width:"27.5%"}} />{Array.from({length:12}, (_, i) => <col key={i} style={{width:`${68/12}%`}} />)}</colgroup>
+              <colgroup>
+                <col style={{ width: "4.5%" }} />
+                <col style={{ width: "26%" }} />
+                {Array.from({ length: 8 }, (_, i) => <col key={`score-${i}`} style={{ width: "5.25%" }} />)}
+                <col style={{ width: "7%" }} />
+                <col style={{ width: "6%" }} />
+                <col style={{ width: "7.25%" }} />
+                <col style={{ width: "7.25%" }} />
+              </colgroup>
               <thead>
                 <tr><th rowSpan={3}>ที่</th><th rowSpan={3}>{subject.category} : {subject.name}<br />ชื่อ - นามสกุล</th><th colSpan={4}>ภาคเรียนที่ 1</th><th colSpan={4}>ภาคเรียนที่ 2</th><th rowSpan={3}><span className="vtext">คะแนนเฉลี่ย 2 ภาคเรียน</span></th><th rowSpan={3}><span className="vtext">ผลการเรียนตลอดปี</span></th><th colSpan={2} rowSpan={2}>สรุปผลการประเมิน</th></tr>
                 <tr>{[1,2].flatMap(term => ["ระหว่างภาค","ปลายภาค","รวม","ผลการเรียน"].map(label => <th key={`${term}-${label}`}><span className="vtext">{label}</span></th>))}</tr>
