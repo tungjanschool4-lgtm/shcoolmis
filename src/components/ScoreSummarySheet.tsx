@@ -11,7 +11,7 @@ export default function ScoreSummarySheet({school, cls, report, term, rank}: {
     score: term === "year" ? row.yearAvg : term === "1" ? row.sem1Total : row.sem2Total,
     grade: term === "year" ? row.yearGrade : term === "1" ? row.sem1Grade : row.sem2Grade}));
   const gpa = computeGPA(rows.map(row => ({credits:row.subject.credits,yearGrade:row.grade})));
-  return <div className="print-page sheet transfer-sheet">
+  return <div className="print-page sheet transfer-sheet score-summary-sheet">
     <ReportHeader school={school} cls={cls} title={`แบบรายงานผลการพัฒนาคุณภาพผู้เรียน (${term === "year" ? "รายปี" : `ภาคเรียนที่ ${term}`})`} />
     <div className="student-heading-line mt-1 mb-2"><span>เลขที่ {report.student.no}</span><span>ชื่อ - นามสกุล {fullName(report.student)}</span></div>
     <table className="report-table transfer-report-table">
