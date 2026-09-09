@@ -66,7 +66,7 @@ function TransferRowsTable({
           <tr key={r.transferSubject.id}>
             <td className="text-center">{r.transferSubject.order_no}</td>
             {showCode && <td className="text-center">{r.transferSubject.code}</td>}
-            <td>{r.transferSubject.name}</td>
+            <td className="transfer-subject-name">{r.transferSubject.name}</td>
             <td className="text-center">{r.transferSubject.category}</td>
             <td className="text-center">{r.transferSubject.credits}</td>
             <td className="text-center">{num(r.score)}</td>
