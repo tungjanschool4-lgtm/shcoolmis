@@ -10,7 +10,7 @@
 }
 
 :root {
-  --font-thai: "Embedded TH SarabunPSK", var(--font-sarabun), "Sarabun", "TH Sarabun New", system-ui, sans-serif;
+  --font-thai: var(--font-sarabun), "Sarabun", "TH Sarabun New", system-ui, sans-serif;
 }
 
 html,
@@ -87,7 +87,7 @@ main h3 {
   margin: 0 auto 16px;
   padding: 8mm;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
-  font-family: var(--font-thai);
+  font-family: "TH SarabunPSK", "TH Sarabun New", var(--font-thai);
   font-size: 14pt;
     font-feature-settings: "locl" 0;
 }
@@ -909,6 +909,9 @@ main h3 {
   font-size: 14px !important;
 }
 
+
+/* Use Sarabun consistently for all PDF text, including Thai and Arabic digits. */
+.print-page { font-family: var(--font-thai); }
 
 /* Roster page: add a little breathing room below the heading and keep all text at 16px. */
 .roster-sheet .roster-form-header {
