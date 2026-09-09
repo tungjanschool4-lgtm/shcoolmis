@@ -904,3 +904,21 @@ main h3 {
 
 /* Use Sarabun consistently for all PDF text, including Thai and Arabic digits. */
 .print-page { font-family: var(--font-thai); }
+
+/* Roster page: add a little breathing room below the heading and keep all text at 16px. */
+.roster-sheet .roster-form-header {
+  min-height: 12mm;
+  margin-bottom: 4mm;
+  line-height: 1.4 !important;
+}
+.roster-sheet .plain-form-title,
+.roster-sheet .plain-form-context,
+.roster-sheet .roster-table th,
+.roster-sheet .roster-table td,
+.roster-sheet > .text-right {
+  font-size: 16px !important;
+}
+.roster-sheet .plain-form-title,
+.roster-sheet .plain-form-context {
+  line-height: 1.4 !important;
+}
