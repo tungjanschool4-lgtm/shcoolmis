@@ -952,3 +952,9 @@ main h3 {
 .score-summary-sheet .transfer-signatures {
   font-size: 15px !important;
 }
+
+/* Subject score sheets use a uniform print size. */
+.score-sheet,
+.score-sheet * {
+  font-size: 14px !important;
+}
