@@ -130,6 +130,11 @@ create table if not exists public.students (
   blood_type text not null default '',
   birth_date text not null default '',
   photo_url text not null default '',
+  expected_basic_level text not null default 'ชำนาญ',
+  expected_applied_level text not null default 'ชำนาญ',
+  expected_activity_level text not null default 'ผ่าน',
+  expected_characteristic_level text not null default 'กำหนด',
+  expected_competency_level text not null default 'กำหนด',
   created_at timestamptz not null default now()
 );
 create index if not exists students_class_idx on public.students(class_id);

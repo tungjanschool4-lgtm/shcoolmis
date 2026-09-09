@@ -72,6 +72,11 @@ export type Student = {
   blood_type: string;
   birth_date: string;
   photo_url: string;
+  expected_basic_level: string;
+  expected_applied_level: string;
+  expected_activity_level: string;
+  expected_characteristic_level: string;
+  expected_competency_level: string;
   created_at: string;
 };
 

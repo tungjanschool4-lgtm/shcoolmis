@@ -155,7 +155,7 @@ export default function PersonReportSheet({
               <td rowSpan={3} className="text-center">1</td>
               <td rowSpan={3} className="text-center font-semibold">ความสามารถพื้นฐาน<br />ด้านการเรียนรู้</td>
               <td>การอ่าน</td>
-              <td rowSpan={3} className="text-center font-semibold"><span className="print-editable" contentEditable suppressContentEditableWarning>ชำนาญ</span></td>
+              <td rowSpan={3} className="text-center font-semibold">{s.expected_basic_level || "ชำนาญ"}</td>
               <td className="text-center font-semibold">{readingLevel}</td>
               <td></td>
             </tr>
@@ -172,28 +172,28 @@ export default function PersonReportSheet({
             <tr>
               <td className="text-center">2</td>
               <td colSpan={2}>ความสามารถในการประยุกต์ใช้ในชีวิตประจำวัน</td>
-              <td className="text-center font-semibold"><span className="print-editable" contentEditable suppressContentEditableWarning>ชำนาญ</span></td>
+              <td className="text-center font-semibold">{s.expected_applied_level || "ชำนาญ"}</td>
               <td className="text-center font-semibold">{appliedLevel}</td>
               <td></td>
             </tr>
             <tr>
               <td className="text-center">3</td>
               <td colSpan={2}>กิจกรรมพัฒนาผู้เรียน</td>
-              <td className="text-center font-semibold"><span className="print-editable" contentEditable suppressContentEditableWarning>ผ่าน</span></td>
+              <td className="text-center font-semibold">{s.expected_activity_level || "ผ่าน"}</td>
               <td className="text-center font-semibold">{activityLevel}</td>
               <td></td>
             </tr>
             <tr>
               <td className="text-center">4</td>
               <td colSpan={2}>คุณลักษณะอันพึงประสงค์</td>
-              <td className="text-center"><span className="print-editable" contentEditable suppressContentEditableWarning>กำหนด</span></td>
+              <td className="text-center">{s.expected_characteristic_level || "กำหนด"}</td>
               <td className="text-center font-semibold">{characteristicLevel}</td>
               <td></td>
             </tr>
             <tr>
               <td className="text-center">5</td>
               <td colSpan={2}>สมรรถนะของผู้เรียน</td>
-              <td className="text-center"><span className="print-editable" contentEditable suppressContentEditableWarning>กำหนด</span></td>
+              <td className="text-center">{s.expected_competency_level || "กำหนด"}</td>
               <td className="text-center font-semibold">{competencyLevel}</td>
               <td></td>
             </tr>

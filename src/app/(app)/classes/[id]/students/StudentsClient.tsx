@@ -9,6 +9,9 @@ import { usePasswordDelete } from "@/components/PasswordDeleteGuard";
 type Row = Partial<Student> & { _key: string; _dirty?: boolean; _new?: boolean };
 
 const PREFIXES = ["เด็กชาย", "เด็กหญิง", "นาย", "นางสาว"];
+const ABILITY_LEVELS = ["เริ่มต้น", "พัฒนา", "ชำนาญ", "เชี่ยวชาญ"];
+const ACTIVITY_LEVELS = ["ไม่ผ่าน", "ผ่าน"];
+const QUALITY_LEVELS = ["กำหนด", "ผ่าน", "ดี", "ดีเยี่ยม"];
 
 export default function StudentsClient({ classId, initial }: { classId: string; initial: Student[] }) {
   const supabase = createClient();
@@ -41,6 +44,11 @@ export default function StudentsClient({ classId, initial }: { classId: string; 
         status: "กำลังศึกษา",
         birth_date: "",
         blood_type: "",
+        expected_basic_level: "ชำนาญ",
+        expected_applied_level: "ชำนาญ",
+        expected_activity_level: "ผ่าน",
+        expected_characteristic_level: "กำหนด",
+        expected_competency_level: "กำหนด",
       },
     ]);
   }
@@ -136,6 +144,11 @@ export default function StudentsClient({ classId, initial }: { classId: string; 
         status: r.status || "กำลังศึกษา",
         birth_date: r.birth_date || "",
         blood_type: r.blood_type || "",
+        expected_basic_level: r.expected_basic_level || "ชำนาญ",
+        expected_applied_level: r.expected_applied_level || "ชำนาญ",
+        expected_activity_level: r.expected_activity_level || "ผ่าน",
+        expected_characteristic_level: r.expected_characteristic_level || "กำหนด",
+        expected_competency_level: r.expected_competency_level || "กำหนด",
       };
       if (r._new) {
         const { data, error } = await supabase.from("students").insert(payload).select("id").single();
@@ -195,7 +208,7 @@ export default function StudentsClient({ classId, initial }: { classId: string; 
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-x-auto">
-        <table className="text-sm min-w-[1100px] w-full">
+        <table className="text-sm min-w-[1900px] w-full">
           <thead className="bg-slate-50 text-slate-600">
             <tr>
               <th className="px-2 py-2 w-14">เลขที่</th>
@@ -207,6 +220,11 @@ export default function StudentsClient({ classId, initial }: { classId: string; 
               <th className="px-2 py-2 w-24">วันเกิด</th>
               <th className="px-2 py-2 w-20">อายุ (ปี)</th>
               <th className="px-2 py-2 w-28">สถานะ</th>
+              <th className="px-2 py-2 w-36">คาดหวัง<br />พื้นฐาน</th>
+              <th className="px-2 py-2 w-36">คาดหวัง<br />ประยุกต์ใช้</th>
+              <th className="px-2 py-2 w-32">คาดหวัง<br />กิจกรรม</th>
+              <th className="px-2 py-2 w-36">คาดหวัง<br />คุณลักษณะ</th>
+              <th className="px-2 py-2 w-36">คาดหวัง<br />สมรรถนะ</th>
               <th className="px-2 py-2 w-12"></th>
             </tr>
           </thead>
@@ -244,6 +262,11 @@ export default function StudentsClient({ classId, initial }: { classId: string; 
                     <option>พักการเรียน</option>
                   </select>
                 </td>
+                <td className="px-1 py-1"><LevelSelect value={r.expected_basic_level} options={ABILITY_LEVELS} onChange={(v) => update(r._key, "expected_basic_level", v)} /></td>
+                <td className="px-1 py-1"><LevelSelect value={r.expected_applied_level} options={ABILITY_LEVELS} onChange={(v) => update(r._key, "expected_applied_level", v)} /></td>
+                <td className="px-1 py-1"><LevelSelect value={r.expected_activity_level} options={ACTIVITY_LEVELS} onChange={(v) => update(r._key, "expected_activity_level", v)} /></td>
+                <td className="px-1 py-1"><LevelSelect value={r.expected_characteristic_level} options={QUALITY_LEVELS} onChange={(v) => update(r._key, "expected_characteristic_level", v)} /></td>
+                <td className="px-1 py-1"><LevelSelect value={r.expected_competency_level} options={QUALITY_LEVELS} onChange={(v) => update(r._key, "expected_competency_level", v)} /></td>
                 <td className="px-1 py-1 text-center">
                   <button onClick={() => removeRow(r._key)} className="text-rose-500">✕</button>
                 </td>
@@ -251,7 +274,7 @@ export default function StudentsClient({ classId, initial }: { classId: string; 
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={10} className="px-4 py-8 text-center text-slate-400">
+                <td colSpan={15} className="px-4 py-8 text-center text-slate-400">
                   ยังไม่มีนักเรียน — กด “เพิ่มนักเรียน”
                 </td>
               </tr>
@@ -260,6 +283,14 @@ export default function StudentsClient({ classId, initial }: { classId: string; 
         </table>
       </div>
     </div>
+  );
+}
+
+function LevelSelect({ value, options, onChange }: { value: string | undefined; options: string[]; onChange: (value: string) => void }) {
+  return (
+    <select value={value || options[0]} onChange={(e) => onChange(e.target.value)} className="w-full rounded border border-slate-200 px-1 py-1">
+      {options.map((option) => <option key={option} value={option}>{option}</option>)}
+    </select>
   );
 }
 

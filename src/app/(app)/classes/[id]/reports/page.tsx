@@ -1,4 +1,5 @@
 import Link from "next/link";
+import CriteriaPdfCard from "./CriteriaPdfCard";
 
 export default async function ReportsHub({
   params,
@@ -52,12 +53,6 @@ export default async function ReportsHub({
       icon: "📔",
       links: [{ href: `/print/${id}/cover`, label: "เปิดหน้าปก + รายชื่อ" }],
     },
-    {
-      title: "เกณฑ์การประเมิน",
-      desc: "หน้าเกณฑ์การตัดสินผลการเรียน คุณลักษณะ อ่านคิดวิเคราะห์เขียน และสูตรคำนวณ",
-      icon: "📐",
-      links: [{ href: `/print/${id}/criteria`, label: "เปิดหน้าเกณฑ์" }],
-    },
   ];
 
   return (
@@ -81,6 +76,7 @@ export default async function ReportsHub({
           </div>
         </div>
       ))}
+      <CriteriaPdfCard classId={id} />
       <p className="sm:col-span-2 text-xs text-slate-400">
         เปิดหน้าพิมพ์ → กด “พิมพ์ / บันทึกเป็น PDF” → เลือกปลายทาง “บันทึกเป็น PDF” และตั้งขนาดกระดาษ A4 ขอบ (Margins) เป็นไม่มี (None) · ขนาด 100% · ปิดหัวกระดาษและท้ายกระดาษ
       </p>
