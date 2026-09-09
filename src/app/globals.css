@@ -11,6 +11,9 @@
 
 :root {
   --font-thai: var(--font-sarabun), "Sarabun", "TH Sarabun New", system-ui, sans-serif;
+  /* Print pages only: force the embedded TH SarabunPSK so every printed/PDF page renders identically,
+     regardless of which fonts happen to be installed on the printing computer. */
+  --font-print-thai: "Embedded TH SarabunPSK", var(--font-thai);
 }
 
 html,
@@ -87,7 +90,7 @@ main h3 {
   margin: 0 auto 16px;
   padding: 8mm;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
-  font-family: "TH SarabunPSK", "TH Sarabun New", var(--font-thai);
+  font-family: var(--font-print-thai);
   font-size: 14pt;
     font-feature-settings: "locl" 0;
 }
@@ -911,7 +914,7 @@ main h3 {
 
 
 /* Use Sarabun consistently for all PDF text, including Thai and Arabic digits. */
-.print-page { font-family: var(--font-thai); }
+.print-page { font-family: var(--font-print-thai); }
 
 /* Roster page: add a little breathing room below the heading and keep all text at 16px. */
 .roster-sheet .roster-form-header {
@@ -960,7 +963,7 @@ main h3 {
 .print-page.score-sheet .plain-form-context,
 .print-page.score-sheet .score-table th,
 .print-page.score-sheet .score-table td {
-  font-family: var(--font-thai) !important;
+  font-family: var(--font-print-thai) !important;
   font-size: 14px !important;
 }
 
@@ -978,7 +981,7 @@ main h3 {
 /* Attendance PDF sheets use a compact, uniform 13px Sarabun typeface. */
 .print-page.monthly-attendance,
 .print-page.monthly-attendance * {
-  font-family: var(--font-thai) !important;
+  font-family: var(--font-print-thai) !important;
   font-size: 13px !important;
 }
 
