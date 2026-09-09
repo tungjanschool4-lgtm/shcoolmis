@@ -963,3 +963,14 @@ main h3 {
   font-family: var(--font-thai) !important;
   font-size: 14px !important;
 }
+
+/* Give score cells more breathing room and keep student names compact. */
+.print-page.score-sheet .score-table th,
+.print-page.score-sheet .score-table td {
+  padding: .35mm .5mm !important;
+}
+.print-page.score-sheet .score-table tbody td:nth-child(2) {
+  font-size: 12px !important;
+  line-height: 1.15 !important;
+  white-space: nowrap;
+}
