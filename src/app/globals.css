@@ -1066,3 +1066,28 @@ main h3 {
     break-after: auto !important;
   }
 }
+
+
+/* Match the personal score report typography to the transfer report. */
+.score-summary-sheet .document-school-name,
+.score-summary-sheet .document-report-title {
+  font-size: 20px !important;
+  line-height: 1.4 !important;
+}
+.score-summary-sheet .document-class-line,
+.score-summary-sheet .student-heading-line {
+  font-size: 18px !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+}
+.score-summary-sheet .transfer-report-table th,
+.score-summary-sheet .transfer-report-table td,
+.score-summary-sheet .transfer-summary-table th,
+.score-summary-sheet .transfer-summary-table td {
+  font-size: 16px !important;
+}
+.score-summary-sheet .transfer-signatures,
+.score-summary-sheet .transfer-signatures * {
+  font-size: 15px !important;
+  line-height: 1.3 !important;
+}
