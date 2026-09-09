@@ -953,9 +953,13 @@ main h3 {
   font-size: 15px !important;
 }
 
-/* Subject score sheets use a uniform print size. */
-.score-sheet,
-.score-sheet * {
+/* Match every subject-score label, heading and table cell to the score note. */
+.print-page.score-sheet,
+.print-page.score-sheet *,
+.print-page.score-sheet .plain-form-title,
+.print-page.score-sheet .plain-form-context,
+.print-page.score-sheet .score-table th,
+.print-page.score-sheet .score-table td {
   font-family: var(--font-thai) !important;
   font-size: 14px !important;
 }
